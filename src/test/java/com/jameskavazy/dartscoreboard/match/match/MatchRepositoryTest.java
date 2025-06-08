@@ -140,4 +140,9 @@ class MatchRepositoryTest {
         assertEquals(2, matchesWon.size());
     }
 
+    @Test
+    void shouldDeleteAll() {
+        repository.deleteAll();
+        assertEquals(0, repository.findAll().size());
+    }
 }

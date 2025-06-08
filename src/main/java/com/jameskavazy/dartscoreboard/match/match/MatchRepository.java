@@ -67,4 +67,9 @@ public class MatchRepository {
                 .query(Match.class)
                 .list();
    }
+
+   public void deleteAll(){
+       jdbcClient.sql("DELETE FROM matches")
+               .update();
+   }
 }
