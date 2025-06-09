@@ -18,7 +18,6 @@ public class MatchController {
         this.matchRepository = matchRepository;
     }
 
-
     @GetMapping("/all")
     List<Match> findAll() {
         return matchRepository.findAll();

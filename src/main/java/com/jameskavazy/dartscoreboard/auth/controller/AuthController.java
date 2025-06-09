@@ -1,29 +1,29 @@
-package com.jameskavazy.dartscoreboard.user.auth;
+package com.jameskavazy.dartscoreboard.auth.controller;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.jameskavazy.dartscoreboard.auth.dto.TokenRequest;
+import com.jameskavazy.dartscoreboard.auth.exception.InvalidTokenException;
+import com.jameskavazy.dartscoreboard.auth.service.GoogleAuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/auth/")
 public class AuthController {
     private final GoogleAuthService googleAuthService;
+
     public AuthController(GoogleAuthService googleAuthService){
         this.googleAuthService = googleAuthService;
     }
     @PostMapping("/google")
-    ResponseEntity<?> signIn(@RequestBody TokenRequest tokenRequest) throws GeneralSecurityException, IOException {
+    ResponseEntity<?> signIn(@RequestBody TokenRequest request) {
         try {
-            Optional<GoogleIdToken.Payload> result = googleAuthService.verifyToken(tokenRequest.token());
-            if (result.isPresent()) {
-                GoogleIdToken.Payload payload = result.get();
-                return ResponseEntity.ok(payload.getEmail());
+            boolean result = googleAuthService.authenticate(request.token());
+
+            if (result) {
+                return ResponseEntity.ok().build();
             } else return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of(
                             "error", "TokenExpired",
