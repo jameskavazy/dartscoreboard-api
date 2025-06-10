@@ -42,14 +42,14 @@ class GoogleAuthServiceTest {
     @Test
     void shouldAuthenticateWhenTokenValid() throws InvalidTokenException {
         when(tokenVerifier.verify("test")).thenReturn(Optional.of(new VerifiedUser("test")));
-        boolean authenticated = googleAuthService.authenticate("test");
+        boolean authenticated = googleAuthService.authenticate("test").isPresent();
         assertTrue(authenticated);
     }
 
     @Test
     void shouldNotAuthenticateWhenInvalidToken() throws InvalidTokenException {
         when(tokenVerifier.verify("test")).thenReturn(Optional.empty());
-        boolean authenticated = googleAuthService.authenticate("test");
+        boolean authenticated = googleAuthService.authenticate("test").isPresent();
         assertFalse(authenticated);
     }
 }

@@ -1,5 +1,6 @@
 package com.jameskavazy.dartscoreboard.auth.service;
 
+import com.jameskavazy.dartscoreboard.auth.dto.AuthResponse;
 import com.jameskavazy.dartscoreboard.auth.dto.VerifiedUser;
 import com.jameskavazy.dartscoreboard.auth.exception.InvalidTokenException;
 import com.jameskavazy.dartscoreboard.user.UserRepository;
@@ -22,15 +23,15 @@ public class GoogleAuthService {
         this.userRepository = userRepository;
     }
 
-    public boolean authenticate(String token) throws InvalidTokenException {
+    public Optional<AuthResponse> authenticate(String token) throws InvalidTokenException {
         Optional<VerifiedUser> userOptional = tokenVerifier.verify(token);
 
         if (userOptional.isPresent()) {
             String email = userOptional.get().email();
             log.info(email);
             //TODO userRepository.findByEmail(email).orElseGet(()-> userRepository.save(new User(email))
-            return true;
+            return Optional.of(new AuthResponse(email));
         }
-        return false;
+        return Optional.empty();
     }
 }
