@@ -1,4 +1,6 @@
 package com.jameskavazy.dartscoreboard.user;
 
-public record User() {
+public record User(
+        String email
+) {
 }

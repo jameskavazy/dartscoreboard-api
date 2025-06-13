@@ -1,24 +1,25 @@
 package com.jameskavazy.dartscoreboard.auth.service;
 
 import com.jameskavazy.dartscoreboard.auth.config.AuthConfigProperties;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.crypto.SecretKey;
 import java.security.Key;
 import java.time.Duration;
 import java.util.*;
 
 @Service
-public class JWTService {
+public class JwtService {
 
     Duration expiration = Duration.ofHours(24);
 
     private final AuthConfigProperties authConfigProperties;
 
-    public JWTService(AuthConfigProperties authConfigProperties) {
+    public JwtService(AuthConfigProperties authConfigProperties) {
         this.authConfigProperties = authConfigProperties;
 
     }
@@ -37,9 +38,20 @@ public class JWTService {
 
     }
 
-    private Key getKey(){
+     private Claims extractClaims(String token){
+        return Jwts.parser()
+                .verifyWith(getKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+    }
+
+    private SecretKey getKey(){
         byte[] keyBytes = Decoders.BASE64.decode(authConfigProperties.jwtSecret());
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
+    public String getEmail(String token) {
+        return extractClaims(token).getSubject();
+    }
 }

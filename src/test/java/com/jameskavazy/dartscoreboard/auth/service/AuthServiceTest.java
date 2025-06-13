@@ -30,7 +30,7 @@ class AuthServiceTest {
     TokenVerifier tokenVerifier;
 
     @Mock
-    JWTService jwtService;
+    JwtService jwtService;
 
     @BeforeEach
     void setUp(){

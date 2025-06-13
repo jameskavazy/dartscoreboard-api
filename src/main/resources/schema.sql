@@ -7,3 +7,9 @@ CREATE TABLE IF NOT EXISTS matches (
     winner_id INT,
     PRIMARY KEY (id)
 );
+
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(100) NOT NULL UNIQUE
+);
+

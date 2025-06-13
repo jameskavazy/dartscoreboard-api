@@ -5,7 +5,7 @@ target/
 !**/src/test/**/target/
 
 client_secret_googleusercontent.com.json
-
+secrets.properties
 
 ### STS ###
 .apt_generated
