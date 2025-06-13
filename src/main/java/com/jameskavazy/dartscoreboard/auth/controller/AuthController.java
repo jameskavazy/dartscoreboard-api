@@ -2,8 +2,10 @@ package com.jameskavazy.dartscoreboard.auth.controller;
 
 import com.jameskavazy.dartscoreboard.auth.dto.AuthResponse;
 import com.jameskavazy.dartscoreboard.auth.dto.TokenRequest;
+import com.jameskavazy.dartscoreboard.auth.dto.AuthResult;
 import com.jameskavazy.dartscoreboard.auth.exception.InvalidTokenException;
-import com.jameskavazy.dartscoreboard.auth.service.GoogleAuthService;
+import com.jameskavazy.dartscoreboard.auth.service.AuthService;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,19 +16,26 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/auth/")
 public class AuthController {
-    private final GoogleAuthService googleAuthService;
+    private final AuthService authService;
 
-    public AuthController(GoogleAuthService googleAuthService){
-        this.googleAuthService = googleAuthService;
+    public AuthController(AuthService authService){
+        this.authService = authService;
     }
     @PostMapping("/google")
     ResponseEntity<?> signIn(@RequestBody TokenRequest request) {
         try {
-            Optional<AuthResponse> response = googleAuthService.authenticate(request.token());
+            Optional<AuthResult> authResult = authService.authenticate(request.token());
 
-            if (response.isPresent()) {
-                return ResponseEntity.ok(
-                        response.get()
+            if (authResult.isPresent()) {
+                String email = authResult.get().email();
+                String jwt = authResult.get().jwt();
+                HttpHeaders headers = new HttpHeaders();
+                headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + jwt);
+
+                return new ResponseEntity<>(
+                        new AuthResponse(email),
+                        headers,
+                        HttpStatus.OK
                 );
             } else return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of(

@@ -2,10 +2,10 @@ package com.jameskavazy.dartscoreboard.auth.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jameskavazy.dartscoreboard.Application;
-import com.jameskavazy.dartscoreboard.auth.dto.AuthResponse;
 import com.jameskavazy.dartscoreboard.auth.dto.TokenRequest;
+import com.jameskavazy.dartscoreboard.auth.dto.AuthResult;
 import com.jameskavazy.dartscoreboard.auth.exception.InvalidTokenException;
-import com.jameskavazy.dartscoreboard.auth.service.GoogleAuthService;
+import com.jameskavazy.dartscoreboard.auth.service.AuthService;
 import com.jameskavazy.dartscoreboard.config.SecurityConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,11 +18,9 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(AuthController.class)
 @ContextConfiguration(classes = {Application.class, SecurityConfig.class})
@@ -35,23 +33,26 @@ class AuthControllerTest {
     ObjectMapper objectMapper;
 
     @MockitoBean
-    GoogleAuthService googleAuthService;
+    AuthService authService;
 
     TokenRequest request = new TokenRequest("test");
 
     @Test
     void shouldAuthenticateAndReturnOk() throws Exception {
-        when(googleAuthService.authenticate(request.token())).thenReturn(Optional.of(new AuthResponse("test.com")));
+        when(authService.authenticate(request.token()))
+                .thenReturn(Optional.of(new AuthResult("test.com", "jwt")));
+
         mockMvc.perform(post("/auth/google")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
+                .andExpectAll(status().isOk())
+                .andExpect(header().string("Authorization", "Bearer " + "jwt"))
                 .andExpect(jsonPath("email").value("test.com"));
     }
 
     @Test
     void shouldNotAuthenticateAndReturn401TokenExpired() throws Exception {
-        when(googleAuthService.authenticate(request.token())).thenReturn(Optional.empty());
+        when(authService.authenticate(request.token())).thenReturn(Optional.empty());
         mockMvc.perform(post("/auth/google")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -62,7 +63,7 @@ class AuthControllerTest {
 
     @Test
     void shouldNotAuthenticateAndReturn401TokenInvalid() throws Exception {
-        when(googleAuthService.authenticate(request.token())).thenThrow(new InvalidTokenException("Token parsing failed: ", new IllegalArgumentException()));
+        when(authService.authenticate(request.token())).thenThrow(new InvalidTokenException("Token parsing failed: ", new IllegalArgumentException()));
         mockMvc.perform(post("/auth/google")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
