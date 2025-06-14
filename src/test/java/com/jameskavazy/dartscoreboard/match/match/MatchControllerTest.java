@@ -2,11 +2,13 @@ package com.jameskavazy.dartscoreboard.match.match;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jameskavazy.dartscoreboard.Application;
-import com.jameskavazy.dartscoreboard.config.SecurityConfig;
-import org.junit.jupiter.api.AfterEach;
+import com.jameskavazy.dartscoreboard.auth.security.JwtFilter;
+import com.jameskavazy.dartscoreboard.auth.service.JwtService;
+import com.jameskavazy.dartscoreboard.auth.config.SecurityConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
@@ -25,7 +27,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(MatchController.class)
-@ContextConfiguration(classes = {Application.class, SecurityConfig.class})
+@AutoConfigureMockMvc(addFilters = false)
 class MatchControllerTest {
 
     @Autowired
@@ -36,6 +38,12 @@ class MatchControllerTest {
 
     @MockitoBean
     MatchRepository repository;
+
+    @MockitoBean
+    JwtFilter filter;
+
+    @MockitoBean
+    JwtService jwtService;
 
     private final List<Match> matches = new ArrayList<>();
 

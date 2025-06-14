@@ -5,10 +5,13 @@ import com.jameskavazy.dartscoreboard.Application;
 import com.jameskavazy.dartscoreboard.auth.dto.TokenRequest;
 import com.jameskavazy.dartscoreboard.auth.dto.AuthResult;
 import com.jameskavazy.dartscoreboard.auth.exception.InvalidTokenException;
+import com.jameskavazy.dartscoreboard.auth.security.JwtFilter;
 import com.jameskavazy.dartscoreboard.auth.service.AuthService;
-import com.jameskavazy.dartscoreboard.config.SecurityConfig;
+import com.jameskavazy.dartscoreboard.auth.config.SecurityConfig;
+import com.jameskavazy.dartscoreboard.auth.service.JwtService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
@@ -23,7 +26,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(AuthController.class)
-@ContextConfiguration(classes = {Application.class, SecurityConfig.class})
+@AutoConfigureMockMvc(addFilters = false)
 class AuthControllerTest {
 
     @Autowired
@@ -34,6 +37,12 @@ class AuthControllerTest {
 
     @MockitoBean
     AuthService authService;
+
+    @MockitoBean
+    JwtFilter filter;
+
+    @MockitoBean
+    JwtService jwtService;
 
     TokenRequest request = new TokenRequest("test");
 

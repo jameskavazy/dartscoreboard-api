@@ -1,13 +1,21 @@
 package com.jameskavazy.dartscoreboard.match.match;
 
+
+import com.jameskavazy.dartscoreboard.auth.security.JwtFilter;
+import com.jameskavazy.dartscoreboard.auth.service.JwtService;
+import com.jameskavazy.dartscoreboard.auth.service.UserDetailsServiceImpl;
+import com.jameskavazy.dartscoreboard.user.User;
+import com.jameskavazy.dartscoreboard.user.UserPrincipal;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.client.RestClient;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -17,6 +25,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -29,6 +38,12 @@ class MatchControllerIntTest {
 
     @Autowired
     MatchRepository matchRepository;
+
+    @MockitoBean
+    JwtService jwtService;
+
+    @MockitoBean
+    UserDetailsServiceImpl userDetailsService;
 
     @Container
     @ServiceConnection
@@ -50,7 +65,14 @@ class MatchControllerIntTest {
         matchRepository.create(
                 new Match("testMatchId", MatchType.FiveO, 1,1, OffsetDateTime.now(), 1)
         );
-        restClient = RestClient.create("http://localhost:" + serverPort);
+
+        restClient = RestClient.builder()
+                .baseUrl("http://localhost:" + serverPort)
+                .defaultHeader("Authorization", "Bearer fakeToken")
+                        .build();
+
+        when(jwtService.getEmail("fakeToken")).thenReturn("valid@email.com");
+        when(userDetailsService.loadUserByUsername("valid@email.com")).thenReturn(new UserPrincipal(new User("valid@email.com")));
     }
     @AfterEach
     void cleanUp(){
@@ -63,7 +85,7 @@ class MatchControllerIntTest {
         assertTrue(postgres.isRunning());
     }
     @Test
-    void shouldFindAllRuns() {
+    void shouldFindAllMatches() {
         List<Match> matches = restClient.get().uri("/api/matches/all")
                 .retrieve()
                 .body(new ParameterizedTypeReference<>() {
@@ -74,6 +96,7 @@ class MatchControllerIntTest {
 
 
     @Test
+    @WithMockUser
     void shouldFindMatchById() {
         Match match = restClient.get().uri("/api/matches/testMatchId")
                 .retrieve()
@@ -89,6 +112,7 @@ class MatchControllerIntTest {
     }
 
     @Test
+    @WithMockUser
     void shouldCreateMatch() {
        Match match = new Match("2ndTestMatchId", MatchType.FiveO, 3,3, OffsetDateTime.now(), 1);
         ResponseEntity<Void> newMatch = restClient.post().uri("/api/matches")
@@ -101,7 +125,10 @@ class MatchControllerIntTest {
 
     @Test
     void shouldUpdateExistingMatch() {
-        Match match = restClient.get().uri("/api/matches/testMatchId").retrieve().body(Match.class);
+        Match match = restClient.get()
+                .uri("/api/matches/testMatchId")
+                .retrieve()
+                .body(Match.class);
 
         ResponseEntity<Void> updatedMatch = restClient.put()
                 .uri("/api/matches/testMatchId")
@@ -114,6 +141,8 @@ class MatchControllerIntTest {
 
     @Test
     void shouldDeleteMatch() {
+
+
         ResponseEntity<Void> match = restClient.delete()
                 .uri("/api/matches/testMatchId")
                 .retrieve()

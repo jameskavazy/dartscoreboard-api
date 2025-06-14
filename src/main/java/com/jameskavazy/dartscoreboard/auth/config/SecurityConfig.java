@@ -1,9 +1,10 @@
-package com.jameskavazy.dartscoreboard.config;
+package com.jameskavazy.dartscoreboard.auth.config;
 
 import com.jameskavazy.dartscoreboard.auth.security.JwtFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -18,8 +19,13 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Autowired
-    private JwtFilter jwtFilter;
+
+    private final JwtFilter jwtFilter;
+
+    public SecurityConfig(JwtFilter jwtFilter){
+        this.jwtFilter = jwtFilter;
+    }
+
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
