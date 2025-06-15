@@ -4,6 +4,8 @@ import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,8 +20,8 @@ public class VisitRepository {
     }
 
     public void create(Visit visit){
-        int updated = jdbcClient.sql("INSERT INTO visits (visit_id, leg_id, user_id, score, checkout) values (?, ?, ?, ?, ?)")
-                .params(List.of(visit.visitId(), visit.legId(), visit.userId(), visit.score(), visit.checkout()))
+        int updated = jdbcClient.sql("INSERT INTO visits (visit_id, leg_id, user_id, score, checkout, created_at) values (?, ?, ?, ?, ?, ?)")
+                .params(List.of(visit.visitId(), visit.legId(), visit.userId(), visit.score(), visit.checkout(), visit.createdAt()))
                 .update();
         Assert.state(updated == 1, "Could not insert visit");
     }
@@ -29,5 +31,29 @@ public class VisitRepository {
                 .param("visitId", visitId)
                 .query(Visit.class)
                 .optional();
+    }
+
+
+    public void deleteLatestVisit(String legId) {
+        String query = """
+                DELETE FROM visits
+                WHERE visit_id = (
+                    SELECT visit_id
+                    FROM visits
+                    WHERE leg_id = :legId
+                    ORDER BY created_at DESC
+                    LIMIT 1
+                )
+                """;
+        int updated = jdbcClient.sql(query)
+                .param("legId", legId)
+                .update();
+        Assert.state(updated == 1, "Could not delete visit");
+    }
+
+    public List<Visit> findAll() {
+        return jdbcClient.sql("SELECT * FROM visits")
+                .query(Visit.class)
+                .list();
     }
 }

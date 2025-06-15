@@ -11,6 +11,8 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -60,11 +62,25 @@ class VisitRepositoryTest {
                "leg-1",
                "user-1",
                 180,
-                false
+                false,
+                OffsetDateTime.now()
         );
 
         visitRepository.create(visit);
 
         assertTrue(visitRepository.findVisitById(visit.visitId()).isPresent());
     }
+
+    @Test
+    void shouldDeleteLatestVisit() {
+        visitRepository.deleteLatestVisit("leg-1");
+        assertEquals(1, visitRepository.findAll().size());
+    }
+
+    @Test
+    void shouldFindAll(){
+        List<Visit> visits = visitRepository.findAll();
+        assertEquals(2, visits.size());
+    }
+
 }

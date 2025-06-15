@@ -61,13 +61,13 @@ CREATE TABLE IF NOT EXISTS legs (
         ON DELETE SET NULL
 );
 
-
 CREATE TABLE IF NOT EXISTS visits (
     visit_id VARCHAR(36),
     leg_id VARCHAR(36) NOT NULL,
     user_id VARCHAR(36) NOT NULL,
     score INT,
     checkout BOOLEAN NOT NULL,
+    created_at TIMESTAMP NOT NULL,
     PRIMARY KEY (visit_id),
 
     CONSTRAINT fk_user_id

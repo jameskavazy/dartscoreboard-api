@@ -1,4 +1,12 @@
--- AUTOMATED TEST DATA -----
+---- AUTOMATED TEST DATA -----
+--
+--Fresh start
+DELETE FROM visits;
+DELETE FROM legs;
+DELETE FROM sets;
+DELETE FROM matches_users;
+DELETE FROM matches;
+DELETE FROM users;
 
 
 INSERT INTO users (user_id, email, username) VALUES
@@ -22,6 +30,6 @@ INSERT INTO legs (leg_id, set_id, match_id, turn_index, winner_id, created_at)
 VALUES ('leg-1', 'set-1', 'match-1', 0, NULL, CURRENT_TIMESTAMP);
 
 
-INSERT INTO visits (visit_id, leg_id, user_id, score, checkout)
-VALUES ('visit-1', 'leg-1', 'user-1', 100, false),
-       ('visit-2', 'leg-1', 'user-2', 140, false);
+INSERT INTO visits (visit_id, leg_id, user_id, score, checkout, created_at)
+VALUES ('visit-1', 'leg-1', 'user-1', 100, false, '2025-06-15 21:25:11.857'),
+       ('visit-2', 'leg-1', 'user-2', 140, false, '2025-06-15 21:26:11.857');
