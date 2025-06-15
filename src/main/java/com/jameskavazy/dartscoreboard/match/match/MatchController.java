@@ -23,9 +23,9 @@ public class MatchController {
         return matchRepository.findAll();
     }
 
-    @GetMapping("/{id}")
-    Match findMatchById(@PathVariable String id){
-        Optional<Match> match = matchRepository.findById(id);
+    @GetMapping("/{matchId}")
+    Match findMatchById(@PathVariable String matchId){
+        Optional<Match> match = matchRepository.findById(matchId);
         if (match.isEmpty()) {
             throw new MatchNotFoundException();
         }
@@ -39,14 +39,9 @@ public class MatchController {
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PutMapping("/{id}")
-    void update(@RequestBody Match match, @PathVariable String id){
-        matchRepository.update(match, id);
+    @PutMapping("/{matchId}")
+    void update(@RequestBody Match match, @PathVariable String matchId){
+        matchRepository.update(match, matchId);
     }
 
-//    @ResponseStatus(HttpStatus.NO_CONTENT)
-//    @DeleteMapping("/{id}")
-//    void delete(@PathVariable String id) {
-//        matchRepository.delete(id);
-//    }
 }

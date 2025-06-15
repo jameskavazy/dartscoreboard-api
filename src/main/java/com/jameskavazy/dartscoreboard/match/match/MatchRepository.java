@@ -1,8 +1,5 @@
 package com.jameskavazy.dartscoreboard.match.match;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
@@ -25,42 +22,52 @@ public class MatchRepository {
                 .query(Match.class)
                 .list();
     }
-    Optional<Match> findById(String id){
-        return jdbcClient.sql("SELECT * FROM matches WHERE id = :id")
-                .param("id", id)
+    Optional<Match> findById(String matchId){
+        return jdbcClient.sql("SELECT * FROM matches WHERE match_id = :matchId")
+                .param("matchId", matchId)
                 .query(Match.class)
                 .optional();
     }
 
     public void create(Match match) {
-        int updated = jdbcClient.sql("INSERT INTO matches(id, created_at, type, race_to_leg, race_to_set, winner_id, status) values(?,?,?,?,?,?,?)")
-                .params(List.of(match.id(), match.createdAt(), match.type().name(), match.raceToLeg(), match.raceToSet(), match.winnerId(), match.status().name()))
+        jdbcClient.sql("INSERT INTO matches(match_id, created_at, match_type, race_to_leg, race_to_set, winner_id, match_status) values(:matchId,:createdAt,:matchType,:raceToLeg,:raceToSet,:winnerId,:matchStatus)")
+                .param("matchId", match.matchId())
+                .param("createdAt", match.createdAt())
+                .param("matchType", match.matchType().name())
+                .param("raceToLeg", match.raceToLeg())
+                .param("raceToSet", match.raceToSet())
+                .param("winnerId", match.winnerId())
+                .param("matchStatus",match.matchStatus().name())
                 .update();
-
-        Assert.state(updated == 1, "Failed to create match " + match.id());
     }
 
-    void update(Match match, String id){
-        int updated = jdbcClient.sql("UPDATE matches SET created_at = ?, type = ?, race_to_leg = ?, race_to_set = ?, winner_id = ?, status = ? WHERE id = ?")
-                .params(List.of(match.createdAt(), match.type().name(), match.raceToLeg(), match.raceToSet(), match.winnerId(), match.status().name(), id))
+    void update(Match match, String matchId){
+        jdbcClient.sql("UPDATE matches SET created_at = :createdAt, match_type = :matchType, race_to_leg = :raceToLeg, race_to_set = :raceToSet, winner_id = :winnerId, match_status = :matchStatus WHERE match_id = :matchId")
+                .param("createdAt", match.createdAt())
+                .param("matchType", match.matchType().name())
+                .param("raceToLeg", match.raceToLeg())
+                .param("raceToSet", match.raceToSet())
+                .param("winnerId", match.winnerId())
+                .param("matchStatus", match.matchStatus().name())
+                .param("matchId", matchId)
                 .update();
 
-        Assert.state(updated == 1, "Failed to update match " + match.id());
+
     }
 
-    void delete(String id){
-        int updated = jdbcClient.sql("DELETE FROM matches WHERE id = :id")
-                .param("id", id)
+    void delete(String matchId){
+        int updated = jdbcClient.sql("DELETE FROM matches WHERE match_id = :matchId")
+                .param("matchId", matchId)
                 .update();
 
-        Assert.state(updated == 1, "Failed to delete match " + id);
+        Assert.state(updated == 1, "Failed to delete match " + matchId);
     }
 
    public int count(){
-        return jdbcClient.sql("SELECT COUNT(id) FROM matches").query(Integer.class).single();
+        return jdbcClient.sql("SELECT COUNT(match_id) FROM matches").query(Integer.class).single();
    }
 
-   public List<Match> findMatchesByWinnerId(int winnerId){
+   public List<Match> findMatchesByWinnerId(String winnerId){
         return jdbcClient.sql("SELECT * FROM matches WHERE winner_id = :winner_id")
                 .param("winner_id", winnerId)
                 .query(Match.class)

@@ -8,17 +8,16 @@ import java.time.OffsetDateTime;
 
 public record Match(
         @NotEmpty
-        String id,
-        MatchType type,
+        String matchId,
+        MatchType matchType,
         @PositiveOrZero
         int raceToLeg,
         @PositiveOrZero
         int raceToSet,
         @PastOrPresent
         OffsetDateTime createdAt,
-        @PositiveOrZero
-        long winnerId,
-        Status status
+        String winnerId,
+        Status matchStatus
     ){
 
 }

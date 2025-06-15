@@ -1,17 +1,14 @@
 package com.jameskavazy.dartscoreboard.match.match;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jameskavazy.dartscoreboard.Application;
 import com.jameskavazy.dartscoreboard.auth.security.JwtFilter;
 import com.jameskavazy.dartscoreboard.auth.service.JwtService;
-import com.jameskavazy.dartscoreboard.auth.config.SecurityConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -56,7 +53,7 @@ class MatchControllerTest {
                         1,
                         2,
                         OffsetDateTime.parse("2025-06-08T13:12:02.221101+01:00"),
-                        0,
+                        null,
                         Status.ONGOING));
     }
 
@@ -79,18 +76,18 @@ class MatchControllerTest {
 
         mvc.perform(get("/api/matches/first"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(match.id())))
-                .andExpect(jsonPath("$.type", is(match.type().name())))
+                .andExpect(jsonPath("$.matchId", is(match.matchId())))
+                .andExpect(jsonPath("$.matchType", is(match.matchType().name())))
                 .andExpect(jsonPath("$.raceToLeg", is(match.raceToLeg())))
                 .andExpect(jsonPath("$.raceToSet", is(match.raceToSet())))
                 .andExpect(jsonPath("$.createdAt", is(match.createdAt().toString())))
-                .andExpect(jsonPath("$.winnerId", is((int) match.winnerId())));
+                .andExpect(jsonPath("$.winnerId", is(match.winnerId())));
 
     }
 
     @Test
     void shouldReturnNotFoundWithInvalidId() throws Exception {
-        mvc.perform(get("/api/matches/3000"))
+        mvc.perform(get("/api/matches/threethousand"))
                 .andExpect(status().isNotFound());
     }
 
@@ -102,7 +99,7 @@ class MatchControllerTest {
                 1,
                 2,
                 OffsetDateTime.parse("2025-06-08T13:12:02.221101+01:00"),
-                0,
+                "user-1",
                 Status.ONGOING);
 
         mvc.perform(post("/api/matches")
@@ -115,24 +112,18 @@ class MatchControllerTest {
     @Test
     void shouldUpdateMatch() throws Exception {
         Match match = new Match(
-                "2nd",
+                "match-1",
                 MatchType.FiveO,
                 1,
                 2,
-                OffsetDateTime.parse("2025-06-08T13:12:02.221101+01:00"),
-                0,
+                OffsetDateTime.parse("2025-06-14T13:12:02.221101+01:00"),
+                null,
                 Status.ONGOING);
-        mvc.perform(put("/api/matches/first")
+        mvc.perform(put("/api/matches/match-1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(match))
             )
                 .andExpect(status().isNoContent());
 
-    }
-
-    @Test
-    void shouldDelete() throws Exception {
-        mvc.perform(delete("/api/matches/first"))
-                .andExpect(status().isNoContent());
     }
 }

@@ -7,6 +7,7 @@ import org.springframework.util.Assert;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public class UserRepository {
@@ -19,7 +20,7 @@ public class UserRepository {
 
     public Optional<User> findByEmail(String email) {
         String query = """
-                SELECT email
+                SELECT *
                 FROM users
                 WHERE email = :email
                 """;
@@ -28,8 +29,8 @@ public class UserRepository {
     }
 
     public User create(User user) {
-        int updated = jdbcClient.sql("INSERT INTO users(email, username) values(?)")
-                .params(List.of(user.email(), user.username()))
+        int updated = jdbcClient.sql("INSERT INTO users(user_id, email, username) values(?, ?, ?)")
+                .params(List.of(UUID.randomUUID().toString(), user.email(), user.username()))
                 .update();
         Assert.state(updated == 1, "Failed to create user " + user.email());
         return user;

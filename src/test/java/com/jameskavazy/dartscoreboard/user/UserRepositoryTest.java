@@ -47,13 +47,6 @@ class UserRepositoryTest {
     @Autowired
     AuthConfigProperties authConfigProperties;
 
-    @BeforeEach
-    void setup(){
-        userRepository.create(new User("james.kavazy@gmail.com", "KavarzE"));
-        userRepository.create(new User("new.user@gmail.com", "newUser"));
-        userRepository.create(new User("charles.kavazy@gmail.com", "Charlie"));
-    }
-
     @Test
     void connectionEstablished() {
         assertTrue(postgres.isCreated());
@@ -62,7 +55,7 @@ class UserRepositoryTest {
 
     @Test
     void shouldFindUserByEmail(){
-        boolean present = userRepository.findByEmail("james.kavazy@gmail.com").isPresent();
+        boolean present = userRepository.findByEmail("user1@example.com").isPresent();
         assertTrue(present);
     }
 

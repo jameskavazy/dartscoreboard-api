@@ -62,7 +62,7 @@ class MatchControllerIntTest {
     @BeforeEach
     void setUp() {
         matchRepository.create(
-                new Match("testMatchId", MatchType.FiveO, 1,1, OffsetDateTime.now(), 1, Status.COMPLETE)
+                new Match("testMatchId", MatchType.FiveO, 1,1, OffsetDateTime.now(), null, Status.COMPLETE)
         );
 
         restClient = RestClient.builder()
@@ -103,17 +103,17 @@ class MatchControllerIntTest {
                 });
 
         assertEquals(
-                "testMatchId", match.id()
+                "testMatchId", match.matchId()
         );
         assertEquals(
-                MatchType.FiveO.name, match.type().name
+                MatchType.FiveO.name, match.matchType().name
         );
     }
 
     @Test
     @WithMockUser
     void shouldCreateMatch() {
-       Match match = new Match("2ndTestMatchId", MatchType.FiveO, 3,3, OffsetDateTime.now(), 1, Status.COMPLETE);
+       Match match = new Match("2ndTestMatchId", MatchType.FiveO, 3,3, OffsetDateTime.now(), "user-1", Status.COMPLETE);
         ResponseEntity<Void> newMatch = restClient.post().uri("/api/matches")
                 .body(match)
                 .retrieve()
@@ -136,18 +136,5 @@ class MatchControllerIntTest {
                 .toBodilessEntity();
 
         assertEquals(204, updatedMatch.getStatusCode().value());
-    }
-
-    @Test
-    void shouldDeleteMatch() {
-
-
-        ResponseEntity<Void> match = restClient.delete()
-                .uri("/api/matches/testMatchId")
-                .retrieve()
-                .toBodilessEntity();
-
-        assertEquals(204, match.getStatusCode().value());
-
     }
 }

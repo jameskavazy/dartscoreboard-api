@@ -1,16 +1,16 @@
 CREATE TABLE IF NOT EXISTS users (
-    user_id SERIAL PRIMARY KEY,
+    user_id VARCHAR(36) PRIMARY KEY,
     email VARCHAR(100) NOT NULL UNIQUE,
     username VARCHAR(25) NOT NULL UNIQUE
 );
 
 CREATE TABLE IF NOT EXISTS matches (
-    match_id uuid DEFAULT gen_random_uuid(),
+    match_id VARCHAR(36),
     created_at TIMESTAMP NOT NULL,
     match_type VARCHAR(50),
     race_to_leg INT,
     race_to_set INT,
-    winner_id INT,
+    winner_id VARCHAR(36),
     match_status VARCHAR(15) NOT NULL,
     PRIMARY KEY (match_id),
     CONSTRAINT fk_winner
@@ -21,9 +21,9 @@ CREATE TABLE IF NOT EXISTS matches (
 
 
 CREATE TABLE IF NOT EXISTS sets (
-    set_id uuid DEFAULT gen_random_uuid(),
-    match_id uuid NOT NULL,
-    set_winner_id INT,
+    set_id VARCHAR(36),
+    match_id VARCHAR(36) NOT NULL,
+    set_winner_id VARCHAR(36),
     created_at TIMESTAMP NOT NULL,
     PRIMARY KEY (set_id),
     CONSTRAINT fk_match_id
@@ -37,11 +37,11 @@ CREATE TABLE IF NOT EXISTS sets (
 );
 
 CREATE TABLE IF NOT EXISTS legs (
-    leg_id uuid DEFAULT gen_random_uuid(),
-    set_id uuid NOT NULL,
-    match_id uuid NOT NULL,
+    leg_id VARCHAR(36),
+    set_id VARCHAR(36) NOT NULL,
+    match_id VARCHAR(36) NOT NULL,
     turn_index INT,
-    winner_id INT,
+    winner_id VARCHAR(36),
     created_at TIMESTAMP NOT NULL,
     PRIMARY KEY (leg_id),
 
@@ -63,9 +63,9 @@ CREATE TABLE IF NOT EXISTS legs (
 
 
 CREATE TABLE IF NOT EXISTS visits (
-    visit_id uuid DEFAULT gen_random_uuid(),
-    leg_id uuid NOT NULL,
-    user_id INT NOT NULL,
+    visit_id VARCHAR(36),
+    leg_id VARCHAR(36) NOT NULL,
+    user_id VARCHAR(36) NOT NULL,
     score INT,
     checkout BOOLEAN NOT NULL,
     PRIMARY KEY (visit_id),
@@ -83,8 +83,8 @@ CREATE TABLE IF NOT EXISTS visits (
 
 
 CREATE TABLE IF NOT EXISTS matches_users (
-    match_id uuid,
-    user_id INT,
+    match_id VARCHAR(36),
+    user_id VARCHAR(36),
     position INT,
 
     PRIMARY KEY (match_id, user_id),

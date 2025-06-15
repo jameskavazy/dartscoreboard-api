@@ -13,7 +13,6 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -48,25 +47,25 @@ class MatchRepositoryTest {
     @BeforeEach
     void setup(){
 
-        repository.create(new Match(
-                "first",
-                MatchType.FiveO,
-                1,
-                2,
-                OffsetDateTime.parse("2025-06-08T13:12:02.221101+01:00"),
-                0,
-                Status.ONGOING
-        ));
-
-        repository.create(new Match(
-                "second",
-                MatchType.ThreeO,
-                1,
-                2,
-                OffsetDateTime.parse("2025-06-08T13:42:02.221101+01:00"),
-                0,
-                Status.ONGOING
-        ));
+//        repository.create(new Match(
+//                "first",
+//                MatchType.FiveO,
+//                1,
+//                2,
+//                OffsetDateTime.parse("2025-06-08T13:12:02.221101+01:00"),
+//                null,
+//                Status.ONGOING
+//        ));
+//
+//        repository.create(new Match(
+//                "second",
+//                MatchType.ThreeO,
+//                1,
+//                2,
+//                OffsetDateTime.parse("2025-06-08T13:42:02.221101+01:00"),
+//                null,
+//                Status.ONGOING
+//        ));
     }
 
 
@@ -79,22 +78,22 @@ class MatchRepositoryTest {
     @Test
     void shouldFindAllMatches() {
         List<Match> matches = repository.findAll();
-        assertEquals(2, matches.size(), "Should find 2 matches");
+        assertEquals(1, matches.size(), "Should find 1 match");
     }
 
     @Test
     void shouldFindMatchWithValidId(){
-        Optional<Match> result = repository.findById("first");
+        Optional<Match> result = repository.findById("match-1");
         assertTrue(result.isPresent());
 
         Match match = result.get();
 
-        assertEquals("first", match.id());
-        assertEquals(MatchType.FiveO, match.type());
-        assertEquals(1, match.raceToLeg());
-        assertEquals(2, match.raceToSet());
-        assertEquals( OffsetDateTime.parse("2025-06-08T13:12:02.221101Z"), match.createdAt());
-        assertEquals(0, match.winnerId());
+        assertEquals("match-1", match.matchId());
+        assertEquals(MatchType.FiveO.name, match.matchType().name);
+        assertEquals(3, match.raceToLeg());
+        assertEquals(1, match.raceToSet());
+        assertEquals( OffsetDateTime.parse("2025-06-15T20:38:21.414670Z"), match.createdAt());
+        assertNull(match.winnerId());
     }
 
     @Test
@@ -105,41 +104,41 @@ class MatchRepositoryTest {
 
     @Test
     void shouldCreateMatch(){
-        Match match = new Match("new match", MatchType.SevenO, 1, 1, OffsetDateTime.now(), 0, Status.ONGOING);
+        Match match = new Match("new match", MatchType.SevenO, 1, 1, OffsetDateTime.now(), null, Status.ONGOING);
         repository.create(match);
         assertTrue(repository.findById("new match").isPresent());
     }
 
     @Test
     void shouldUpdateMatch(){
-        Match match = new Match("new match", MatchType.SevenO, 1, 1, OffsetDateTime.now(), 0, Status.ONGOING);
-        repository.update(match, "first");
-        Optional<Match> result = repository.findById("first");
+        Match match = new Match("match-1", MatchType.SevenO, 1, 1, OffsetDateTime.now(), null, Status.ONGOING);
+        repository.update(match, "match-1");
+        Optional<Match> result = repository.findById("match-1");
         boolean presence = result.isPresent();
         assertTrue(presence);
 
         Match found = result.get();
-        assertEquals("first", found.id());
-        assertEquals(MatchType.SevenO, found.type());
+        assertEquals("match-1", found.matchId());
+        assertEquals(MatchType.SevenO, found.matchType());
     }
 
     @Test
     void shouldDeleteMatch(){
-        repository.delete("first");
+        repository.delete("match-1");
         List<Match> matches = repository.findAll();
-        assertEquals(1, matches.size());
+        assertEquals(0, matches.size());
     }
 
     @Test
-    void shouldReturnCountOfTwo(){
+    void shouldReturnCountOfOne(){
         int count = repository.count();
-        assertEquals(2,count);
+        assertEquals(1,count);
     }
 
     @Test
     void shouldReturnMatchesWon(){
-        List<Match> matchesWon = repository.findMatchesByWinnerId(0);
-        assertEquals(2, matchesWon.size());
+        List<Match> matchesWon = repository.findMatchesByWinnerId("user-1");
+        assertEquals(0, matchesWon.size());
     }
 
     @Test
