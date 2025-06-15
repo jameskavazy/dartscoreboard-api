@@ -1,15 +1,101 @@
+CREATE TABLE IF NOT EXISTS users (
+    user_id SERIAL PRIMARY KEY,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    username VARCHAR(25) NOT NULL UNIQUE
+);
+
 CREATE TABLE IF NOT EXISTS matches (
-    id VARCHAR(100) NOT NULL,
-    created_at timestamp NOT NULL,
-    type VARCHAR(50),
+    match_id uuid DEFAULT gen_random_uuid(),
+    created_at TIMESTAMP NOT NULL,
+    match_type VARCHAR(50),
     race_to_leg INT,
     race_to_set INT,
     winner_id INT,
-    PRIMARY KEY (id)
+    match_status VARCHAR(15) NOT NULL,
+    PRIMARY KEY (match_id),
+    CONSTRAINT fk_winner
+        FOREIGN KEY (winner_id)
+            REFERENCES users(user_id)
+            ON DELETE SET NULL
 );
 
-CREATE TABLE IF NOT EXISTS users (
-    id SERIAL PRIMARY KEY,
-    email VARCHAR(100) NOT NULL UNIQUE
+
+CREATE TABLE IF NOT EXISTS sets (
+    set_id uuid DEFAULT gen_random_uuid(),
+    match_id uuid NOT NULL,
+    set_winner_id INT,
+    created_at TIMESTAMP NOT NULL,
+    PRIMARY KEY (set_id),
+    CONSTRAINT fk_match_id
+            FOREIGN KEY (match_id)
+            REFERENCES matches(match_id)
+            ON DELETE CASCADE,
+    CONSTRAINT fk_set_winner
+        FOREIGN KEY (set_winner_id)
+        REFERENCES users(user_id)
+        ON DELETE SET NULL
 );
 
+CREATE TABLE IF NOT EXISTS legs (
+    leg_id uuid DEFAULT gen_random_uuid(),
+    set_id uuid NOT NULL,
+    match_id uuid NOT NULL,
+    turn_index INT,
+    winner_id INT,
+    created_at TIMESTAMP NOT NULL,
+    PRIMARY KEY (leg_id),
+
+    CONSTRAINT fk_match_id
+        FOREIGN KEY (match_id)
+        REFERENCES matches(match_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_set_id
+        FOREIGN KEY (set_id)
+        REFERENCES sets(set_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_winner_id
+        FOREIGN KEY (winner_id)
+        REFERENCES users(user_id)
+        ON DELETE SET NULL
+);
+
+
+CREATE TABLE IF NOT EXISTS visits (
+    visit_id uuid DEFAULT gen_random_uuid(),
+    leg_id uuid NOT NULL,
+    user_id INT NOT NULL,
+    score INT,
+    checkout BOOLEAN NOT NULL,
+    PRIMARY KEY (visit_id),
+
+    CONSTRAINT fk_user_id
+        FOREIGN KEY (user_id)
+        REFERENCES users(user_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_leg_id
+        FOREIGN KEY (leg_id)
+        REFERENCES legs(leg_id)
+        ON DELETE CASCADE
+);
+
+
+CREATE TABLE IF NOT EXISTS matches_users (
+    match_id uuid,
+    user_id INT,
+    position INT,
+
+    PRIMARY KEY (match_id, user_id),
+
+    CONSTRAINT fk_match_id
+        FOREIGN KEY (match_id)
+        REFERENCES matches(match_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_user_id
+        FOREIGN KEY (user_id)
+        REFERENCES users(user_id)
+        ON DELETE CASCADE
+);

@@ -44,9 +44,9 @@ public class MatchController {
         matchRepository.update(match, id);
     }
 
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @DeleteMapping("/{id}")
-    void delete(@PathVariable String id) {
-        matchRepository.delete(id);
-    }
+//    @ResponseStatus(HttpStatus.NO_CONTENT)
+//    @DeleteMapping("/{id}")
+//    void delete(@PathVariable String id) {
+//        matchRepository.delete(id);
+//    }
 }

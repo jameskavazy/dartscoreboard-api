@@ -49,9 +49,9 @@ class UserRepositoryTest {
 
     @BeforeEach
     void setup(){
-        userRepository.create(new User("james.kavazy@gmail.com"));
-        userRepository.create(new User("new.user@gmail.com"));
-        userRepository.create(new User("charles.kavazy@gmail.com"));
+        userRepository.create(new User("james.kavazy@gmail.com", "KavarzE"));
+        userRepository.create(new User("new.user@gmail.com", "newUser"));
+        userRepository.create(new User("charles.kavazy@gmail.com", "Charlie"));
     }
 
     @Test
@@ -74,7 +74,7 @@ class UserRepositoryTest {
 
     @Test
     void shouldCreateUser(){
-        userRepository.create(new User("fourth-user@email.com"));
+        userRepository.create(new User("fourth-user@email.com", "FourthUser"));
 
         boolean present = userRepository.findByEmail("fourth-user@email.com").isPresent();
         assertTrue(present);

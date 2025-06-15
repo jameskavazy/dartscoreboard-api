@@ -34,7 +34,7 @@ public class AuthService {
             log.info(email);
             String jwt = jwtService.generateToken(email);
             User user = userRepository.findByEmail(email)
-                    .orElseGet(() -> userRepository.create(new User(email)));
+                    .orElseGet(() -> userRepository.create(new User(email, email)));
 
             return Optional.of(new AuthResult(user.email(), jwt));
         }

@@ -13,7 +13,6 @@ import java.util.Optional;
 @Repository
 public class MatchRepository {
 
-//    private static final Logger log = LoggerFactory.getLogger(MatchRepository.class);
     private final JdbcClient jdbcClient;
 
     public MatchRepository(JdbcClient jdbcClient){
@@ -34,16 +33,16 @@ public class MatchRepository {
     }
 
     public void create(Match match) {
-        int updated = jdbcClient.sql("INSERT INTO matches(id, created_at, type, race_to_leg, race_to_set, winner_id) values(?,?,?,?,?,?)")
-                .params(List.of(match.id(), match.createdAt(), match.type().name(), match.raceToLeg(), match.raceToSet(), match.winnerId()))
+        int updated = jdbcClient.sql("INSERT INTO matches(id, created_at, type, race_to_leg, race_to_set, winner_id, status) values(?,?,?,?,?,?,?)")
+                .params(List.of(match.id(), match.createdAt(), match.type().name(), match.raceToLeg(), match.raceToSet(), match.winnerId(), match.status().name()))
                 .update();
 
         Assert.state(updated == 1, "Failed to create match " + match.id());
     }
 
     void update(Match match, String id){
-        int updated = jdbcClient.sql("UPDATE matches SET created_at = ?, type = ?, race_to_leg = ?, race_to_set = ?, winner_id = ? WHERE id = ?")
-                .params(List.of(match.createdAt(), match.type().name(), match.raceToLeg(), match.raceToSet(), match.winnerId(), id))
+        int updated = jdbcClient.sql("UPDATE matches SET created_at = ?, type = ?, race_to_leg = ?, race_to_set = ?, winner_id = ?, status = ? WHERE id = ?")
+                .params(List.of(match.createdAt(), match.type().name(), match.raceToLeg(), match.raceToSet(), match.winnerId(), match.status().name(), id))
                 .update();
 
         Assert.state(updated == 1, "Failed to update match " + match.id());

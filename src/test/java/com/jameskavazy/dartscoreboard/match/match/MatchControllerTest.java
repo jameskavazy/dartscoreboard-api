@@ -56,7 +56,8 @@ class MatchControllerTest {
                         1,
                         2,
                         OffsetDateTime.parse("2025-06-08T13:12:02.221101+01:00"),
-                        0));
+                        0,
+                        Status.ONGOING));
     }
 
 
@@ -101,7 +102,8 @@ class MatchControllerTest {
                 1,
                 2,
                 OffsetDateTime.parse("2025-06-08T13:12:02.221101+01:00"),
-                0);
+                0,
+                Status.ONGOING);
 
         mvc.perform(post("/api/matches")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -118,7 +120,8 @@ class MatchControllerTest {
                 1,
                 2,
                 OffsetDateTime.parse("2025-06-08T13:12:02.221101+01:00"),
-                0);
+                0,
+                Status.ONGOING);
         mvc.perform(put("/api/matches/first")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(match))
@@ -131,6 +134,5 @@ class MatchControllerTest {
     void shouldDelete() throws Exception {
         mvc.perform(delete("/api/matches/first"))
                 .andExpect(status().isNoContent());
-
     }
 }

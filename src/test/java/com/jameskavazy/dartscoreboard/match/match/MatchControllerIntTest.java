@@ -1,7 +1,6 @@
 package com.jameskavazy.dartscoreboard.match.match;
 
 
-import com.jameskavazy.dartscoreboard.auth.security.JwtFilter;
 import com.jameskavazy.dartscoreboard.auth.service.JwtService;
 import com.jameskavazy.dartscoreboard.auth.service.UserDetailsServiceImpl;
 import com.jameskavazy.dartscoreboard.user.User;
@@ -63,7 +62,7 @@ class MatchControllerIntTest {
     @BeforeEach
     void setUp() {
         matchRepository.create(
-                new Match("testMatchId", MatchType.FiveO, 1,1, OffsetDateTime.now(), 1)
+                new Match("testMatchId", MatchType.FiveO, 1,1, OffsetDateTime.now(), 1, Status.COMPLETE)
         );
 
         restClient = RestClient.builder()
@@ -72,7 +71,7 @@ class MatchControllerIntTest {
                         .build();
 
         when(jwtService.getEmail("fakeToken")).thenReturn("valid@email.com");
-        when(userDetailsService.loadUserByUsername("valid@email.com")).thenReturn(new UserPrincipal(new User("valid@email.com")));
+        when(userDetailsService.loadUserByUsername("valid@email.com")).thenReturn(new UserPrincipal(new User("valid@email.com", "ValidMan")));
     }
     @AfterEach
     void cleanUp(){
@@ -114,7 +113,7 @@ class MatchControllerIntTest {
     @Test
     @WithMockUser
     void shouldCreateMatch() {
-       Match match = new Match("2ndTestMatchId", MatchType.FiveO, 3,3, OffsetDateTime.now(), 1);
+       Match match = new Match("2ndTestMatchId", MatchType.FiveO, 3,3, OffsetDateTime.now(), 1, Status.COMPLETE);
         ResponseEntity<Void> newMatch = restClient.post().uri("/api/matches")
                 .body(match)
                 .retrieve()

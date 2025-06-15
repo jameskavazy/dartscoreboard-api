@@ -17,7 +17,8 @@ public record Match(
         @PastOrPresent
         OffsetDateTime createdAt,
         @PositiveOrZero
-        long winnerId
+        long winnerId,
+        Status status
     ){
 
 }

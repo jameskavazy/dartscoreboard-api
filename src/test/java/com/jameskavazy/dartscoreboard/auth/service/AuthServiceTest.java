@@ -42,7 +42,7 @@ class AuthServiceTest {
     void shouldAuthenticateWhenTokenValid() throws InvalidTokenException {
         when(jwtService.generateToken("test")).thenReturn("a token");
         when(tokenVerifier.verify("test")).thenReturn(Optional.of(new OAuthUser("test")));
-        when(userRepository.create(new User("test"))).thenReturn(new User("test"));
+        when(userRepository.create(new User("test","test"))).thenReturn(new User("test","test"));
 
         boolean authenticated = authService.authenticate("test").isPresent();
         assertTrue(authenticated);

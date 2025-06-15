@@ -54,7 +54,8 @@ class MatchRepositoryTest {
                 1,
                 2,
                 OffsetDateTime.parse("2025-06-08T13:12:02.221101+01:00"),
-                0
+                0,
+                Status.ONGOING
         ));
 
         repository.create(new Match(
@@ -63,7 +64,8 @@ class MatchRepositoryTest {
                 1,
                 2,
                 OffsetDateTime.parse("2025-06-08T13:42:02.221101+01:00"),
-                0
+                0,
+                Status.ONGOING
         ));
     }
 
@@ -103,14 +105,14 @@ class MatchRepositoryTest {
 
     @Test
     void shouldCreateMatch(){
-        Match match = new Match("new match", MatchType.SevenO, 1, 1, OffsetDateTime.now(), 0);
+        Match match = new Match("new match", MatchType.SevenO, 1, 1, OffsetDateTime.now(), 0, Status.ONGOING);
         repository.create(match);
         assertTrue(repository.findById("new match").isPresent());
     }
 
     @Test
     void shouldUpdateMatch(){
-        Match match = new Match("new match", MatchType.SevenO, 1, 1, OffsetDateTime.now(), 0);
+        Match match = new Match("new match", MatchType.SevenO, 1, 1, OffsetDateTime.now(), 0, Status.ONGOING);
         repository.update(match, "first");
         Optional<Match> result = repository.findById("first");
         boolean presence = result.isPresent();
