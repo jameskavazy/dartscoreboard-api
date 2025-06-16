@@ -1,18 +1,35 @@
 package com.jameskavazy.dartscoreboard.match.match;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jameskavazy.dartscoreboard.auth.security.JwtFilter;
 import com.jameskavazy.dartscoreboard.auth.service.JwtService;
+import com.jameskavazy.dartscoreboard.match.visit.VisitRequest;
+import com.jameskavazy.dartscoreboard.user.User;
+import com.jameskavazy.dartscoreboard.user.UserPrincipal;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.provisioning.UserDetailsManager;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 
+import java.security.Principal;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +41,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(MatchController.class)
+@Import(SpringSecurityUserDetailsTestConfig.class)
 @AutoConfigureMockMvc(addFilters = false)
 class MatchControllerTest {
 
@@ -34,13 +52,16 @@ class MatchControllerTest {
     ObjectMapper objectMapper;
 
     @MockitoBean
-    MatchRepository repository;
+    MatchService matchService;
 
     @MockitoBean
     JwtFilter filter;
 
     @MockitoBean
     JwtService jwtService;
+
+    @MockitoBean
+    UserPrincipal userPrincipal;
 
     private final List<Match> matches = new ArrayList<>();
 
@@ -60,7 +81,7 @@ class MatchControllerTest {
 
     @Test
     void shouldFindAllMatches() throws Exception {
-        when(repository.findAll()).thenReturn(matches);
+        when(matchService.findAllMatches()).thenReturn(matches);
 
         mvc.perform(get("/api/matches"))
                 .andExpect(status().isOk())
@@ -72,7 +93,7 @@ class MatchControllerTest {
     void shouldReturnMatchFromValidId() throws Exception {
         Match match = matches.get(0);
 
-        when(repository.findById("first")).thenReturn(Optional.of(match));
+        when(matchService.findMatchById("first")).thenReturn(Optional.of(match));
 
         mvc.perform(get("/api/matches/first"))
                 .andExpect(status().isOk())
@@ -125,5 +146,16 @@ class MatchControllerTest {
             )
                 .andExpect(status().isNoContent());
 
+    }
+
+    @Test
+    @WithUserDetails
+    void shouldReturnOKForCreateVisit() throws Exception {
+        VisitRequest visitRequest = new VisitRequest(40);
+        mvc.perform(post("/api/matches/match-1/sets/set-1/legs/leg-1/visits/")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(visitRequest))
+                )
+                .andExpect(status().isCreated());
     }
 }

@@ -13,11 +13,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 import java.util.Optional;
-
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
@@ -43,7 +41,10 @@ class AuthServiceTest {
     void shouldAuthenticateWhenTokenValid() throws InvalidTokenException {
         when(jwtService.generateToken("test")).thenReturn("a token");
         when(tokenVerifier.verify("test")).thenReturn(Optional.of(new OAuthUser("test")));
-        when(userRepository.create(new User("test","test"))).thenReturn(new User("test","test"));
+
+        doReturn(new User("test", "test", "test"))
+                .when(userRepository)
+                .create(any(User.class));
 
         boolean authenticated = authService.authenticate("test").isPresent();
         assertTrue(authenticated);

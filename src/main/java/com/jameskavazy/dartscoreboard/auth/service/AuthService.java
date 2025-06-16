@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class AuthService {
@@ -34,7 +35,7 @@ public class AuthService {
             log.info(email);
             String jwt = jwtService.generateToken(email);
             User user = userRepository.findByEmail(email)
-                    .orElseGet(() -> userRepository.create(new User(email, email)));
+                    .orElseGet(() -> userRepository.create(new User(UUID.randomUUID().toString(), email, email)));
 
             return Optional.of(new AuthResult(user.email(), jwt));
         }

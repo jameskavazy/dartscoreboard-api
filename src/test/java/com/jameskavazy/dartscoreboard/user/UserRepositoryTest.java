@@ -67,7 +67,7 @@ class UserRepositoryTest {
 
     @Test
     void shouldCreateUser(){
-        userRepository.create(new User("fourth-user@email.com", "FourthUser"));
+        userRepository.create(new User("validUser","fourth-user@email.com", "FourthUser"));
 
         boolean present = userRepository.findByEmail("fourth-user@email.com").isPresent();
         assertTrue(present);

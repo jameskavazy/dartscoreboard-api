@@ -1,7 +1,12 @@
 package com.jameskavazy.dartscoreboard.match.match;
 
+import com.jameskavazy.dartscoreboard.match.visit.VisitRequest;
+import com.jameskavazy.dartscoreboard.user.UserPrincipal;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,20 +16,20 @@ import java.util.Optional;
 @RequestMapping("/api/matches")
 public class MatchController {
 
-    MatchRepository matchRepository;
+   private final MatchService matchService;
 
-    public MatchController(MatchRepository matchRepository){
-        this.matchRepository = matchRepository;
+    public MatchController(MatchService matchService){
+       this.matchService = matchService;
     }
 
     @GetMapping("")
     List<Match> findAllMatches() {
-        return matchRepository.findAll();
+        return matchService.findAllMatches();
     }
 
     @GetMapping("/{matchId}")
     Match findMatchById(@PathVariable String matchId){
-        Optional<Match> match = matchRepository.findById(matchId);
+        Optional<Match> match = matchService.findMatchById(matchId);
         if (match.isEmpty()) {
             throw new MatchNotFoundException();
         }
@@ -34,17 +39,23 @@ public class MatchController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("")
     void createMatch(@Valid @RequestBody Match match){
-        matchRepository.create(match);
+        matchService.createMatch(match);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PutMapping("/{matchId}")
     void updateMatch(@RequestBody Match match, @PathVariable String matchId){
-        matchRepository.update(match, matchId);
+        matchService.updateMatch(match, matchId);
     }
 
-    @PostMapping("/matches/{matchID}/sets/{setId}/legs/{legId}/visits/")
-    String createVisit(@PathVariable String matchId, @PathVariable String setId, @PathVariable String legId){
-           return matchId + setId + legId;
+    @PostMapping("/{matchId}/sets/{setId}/legs/{legId}/visits/")
+    ResponseEntity<?> createVisit(@PathVariable String matchId,
+                                  @PathVariable String setId,
+                                  @PathVariable String legId,
+                                  @RequestBody VisitRequest visitRequest,
+                                  @AuthenticationPrincipal UserDetails userDetails){
+
+        matchService.createVisit(visitRequest, matchId, setId, legId, userDetails.getUsername());
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

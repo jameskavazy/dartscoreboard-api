@@ -74,7 +74,7 @@ class MatchControllerIntTest {
                         .build();
 
         when(jwtService.getEmail("fakeToken")).thenReturn("valid@email.com");
-        when(userDetailsService.loadUserByUsername("valid@email.com")).thenReturn(new UserPrincipal(new User("valid@email.com", "valid@email.com")));
+        when(userDetailsService.loadUserByUsername("valid@email.com")).thenReturn(new UserPrincipal(new User("valid","valid@email.com", "valid@email.com")));
         doReturn(true)
                 .when(jwtService)
                 .validateToken(eq("fakeToken"), any(UserPrincipal.class));
