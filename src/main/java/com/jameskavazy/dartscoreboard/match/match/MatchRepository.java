@@ -1,11 +1,14 @@
 package com.jameskavazy.dartscoreboard.match.match;
 
+import org.springframework.beans.factory.config.YamlProcessor;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public class MatchRepository {
@@ -51,8 +54,6 @@ public class MatchRepository {
                 .param("matchStatus", match.matchStatus().name())
                 .param("matchId", matchId)
                 .update();
-
-
     }
 
     void delete(String matchId){

@@ -38,8 +38,8 @@ public class MatchController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("")
-    void createMatch(@Valid @RequestBody Match match){
-        matchService.createMatch(match);
+    void createMatch(@Valid @RequestBody MatchRequest matchRequest){
+        matchService.createMatch(matchRequest);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)

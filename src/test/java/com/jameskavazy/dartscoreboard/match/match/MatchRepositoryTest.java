@@ -104,14 +104,14 @@ class MatchRepositoryTest {
 
     @Test
     void shouldCreateMatch(){
-        Match match = new Match("new match", MatchType.SevenO, 1, 1, OffsetDateTime.now(), null, Status.ONGOING);
+        Match match = new Match("new match", MatchType.SevenO, 1, 1, OffsetDateTime.now(), null, MatchStatus.ONGOING);
         repository.create(match);
         assertTrue(repository.findById("new match").isPresent());
     }
 
     @Test
     void shouldUpdateMatch(){
-        Match match = new Match("match-1", MatchType.SevenO, 1, 1, OffsetDateTime.now(), null, Status.ONGOING);
+        Match match = new Match("match-1", MatchType.SevenO, 1, 1, OffsetDateTime.now(), null, MatchStatus.ONGOING);
         repository.update(match, "match-1");
         Optional<Match> result = repository.findById("match-1");
         boolean presence = result.isPresent();

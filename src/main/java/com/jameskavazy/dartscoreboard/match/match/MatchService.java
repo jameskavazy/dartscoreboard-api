@@ -4,7 +4,6 @@ import com.jameskavazy.dartscoreboard.match.visit.Visit;
 import com.jameskavazy.dartscoreboard.match.visit.VisitRepository;
 import com.jameskavazy.dartscoreboard.match.visit.VisitRequest;
 import com.jameskavazy.dartscoreboard.user.User;
-import com.jameskavazy.dartscoreboard.user.UserPrincipal;
 import com.jameskavazy.dartscoreboard.user.UserRepository;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -40,7 +39,16 @@ public class MatchService {
         return matchRepository.findById(matchId);
     }
 
-    public void createMatch(Match match) {
+    public void createMatch(MatchRequest matchRequest) {
+        Match match = new Match(
+                UUID.randomUUID().toString(),
+                matchRequest.matchType(),
+                matchRequest.raceToLeg(),
+                matchRequest.raceToSet(),
+                OffsetDateTime.now(),
+                null,
+                MatchStatus.ONGOING
+        );
         matchRepository.create(match);
     }
 

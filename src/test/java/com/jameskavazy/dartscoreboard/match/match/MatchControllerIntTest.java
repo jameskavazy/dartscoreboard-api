@@ -65,7 +65,7 @@ class MatchControllerIntTest {
     @BeforeEach
     void setUp() {
         matchRepository.create(
-                new Match("testMatchId", MatchType.FiveO, 1,1, OffsetDateTime.now(), null, Status.COMPLETE)
+                new Match("testMatchId", MatchType.FiveO, 1,1, OffsetDateTime.now(), null, MatchStatus.COMPLETE)
         );
 
         restClient = RestClient.builder()
@@ -119,9 +119,13 @@ class MatchControllerIntTest {
     @Test
     @WithMockUser
     void shouldCreateMatch() {
-       Match match = new Match("2ndTestMatchId", MatchType.FiveO, 3,3, OffsetDateTime.now(), "user-1", Status.COMPLETE);
+        MatchRequest matchRequest = new MatchRequest(
+                MatchType.FiveO,
+                1,
+                2
+        );
         ResponseEntity<Void> newMatch = restClient.post().uri("/api/matches")
-                .body(match)
+                .body(matchRequest)
                 .retrieve()
                 .toBodilessEntity();
 

@@ -1,35 +1,22 @@
 package com.jameskavazy.dartscoreboard.match.match;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jameskavazy.dartscoreboard.auth.security.JwtFilter;
 import com.jameskavazy.dartscoreboard.auth.service.JwtService;
 import com.jameskavazy.dartscoreboard.match.visit.VisitRequest;
-import com.jameskavazy.dartscoreboard.user.User;
 import com.jameskavazy.dartscoreboard.user.UserPrincipal;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-import org.springframework.security.provisioning.UserDetailsManager;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 
-import java.security.Principal;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -75,7 +62,7 @@ class MatchControllerTest {
                         2,
                         OffsetDateTime.parse("2025-06-08T13:12:02.221101+01:00"),
                         null,
-                        Status.ONGOING));
+                        MatchStatus.ONGOING));
     }
 
 
@@ -114,18 +101,15 @@ class MatchControllerTest {
 
     @Test
     void shouldCreateMatch() throws Exception {
-        Match match = new Match(
-                "2nd",
+        MatchRequest matchRequest = new MatchRequest(
                 MatchType.FiveO,
                 1,
-                2,
-                OffsetDateTime.parse("2025-06-08T13:12:02.221101+01:00"),
-                "user-1",
-                Status.ONGOING);
+                2
+        );
 
         mvc.perform(post("/api/matches")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(match))
+                        .content(objectMapper.writeValueAsString(matchRequest))
                 )
                 .andExpect(status().isCreated());
     }
@@ -139,7 +123,7 @@ class MatchControllerTest {
                 2,
                 OffsetDateTime.parse("2025-06-14T13:12:02.221101+01:00"),
                 null,
-                Status.ONGOING);
+                MatchStatus.ONGOING);
         mvc.perform(put("/api/matches/match-1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(match))
