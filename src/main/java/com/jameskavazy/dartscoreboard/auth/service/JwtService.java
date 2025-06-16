@@ -1,10 +1,12 @@
 package com.jameskavazy.dartscoreboard.auth.service;
 
 import com.jameskavazy.dartscoreboard.auth.config.AuthConfigProperties;
+import com.jameskavazy.dartscoreboard.user.UserPrincipal;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -48,6 +50,14 @@ public class JwtService {
     private SecretKey getKey(){
         byte[] keyBytes = Decoders.BASE64.decode(authConfigProperties.jwtSecret());
         return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    public boolean validateToken(String token, UserDetails userDetails){
+        return getEmail(token).equals(userDetails.getUsername()) && !isTokenExpired(token);
+    }
+
+    private boolean isTokenExpired(String token){
+        return extractClaims(token).getExpiration().before(new Date());
     }
 
     public String getEmail(String token) {

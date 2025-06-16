@@ -62,7 +62,7 @@ class MatchControllerTest {
     void shouldFindAllMatches() throws Exception {
         when(repository.findAll()).thenReturn(matches);
 
-        mvc.perform(get("/api/matches/all"))
+        mvc.perform(get("/api/matches"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()", is(matches.size()))
                 );

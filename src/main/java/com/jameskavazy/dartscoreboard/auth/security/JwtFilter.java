@@ -2,6 +2,7 @@ package com.jameskavazy.dartscoreboard.auth.security;
 
 import com.jameskavazy.dartscoreboard.auth.service.JwtService;
 
+import com.jameskavazy.dartscoreboard.user.UserPrincipal;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -50,13 +51,14 @@ public class JwtFilter extends OncePerRequestFilter {
         if (email != null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
-            UsernamePasswordAuthenticationToken authToken
-                    = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+            if (jwtService.validateToken(token, userDetails)){
+                UsernamePasswordAuthenticationToken authToken
+                        = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
-            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            SecurityContextHolder.getContext().setAuthentication(authToken);
+                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+            }
         }
-
         filterChain.doFilter(request, response);
     }
 }

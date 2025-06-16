@@ -24,6 +24,9 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 @Testcontainers
@@ -71,7 +74,10 @@ class MatchControllerIntTest {
                         .build();
 
         when(jwtService.getEmail("fakeToken")).thenReturn("valid@email.com");
-        when(userDetailsService.loadUserByUsername("valid@email.com")).thenReturn(new UserPrincipal(new User("valid@email.com", "ValidMan")));
+        when(userDetailsService.loadUserByUsername("valid@email.com")).thenReturn(new UserPrincipal(new User("valid@email.com", "valid@email.com")));
+        doReturn(true)
+                .when(jwtService)
+                .validateToken(eq("fakeToken"), any(UserPrincipal.class));
     }
     @AfterEach
     void cleanUp(){
@@ -85,7 +91,7 @@ class MatchControllerIntTest {
     }
     @Test
     void shouldFindAllMatches() {
-        List<Match> matches = restClient.get().uri("/api/matches/all")
+        List<Match> matches = restClient.get().uri("/api/matches")
                 .retrieve()
                 .body(new ParameterizedTypeReference<>() {
                 });

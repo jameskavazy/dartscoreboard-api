@@ -3,7 +3,6 @@ package com.jameskavazy.dartscoreboard.match.match;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,8 +17,8 @@ public class MatchController {
         this.matchRepository = matchRepository;
     }
 
-    @GetMapping("/all")
-    List<Match> findAll() {
+    @GetMapping("")
+    List<Match> findAllMatches() {
         return matchRepository.findAll();
     }
 
@@ -34,14 +33,18 @@ public class MatchController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("")
-    void create(@Valid @RequestBody Match match){
+    void createMatch(@Valid @RequestBody Match match){
         matchRepository.create(match);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PutMapping("/{matchId}")
-    void update(@RequestBody Match match, @PathVariable String matchId){
+    void updateMatch(@RequestBody Match match, @PathVariable String matchId){
         matchRepository.update(match, matchId);
     }
 
+    @PostMapping("/matches/{matchID}/sets/{setId}/legs/{legId}/visits/")
+    String createVisit(@PathVariable String matchId, @PathVariable String setId, @PathVariable String legId){
+           return matchId + setId + legId;
+    }
 }
