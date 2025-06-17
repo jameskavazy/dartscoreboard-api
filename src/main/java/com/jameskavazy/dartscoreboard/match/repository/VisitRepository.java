@@ -55,4 +55,16 @@ public class VisitRepository {
                 .query(Visit.class)
                 .list();
     }
+
+    public int extractCurrentScore(String userId, String legId) {
+        return jdbcClient.sql("""
+                SELECT SUM(score)
+                FROM visits
+                WHERE leg_id = :legId
+                    AND user_id = :userId
+                """).param("legId", legId)
+                .param("userId", userId)
+                .query(Integer.class)
+                .single();
+    }
 }

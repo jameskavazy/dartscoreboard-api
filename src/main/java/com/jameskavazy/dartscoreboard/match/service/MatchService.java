@@ -1,9 +1,9 @@
 package com.jameskavazy.dartscoreboard.match.service;
 
+import com.jameskavazy.dartscoreboard.match.domain.ScoreCalculator;
 import com.jameskavazy.dartscoreboard.match.dto.MatchRequest;
 import com.jameskavazy.dartscoreboard.match.exception.InvalidHierarchyException;
 import com.jameskavazy.dartscoreboard.match.models.matches.Match;
-import com.jameskavazy.dartscoreboard.match.repository.LegRepository;
 import com.jameskavazy.dartscoreboard.match.repository.MatchRepository;
 import com.jameskavazy.dartscoreboard.match.models.matches.MatchStatus;
 import com.jameskavazy.dartscoreboard.match.models.visits.Visit;
@@ -26,18 +26,18 @@ public class MatchService {
     private final VisitRepository visitRepository;
     private final UserRepository userRepository;
 
-    private final LegRepository legRepository;
 
+    private final ScoreCalculator scoreCalculator;
     //TODO score calculator, turn-manager, progression handler classes
 
     public MatchService(MatchRepository matchRepository,
                         VisitRepository visitRepository,
                         UserRepository userRepository,
-                        LegRepository legRepository){
+                        ScoreCalculator scoreCalculator){
         this.matchRepository = matchRepository;
         this.visitRepository = visitRepository;
         this.userRepository = userRepository;
-        this.legRepository = legRepository;
+        this.scoreCalculator = scoreCalculator;
     }
 
 
@@ -71,6 +71,7 @@ public class MatchService {
     public void createVisit(VisitRequest visitRequest, String matchId, String setId, String legId, String userPrincipalUsername) {
         String userId = null;
         Optional<User> userOptional = userRepository.findByEmail(userPrincipalUsername);
+        int scoreRequest = visitRequest.score();
 
         if (userOptional.isPresent()){
             User user = userOptional.get();
@@ -79,19 +80,14 @@ public class MatchService {
             throw new UsernameNotFoundException("Could not insert visit: Could not find authorized user: " + userPrincipalUsername);
         }
 
-        if(!legRepository.isValidLegHierarchy(legId, setId, matchId)){
+        if(!matchRepository.isValidLegHierarchy(legId, setId, matchId)){
             throw new InvalidHierarchyException(legId + " does not belong to specified set or match");
         }
 
-        Visit visit = new Visit(
-                UUID.randomUUID().toString(),
-                legId,
-                userId,
-                visitRequest.score(),
-                false, // TODO gameLOGIC
-                OffsetDateTime.now()
-        );
+        int currentScore = visitRepository.extractCurrentScore(userId, legId);
 
-        visitRepository.create(visit);
+        Visit validatedVisit = scoreCalculator.validateAndBuildVisit(userId, currentScore, scoreRequest, legId);
+        visitRepository.create(validatedVisit);
     }
 }
+

@@ -1,12 +1,10 @@
 package com.jameskavazy.dartscoreboard.match.repository;
 
 import com.jameskavazy.dartscoreboard.match.models.matches.Match;
-import com.jameskavazy.dartscoreboard.match.repository.MatchRepository;
 import com.jameskavazy.dartscoreboard.match.models.matches.MatchStatus;
 import com.jameskavazy.dartscoreboard.match.models.matches.MatchType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -123,5 +121,23 @@ class MatchRepositoryTest {
     void shouldDeleteAll() {
         repository.deleteAll();
         assertEquals(0, repository.findAll().size());
+    }
+
+        @Test
+    void shouldReturnTrue_withValidHierarchy(){
+        boolean validLegHierarchy = repository.isValidLegHierarchy("leg-1", "set-1", "match-1");
+        assertTrue(validLegHierarchy);
+    }
+
+    @Test
+    void shouldReturnFalse_withInValidHierarchy_invalidMatch(){
+        boolean validLegHierarchy = repository.isValidLegHierarchy("leg-1", "set-1", "match-2");
+        assertFalse(validLegHierarchy);
+    }
+
+    @Test
+    void shouldReturnFalse_withInValidHierarchy_invalidSet(){
+        boolean validLegHierarchy = repository.isValidLegHierarchy("leg-1", "set-2", "match-1");
+        assertFalse(validLegHierarchy);
     }
 }

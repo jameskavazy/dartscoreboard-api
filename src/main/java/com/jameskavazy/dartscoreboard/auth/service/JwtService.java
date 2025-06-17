@@ -1,7 +1,6 @@
 package com.jameskavazy.dartscoreboard.auth.service;
 
 import com.jameskavazy.dartscoreboard.auth.config.AuthConfigProperties;
-import com.jameskavazy.dartscoreboard.user.UserPrincipal;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;

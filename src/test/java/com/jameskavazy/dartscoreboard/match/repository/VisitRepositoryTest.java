@@ -1,7 +1,6 @@
 package com.jameskavazy.dartscoreboard.match.repository;
 
 import com.jameskavazy.dartscoreboard.match.models.visits.Visit;
-import com.jameskavazy.dartscoreboard.match.repository.VisitRepository;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -76,13 +75,19 @@ class VisitRepositoryTest {
     @Test
     void shouldDeleteLatestVisit() {
         visitRepository.deleteLatestVisit("leg-1");
-        assertEquals(1, visitRepository.findAll().size());
+        assertEquals(2, visitRepository.findAll().size());
     }
 
     @Test
     void shouldFindAll(){
         List<Visit> visits = visitRepository.findAll();
-        assertEquals(2, visits.size());
+        assertEquals(3, visits.size());
+    }
+
+    @Test
+    void shouldReturnCorrectScore(){
+        int score = visitRepository.extractCurrentScore("user-1", "leg-1");
+        assertEquals(280, score);
     }
 
 }

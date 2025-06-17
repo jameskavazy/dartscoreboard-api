@@ -32,4 +32,5 @@ VALUES ('leg-1', 'set-1', 'match-1', 0, NULL, CURRENT_TIMESTAMP);
 
 INSERT INTO visits (visit_id, leg_id, user_id, score, checkout, created_at)
 VALUES ('visit-1', 'leg-1', 'user-1', 100, false, '2025-06-15 21:25:11.857'),
-       ('visit-2', 'leg-1', 'user-2', 140, false, '2025-06-15 21:26:11.857');
+       ('visit-2', 'leg-1', 'user-2', 140, false, '2025-06-15 21:26:11.857'),
+       ('visit-3', 'leg-1', 'user-1', 180, false, '2025-06-15 21:27:11.857');
