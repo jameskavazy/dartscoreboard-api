@@ -16,7 +16,7 @@ import java.util.*;
 @Service
 public class JwtService {
 
-    Duration expiration = Duration.ofHours(24);
+    Duration expiration = Duration.ofDays(30);
 
     private final AuthConfigProperties authConfigProperties;
 

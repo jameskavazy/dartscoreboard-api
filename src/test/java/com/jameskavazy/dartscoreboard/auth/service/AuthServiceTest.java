@@ -2,7 +2,7 @@ package com.jameskavazy.dartscoreboard.auth.service;
 
 import com.jameskavazy.dartscoreboard.auth.dto.OAuthUser;
 import com.jameskavazy.dartscoreboard.auth.exception.InvalidTokenException;
-import com.jameskavazy.dartscoreboard.auth.security.TokenVerifier;
+import com.jameskavazy.dartscoreboard.auth.security.token.TokenVerifier;
 import com.jameskavazy.dartscoreboard.user.User;
 import com.jameskavazy.dartscoreboard.user.UserRepository;
 import org.junit.jupiter.api.BeforeEach;

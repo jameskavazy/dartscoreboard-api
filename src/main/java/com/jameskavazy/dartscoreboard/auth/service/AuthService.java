@@ -5,7 +5,7 @@ import com.jameskavazy.dartscoreboard.auth.dto.AuthResult;
 import com.jameskavazy.dartscoreboard.auth.exception.InvalidTokenException;
 import com.jameskavazy.dartscoreboard.user.User;
 import com.jameskavazy.dartscoreboard.user.UserRepository;
-import com.jameskavazy.dartscoreboard.auth.security.TokenVerifier;
+import com.jameskavazy.dartscoreboard.auth.security.token.TokenVerifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
