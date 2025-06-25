@@ -1,12 +1,22 @@
 package com.jameskavazy.dartscoreboard.match.service;
 
+import com.jameskavazy.dartscoreboard.match.domain.MatchContext;
+import com.jameskavazy.dartscoreboard.match.domain.ProgressionHandler;
+import com.jameskavazy.dartscoreboard.match.domain.ResultScenario;
 import com.jameskavazy.dartscoreboard.match.domain.ScoreCalculator;
 import com.jameskavazy.dartscoreboard.match.dto.MatchRequest;
 import com.jameskavazy.dartscoreboard.match.exception.InvalidHierarchyException;
+import com.jameskavazy.dartscoreboard.match.exception.InvalidPlayerTurnException;
+import com.jameskavazy.dartscoreboard.match.exception.MatchNotFoundException;
+import com.jameskavazy.dartscoreboard.match.models.legs.Leg;
 import com.jameskavazy.dartscoreboard.match.models.matches.Match;
+import com.jameskavazy.dartscoreboard.match.models.matches.MatchesUsers;
+import com.jameskavazy.dartscoreboard.match.models.sets.Set;
+import com.jameskavazy.dartscoreboard.match.repository.LegRepository;
 import com.jameskavazy.dartscoreboard.match.repository.MatchRepository;
 import com.jameskavazy.dartscoreboard.match.models.matches.MatchStatus;
 import com.jameskavazy.dartscoreboard.match.models.visits.Visit;
+import com.jameskavazy.dartscoreboard.match.repository.SetRepository;
 import com.jameskavazy.dartscoreboard.match.repository.VisitRepository;
 import com.jameskavazy.dartscoreboard.match.dto.VisitRequest;
 import com.jameskavazy.dartscoreboard.user.User;
@@ -24,20 +34,26 @@ public class MatchService {
 
     private final MatchRepository matchRepository;
     private final VisitRepository visitRepository;
+    private final SetRepository setRepository;
+    private final LegRepository legRepository;
     private final UserRepository userRepository;
 
-
     private final ScoreCalculator scoreCalculator;
-    //TODO score calculator, turn-manager, progression handler classes
+
+    private final ProgressionHandler progressionHandler;
 
     public MatchService(MatchRepository matchRepository,
                         VisitRepository visitRepository,
-                        UserRepository userRepository,
-                        ScoreCalculator scoreCalculator){
+                        SetRepository setRepository, LegRepository legRepository, UserRepository userRepository,
+                        ScoreCalculator scoreCalculator,
+                        ProgressionHandler progressionHandler){
         this.matchRepository = matchRepository;
         this.visitRepository = visitRepository;
+        this.setRepository = setRepository;
+        this.legRepository = legRepository;
         this.userRepository = userRepository;
         this.scoreCalculator = scoreCalculator;
+        this.progressionHandler = progressionHandler;
     }
 
 
@@ -61,6 +77,8 @@ public class MatchService {
                 MatchStatus.ONGOING
         );
         matchRepository.create(match);
+
+        // TODO create associated data - legs, sets, match users
     }
 
     public void updateMatch(Match match, String matchId) {
@@ -68,26 +86,136 @@ public class MatchService {
     }
 
 
-    public void createVisit(VisitRequest visitRequest, String matchId, String setId, String legId, String userPrincipalUsername) {
-        String userId = null;
-        Optional<User> userOptional = userRepository.findByEmail(userPrincipalUsername);
+    public void processVisitRequest(VisitRequest visitRequest,
+                                    String matchId,
+                                    String setId,
+                                    String legId,
+                                    String userPrincipalUsername) {
+
+        String userId = validateUser(userPrincipalUsername);
+        Match match = validateMatchHierarchy(matchId, legId, setId);
+        validateTurn(matchId, legId, userId);
+
         int scoreRequest = visitRequest.score();
+        int currentScore = visitRepository.extractCurrentScore(userId, legId);
+        
+        Visit visit = scoreCalculator.validateAndBuildVisit(userId, currentScore, scoreRequest, legId);
+        visitRepository.create(visit);
+
+        MatchContext matchContext = createMatchContext(matchId, setId, legId, userId, match, currentScore, visit);
+        ResultScenario resultScenario = progressionHandler.checkResult(matchContext);
+        handleResult(resultScenario, matchContext);
+    }
+
+    private void validateTurn(String matchId, String legId, String userId) {
+        int turnIndex = legRepository.getTurnIndex(legId);
+        List<MatchesUsers> matchUsers = matchRepository.getMatchUsers(matchId);
+        if (matchUsers == null || matchUsers.isEmpty()) {
+            throw new MatchNotFoundException("No users associated with match " + matchId);
+        }
+        if (matchUsers.get(turnIndex).position() != turnIndex || !matchUsers.get(turnIndex).userId().equals(userId)){
+            throw new InvalidPlayerTurnException("Player requested visit when it was not their turn");
+        }
+    }
+
+    private Match validateMatchHierarchy(String matchId, String legId, String setId) {
+        Match match = matchRepository.findById(matchId)
+                .orElseThrow(() -> new MatchNotFoundException("Could not find match with id: " + matchId));
+
+        if (!matchRepository.isValidLegHierarchy(legId, setId, matchId)){
+            throw new InvalidHierarchyException(legId + " does not belong to specified set or match");
+        }
+        return match;
+    }
+
+    private String validateUser(String userPrincipalUsername){
+        Optional<User> userOptional = userRepository.findByEmail(userPrincipalUsername);
 
         if (userOptional.isPresent()){
             User user = userOptional.get();
-            userId = user.userId();
+            return user.userId();
         } else {
             throw new UsernameNotFoundException("Could not insert visit: Could not find authorized user: " + userPrincipalUsername);
         }
+    }
 
-        if(!matchRepository.isValidLegHierarchy(legId, setId, matchId)){
-            throw new InvalidHierarchyException(legId + " does not belong to specified set or match");
+    private MatchContext createMatchContext(String matchId, String setId, String legId, String userId, Match match, int currentScore, Visit validatedVisit) {
+        List<String> usersInMatch = matchRepository.getUsersIdsInMatch(matchId);
+        int startingScore = matchRepository.getStartingScore(matchId);
+        int legsWon = legRepository.countLegsWonInSet(userId, setId);
+        int setsWon = setRepository.countSetsWonInMatch(userId, matchId);
+        int finalScore = startingScore - currentScore - validatedVisit.score();
+
+        return new MatchContext(
+                match, usersInMatch, legsWon, setsWon, finalScore, legId, userId, setId
+        );
+    }
+
+    private void handleResult(ResultScenario resultScenario, MatchContext matchContext) {
+        switch (resultScenario) {
+            case NO_LEG_WON -> handleNoLegWon(matchContext);
+            case LEG_WON_NO_SET_WON -> handleLegWon(matchContext);
+            case LEG_WON_SET_WON_NO_MATCH_WON -> handleLegWonSetWonNoMatchWon(matchContext);
+            case LEG_WON_SET_WON_MATCH_WON -> handleLegWonSetWonMatchWon(matchContext);
         }
+    }
 
-        int currentScore = visitRepository.extractCurrentScore(userId, legId);
+    private void handleLegWon(MatchContext matchContext) {
+        legRepository.updateWinnerId(matchContext.userId(), matchContext.legId());
+        int numOfLegs = legRepository.countLegsInSet(matchContext.setId());
+        int shift = setRepository.getSetsInMatch(matchContext.match().matchId()).size() - 1;
 
-        Visit validatedVisit = scoreCalculator.validateAndBuildVisit(userId, currentScore, scoreRequest, legId);
-        visitRepository.create(validatedVisit);
+        // base on leg count, shift by which set we're in, less 1
+        int turnIndex = nextPlayerIndex(matchContext, numOfLegs, shift);
+
+        legRepository.create(
+                new Leg(
+                        UUID.randomUUID().toString(), matchContext.match().matchId(), matchContext.setId(), turnIndex, null, OffsetDateTime.now()
+                )
+        );
+    }
+
+    private void handleLegWonSetWonNoMatchWon(MatchContext matchContext){
+        legRepository.updateWinnerId(matchContext.userId(), matchContext.legId());
+        setRepository.updateWinnerId(matchContext.userId(), matchContext.setId());
+
+        String matchId = matchContext.match().matchId();
+        int numOfSets = setRepository.getSetsInMatch(matchId).size();
+
+        // base by numOfSets, no shift needed
+        int turnIndex = nextPlayerIndex(matchContext, numOfSets, 0);
+
+        Set set = new Set(UUID.randomUUID().toString(), matchId, null, OffsetDateTime.now());
+
+        setRepository.create(set);
+
+        Leg leg = new Leg(UUID.randomUUID().toString(), matchId, set.setId(), turnIndex, null, OffsetDateTime.now());
+        legRepository.create(leg);
+    }
+
+    private void handleLegWonSetWonMatchWon(MatchContext matchContext){
+        legRepository.updateWinnerId(matchContext.userId(), matchContext.legId());
+        setRepository.updateWinnerId(matchContext.userId(), matchContext.setId());
+        Match match = new Match(
+                matchContext.match().matchId(),
+                matchContext.match().matchType(),
+                matchContext.match().raceToLeg(),
+                matchContext.match().raceToSet(),
+                matchContext.match().createdAt(),
+                matchContext.userId(),
+                MatchStatus.COMPLETE
+        );
+        matchRepository.update(match, match.matchId());
+    }
+
+    private void handleNoLegWon(MatchContext matchContext) {
+        int currentTurnIndex = legRepository.getTurnIndex(matchContext.legId());
+        int nextPlayerIndex = nextPlayerIndex(matchContext, currentTurnIndex, 1);
+        legRepository.updateTurnIndex(nextPlayerIndex, matchContext.legId());
+    }
+
+    private int nextPlayerIndex(MatchContext matchContext, int base, int shift) {
+       return progressionHandler.increment(base, shift + matchContext.usersIdsInMatch().size(), matchContext.usersIdsInMatch().size());
     }
 }
 

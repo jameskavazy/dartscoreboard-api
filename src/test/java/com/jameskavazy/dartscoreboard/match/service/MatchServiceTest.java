@@ -1,9 +1,17 @@
 package com.jameskavazy.dartscoreboard.match.service;
 
+import com.jameskavazy.dartscoreboard.match.domain.ProgressionHandler;
+import com.jameskavazy.dartscoreboard.match.domain.ResultScenario;
 import com.jameskavazy.dartscoreboard.match.domain.ScoreCalculator;
 import com.jameskavazy.dartscoreboard.match.exception.InvalidHierarchyException;
+import com.jameskavazy.dartscoreboard.match.models.matches.Match;
+import com.jameskavazy.dartscoreboard.match.models.matches.MatchStatus;
+import com.jameskavazy.dartscoreboard.match.models.matches.MatchType;
+import com.jameskavazy.dartscoreboard.match.models.matches.MatchesUsers;
 import com.jameskavazy.dartscoreboard.match.models.visits.Visit;
+import com.jameskavazy.dartscoreboard.match.repository.LegRepository;
 import com.jameskavazy.dartscoreboard.match.repository.MatchRepository;
+import com.jameskavazy.dartscoreboard.match.repository.SetRepository;
 import com.jameskavazy.dartscoreboard.match.repository.VisitRepository;
 import com.jameskavazy.dartscoreboard.match.dto.VisitRequest;
 import com.jameskavazy.dartscoreboard.user.User;
@@ -16,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -34,15 +43,22 @@ class MatchServiceTest {
 
     @Mock
     MatchRepository matchRepository;
+    @Mock
+    LegRepository legRepository;
+    @Mock
+    ScoreCalculator scoreCalculator;
+
+    @Mock
+    SetRepository setRepository;
+
+    @Mock
+    ProgressionHandler progressionHandler;
 
     @InjectMocks
     MatchService matchService;
 
-    @Mock
-    ScoreCalculator scoreCalculator;
-
     @Test
-    void shouldCreateVisit() {
+    void processVisitRequest_shouldProcessWithValidData() {
         VisitRequest visitRequest = new VisitRequest(180);
 
         String matchId = "match-1";
@@ -55,6 +71,13 @@ class MatchServiceTest {
         when(matchRepository.isValidLegHierarchy(legId, setId, matchId)).thenReturn(true);
         when(userRepository.findByEmail("user1@example.com")).thenReturn(Optional.of(user));
         when(visitRepository.extractCurrentScore(userId, legId)).thenReturn(301);
+        when(matchRepository.findById(matchId)).thenReturn(
+                Optional.of(new Match(matchId, MatchType.FiveO, 3,3,
+                        OffsetDateTime.now(), null, MatchStatus.ONGOING))
+        );
+        when(matchRepository.getMatchUsers(matchId)).thenReturn(List.of(new MatchesUsers("match-1", "user-1", 0),
+                        new MatchesUsers("match-1", "user-2", 1)));
+        when(legRepository.getTurnIndex(legId)).thenReturn(0);
         when(scoreCalculator.validateAndBuildVisit(userId, 301, visitRequest.score(), legId))
                 .thenReturn(new Visit(
                         "visit-4",
@@ -63,9 +86,10 @@ class MatchServiceTest {
                         visitRequest.score(),
                         false,
                         OffsetDateTime.now()));
+        when(progressionHandler.checkResult(any())).thenReturn(ResultScenario.NO_LEG_WON);
 
 
-        matchService.createVisit(
+        matchService.processVisitRequest(
                 visitRequest, matchId, setId, legId, user.email()
         );
 
@@ -92,7 +116,7 @@ class MatchServiceTest {
 
         when(userRepository.findByEmail("user1@example.com")).thenReturn(Optional.empty());
 
-        assertThrows(UsernameNotFoundException.class, () -> matchService.createVisit(
+        assertThrows(UsernameNotFoundException.class, () -> matchService.processVisitRequest(
                 visitRequest, matchId, setId, legId, user.email()
         ));
     }
@@ -109,9 +133,11 @@ class MatchServiceTest {
         User user = new User(userId, "user1@example.com", "user1@example.com");
 
         when(userRepository.findByEmail("user1@example.com")).thenReturn(Optional.of(user));
+        when(matchRepository.findById(matchId)).thenReturn(Optional.of(new Match(matchId, MatchType.FiveO, 3,3,
+                OffsetDateTime.now(), null, MatchStatus.ONGOING)));
         when(matchRepository.isValidLegHierarchy(legId, setId, matchId)).thenReturn(false);
 
-        assertThrows(InvalidHierarchyException.class, () -> matchService.createVisit(
+        assertThrows(InvalidHierarchyException.class, () -> matchService.processVisitRequest(
                 visitRequest, matchId, setId, legId, user.email()
         ));
     }

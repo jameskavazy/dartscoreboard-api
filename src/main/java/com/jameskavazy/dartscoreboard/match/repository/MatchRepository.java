@@ -1,6 +1,8 @@
 package com.jameskavazy.dartscoreboard.match.repository;
 
 import com.jameskavazy.dartscoreboard.match.models.matches.Match;
+import com.jameskavazy.dartscoreboard.match.models.matches.MatchType;
+import com.jameskavazy.dartscoreboard.match.models.matches.MatchesUsers;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
@@ -95,5 +97,43 @@ public class MatchRepository {
                 .single();
 
         return count == 1;
+    }
+
+    public List<String> getUsersIdsInMatch(String matchId) {
+        return jdbcClient.sql("""
+                    SELECT user_id
+                    FROM matches_users
+                    WHERE match_id = :matchId
+                    ORDER BY position ASC
+                """)
+                .param("matchId", matchId)
+                .query(String.class)
+                .list();
+    }
+
+    public List<MatchesUsers> getMatchUsers(String matchId) {
+        return jdbcClient.sql("""
+                    SELECT *
+                    FROM matches_users
+                    WHERE match_id = :matchId
+                    ORDER BY position ASC
+                """)
+                .param("matchId", matchId)
+                .query(MatchesUsers.class)
+                .list();
+    }
+
+
+    public int getStartingScore(String matchId) {
+        MatchType matchType = jdbcClient.sql("""
+                        SELECT match_type
+                        FROM matches
+                        WHERE match_id = :matchId
+                        """)
+                .param("matchId", matchId)
+                .query(MatchType.class)
+                .single();
+
+        return matchType.startingScore;
     }
 }

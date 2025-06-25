@@ -140,4 +140,10 @@ class MatchRepositoryTest {
         boolean validLegHierarchy = repository.isValidLegHierarchy("leg-1", "set-2", "match-1");
         assertFalse(validLegHierarchy);
     }
+
+    @Test
+    void shouldReturnStartingScore(){
+        int startingScore = repository.getStartingScore("match-1");
+        assertEquals(501, startingScore);
+    }
 }

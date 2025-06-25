@@ -24,10 +24,8 @@ class ScoreCalculatorTest {
 
         assertEquals(58, visit.score());
         assertEquals("user-1", visit.userId());
-
-
-
     }
+
     @Test
     void shouldThrowInvalidVisitScoreException(){
         assertThrows(InvalidVisitScoreException.class,

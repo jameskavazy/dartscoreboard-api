@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.NOT_FOUND)
 public class MatchNotFoundException extends RuntimeException {
-    public MatchNotFoundException(){
-        super("Match Not Found");
+    public MatchNotFoundException(String msg){
+        super("Match Not Found: " + msg);
     }
 }

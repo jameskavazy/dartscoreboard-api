@@ -34,7 +34,7 @@ public class MatchController {
     Match findMatchById(@PathVariable String matchId){
         Optional<Match> match = matchService.findMatchById(matchId);
         if (match.isEmpty()) {
-            throw new MatchNotFoundException();
+            throw new MatchNotFoundException("Could not find match: " + matchId);
         }
         return match.get();
     }
@@ -58,7 +58,7 @@ public class MatchController {
                                   @RequestBody VisitRequest visitRequest,
                                   @AuthenticationPrincipal UserDetails userDetails){
 
-        matchService.createVisit(visitRequest, matchId, setId, legId, userDetails.getUsername());
+        matchService.processVisitRequest(visitRequest, matchId, setId, legId, userDetails.getUsername());
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

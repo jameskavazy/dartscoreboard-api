@@ -19,7 +19,7 @@ VALUES ('match-1', '2025-06-15T20:38:21.414670Z', 'FiveO', 3, 1, NULL, 'ONGOING'
 
 
 INSERT INTO matches_users (match_id, user_id, position)
-VALUES ('match-1', 'user-1', 0), ('match-1', 'user-2', 0);
+VALUES ('match-1', 'user-1', 0), ('match-1', 'user-2', 1);
 
 
 INSERT INTO sets (set_id, match_id, set_winner_id, created_at)
