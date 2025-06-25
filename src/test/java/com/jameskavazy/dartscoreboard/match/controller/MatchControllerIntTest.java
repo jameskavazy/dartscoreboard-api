@@ -78,8 +78,8 @@ class MatchControllerIntTest {
                 .defaultHeader("Authorization", "Bearer fakeToken")
                         .build();
 
-        when(jwtService.getEmail("fakeToken")).thenReturn("valid@email.com");
-        when(userDetailsService.loadUserByUsername("valid@email.com")).thenReturn(new UserPrincipal(new User("valid","valid@email.com", "valid@email.com")));
+        when(jwtService.getEmail("fakeToken")).thenReturn("valid@username.com");
+        when(userDetailsService.loadUserByUsername("valid@username.com")).thenReturn(new UserPrincipal(new User("valid","valid@username.com", "valid@username.com")));
         doReturn(true)
                 .when(jwtService)
                 .validateToken(eq("fakeToken"), any(UserPrincipal.class));

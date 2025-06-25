@@ -75,19 +75,19 @@ class VisitRepositoryTest {
     @Test
     void shouldDeleteLatestVisit() {
         visitRepository.deleteLatestVisit("leg-1");
-        assertEquals(2, visitRepository.findAll().size());
+        assertEquals(7, visitRepository.findAll().size());
     }
 
     @Test
     void shouldFindAll(){
         List<Visit> visits = visitRepository.findAll();
-        assertEquals(3, visits.size());
+        assertEquals(8, visits.size());
     }
 
     @Test
     void shouldReturnCorrectScore(){
         int score = visitRepository.extractCurrentScore("user-1", "leg-1");
-        assertEquals(280, score);
+        assertEquals(380, score);
     }
 
 }

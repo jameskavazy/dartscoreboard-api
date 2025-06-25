@@ -31,13 +31,13 @@ public class AuthService {
         Optional<OAuthUser> oAuthUserOptional = tokenVerifier.verify(token);
 
         if (oAuthUserOptional.isPresent()) {
-            String email = oAuthUserOptional.get().email();
-            log.info(email);
-            String jwt = jwtService.generateToken(email);
-            User user = userRepository.findByEmail(email)
-                    .orElseGet(() -> userRepository.create(new User(UUID.randomUUID().toString(), email, email)));
+            String username = oAuthUserOptional.get().username();
+            log.info(username);
+            String jwt = jwtService.generateToken(username);
+            User user = userRepository.findByUsername(username)
+                    .orElseGet(() -> userRepository.create(new User(UUID.randomUUID().toString(), username, username)));
 
-            return Optional.of(new AuthResult(user.email(), jwt));
+            return Optional.of(new AuthResult(user.username(), jwt));
         }
         return Optional.empty();
     }

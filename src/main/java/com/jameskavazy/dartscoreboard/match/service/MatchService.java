@@ -86,7 +86,7 @@ public class MatchService {
     }
 
 
-    public void processVisitRequest(VisitRequest visitRequest,
+    public ResultScenario processVisitRequest(VisitRequest visitRequest,
                                     String matchId,
                                     String setId,
                                     String legId,
@@ -105,6 +105,7 @@ public class MatchService {
         MatchContext matchContext = createMatchContext(matchId, setId, legId, userId, match, currentScore, visit);
         ResultScenario resultScenario = progressionHandler.checkResult(matchContext);
         handleResult(resultScenario, matchContext);
+        return resultScenario;
     }
 
     private void validateTurn(String matchId, String legId, String userId) {
@@ -129,7 +130,7 @@ public class MatchService {
     }
 
     private String validateUser(String userPrincipalUsername){
-        Optional<User> userOptional = userRepository.findByEmail(userPrincipalUsername);
+        Optional<User> userOptional = userRepository.findByUsername(userPrincipalUsername);
 
         if (userOptional.isPresent()){
             User user = userOptional.get();
@@ -153,10 +154,10 @@ public class MatchService {
 
     private void handleResult(ResultScenario resultScenario, MatchContext matchContext) {
         switch (resultScenario) {
-            case NO_LEG_WON -> handleNoLegWon(matchContext);
-            case LEG_WON_NO_SET_WON -> handleLegWon(matchContext);
-            case LEG_WON_SET_WON_NO_MATCH_WON -> handleLegWonSetWonNoMatchWon(matchContext);
-            case LEG_WON_SET_WON_MATCH_WON -> handleLegWonSetWonMatchWon(matchContext);
+            case NO_RESULT -> handleNoLegWon(matchContext);
+            case LEG_WON -> handleLegWon(matchContext);
+            case MATCH_WON -> handleLegWonSetWonNoMatchWon(matchContext);
+            case SET_WON -> handleLegWonSetWonMatchWon(matchContext);
         }
     }
 

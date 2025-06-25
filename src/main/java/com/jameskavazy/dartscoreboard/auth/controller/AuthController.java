@@ -27,13 +27,13 @@ public class AuthController {
             Optional<AuthResult> authResult = authService.authenticate(request.token());
 
             if (authResult.isPresent()) {
-                String email = authResult.get().email();
+                String username = authResult.get().username();
                 String jwt = authResult.get().jwt();
                 HttpHeaders headers = new HttpHeaders();
                 headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + jwt);
 
                 return new ResponseEntity<>(
-                        new AuthResponse(email),
+                        new AuthResponse(username),
                         headers,
                         HttpStatus.OK
                 );

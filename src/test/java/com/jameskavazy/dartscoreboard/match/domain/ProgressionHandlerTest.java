@@ -4,7 +4,6 @@ import com.jameskavazy.dartscoreboard.match.models.matches.Match;
 import com.jameskavazy.dartscoreboard.match.models.matches.MatchStatus;
 import com.jameskavazy.dartscoreboard.match.models.matches.MatchType;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -28,7 +27,7 @@ class ProgressionHandlerTest {
         );
 
         ResultScenario resultScenario = progressionHandler.checkResult(matchContext);
-        assertEquals(ResultScenario.NO_LEG_WON, resultScenario);
+        assertEquals(ResultScenario.NO_RESULT, resultScenario);
     }
 
     @Test
@@ -37,7 +36,7 @@ class ProgressionHandlerTest {
                 match,  userIds, 1, 1, 0, "leg-1", "user-1", "set-1"
         );
         ResultScenario resultScenario = progressionHandler.checkResult(matchContext);
-        assertEquals(ResultScenario.LEG_WON_NO_SET_WON, resultScenario);
+        assertEquals(ResultScenario.LEG_WON, resultScenario);
     }
 
     @Test
@@ -47,7 +46,7 @@ class ProgressionHandlerTest {
         );
 
         ResultScenario resultScenario = progressionHandler.checkResult(matchContext);
-        assertEquals(ResultScenario.LEG_WON_SET_WON_NO_MATCH_WON, resultScenario);
+        assertEquals(ResultScenario.SET_WON, resultScenario);
     }
 
     @Test
@@ -57,7 +56,7 @@ class ProgressionHandlerTest {
         );
 
         ResultScenario resultScenario = progressionHandler.checkResult(matchContext);
-        assertEquals(ResultScenario.LEG_WON_SET_WON_MATCH_WON, resultScenario);
+        assertEquals(ResultScenario.MATCH_WON, resultScenario);
     }
 
     @Test

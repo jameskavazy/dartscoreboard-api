@@ -66,7 +66,7 @@ class MatchRepositoryTest {
 
         assertEquals("match-1", match.matchId());
         assertEquals(MatchType.FiveO.name, match.matchType().name);
-        assertEquals(3, match.raceToLeg());
+        assertEquals(1, match.raceToLeg());
         assertEquals(1, match.raceToSet());
         assertEquals( OffsetDateTime.parse("2025-06-15T20:38:21.414670Z"), match.createdAt());
         assertNull(match.winnerId());

@@ -10,13 +10,11 @@ public class ProgressionHandler {
     }
 
     public ResultScenario checkResult(MatchContext matchContext){
-        if (matchContext.computedScore() != 0) return ResultScenario.NO_LEG_WON;
-        if (matchContext.match().raceToLeg() - 1 != matchContext.legsWon()) return ResultScenario.LEG_WON_NO_SET_WON;
-        if (matchContext.match().raceToSet() - 1 != matchContext.setsWon()) return ResultScenario.LEG_WON_SET_WON_NO_MATCH_WON;
-
-        return ResultScenario.LEG_WON_SET_WON_MATCH_WON;
+        if (matchContext.computedScore() != 0) return ResultScenario.NO_RESULT;
+        if (matchContext.match().raceToLeg() != matchContext.legsWon() + 1) return ResultScenario.LEG_WON;
+        if (matchContext.match().raceToSet() == matchContext.setsWon() + 1) return ResultScenario.MATCH_WON;
+        return ResultScenario.SET_WON;
     }
-
     public int increment(int base, int shift, int size) {
         return (base + shift) % size;
     }

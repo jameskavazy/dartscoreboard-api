@@ -56,7 +56,7 @@ class AuthControllerTest {
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpectAll(status().isOk())
                 .andExpect(header().string("Authorization", "Bearer " + "jwt"))
-                .andExpect(jsonPath("email").value("test.com"));
+                .andExpect(jsonPath("username").value("test.com"));
     }
 
     @Test

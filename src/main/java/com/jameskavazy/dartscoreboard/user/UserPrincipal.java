@@ -30,7 +30,4 @@ public class UserPrincipal implements UserDetails {
         return user.username();
     }
 
-    public String getEmail(){
-        return user.email();
-    }
 }

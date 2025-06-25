@@ -4,6 +4,7 @@ import com.jameskavazy.dartscoreboard.user.User;
 import com.jameskavazy.dartscoreboard.user.UserPrincipal;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -13,6 +14,7 @@ import org.springframework.security.provisioning.UserDetailsManager;
 import java.util.List;
 
 @TestConfiguration
+@Primary
 public class SpringSecurityUserDetailsTestConfig {
 
     @Bean
@@ -56,6 +58,6 @@ public class SpringSecurityUserDetailsTestConfig {
 
     @Bean
     public User testUser(){
-        return new User("user-1", "valid@email.com", "valid@email.com");
+        return new User("user-1", "valid@username.com", "valid@username.com");
     }
 }

@@ -69,7 +69,7 @@ class MatchServiceTest {
         User user = new User(userId, "user1@example.com", "user1@example.com");
 
         when(matchRepository.isValidLegHierarchy(legId, setId, matchId)).thenReturn(true);
-        when(userRepository.findByEmail("user1@example.com")).thenReturn(Optional.of(user));
+        when(userRepository.findByUsername("user1@example.com")).thenReturn(Optional.of(user));
         when(visitRepository.extractCurrentScore(userId, legId)).thenReturn(301);
         when(matchRepository.findById(matchId)).thenReturn(
                 Optional.of(new Match(matchId, MatchType.FiveO, 3,3,
@@ -86,11 +86,11 @@ class MatchServiceTest {
                         visitRequest.score(),
                         false,
                         OffsetDateTime.now()));
-        when(progressionHandler.checkResult(any())).thenReturn(ResultScenario.NO_LEG_WON);
+        when(progressionHandler.checkResult(any())).thenReturn(ResultScenario.NO_RESULT);
 
 
         matchService.processVisitRequest(
-                visitRequest, matchId, setId, legId, user.email()
+                visitRequest, matchId, setId, legId, user.username()
         );
 
         verify(visitRepository)
@@ -114,10 +114,10 @@ class MatchServiceTest {
 
         User user = new User(userId, "user1@example.com", "user1@example.com");
 
-        when(userRepository.findByEmail("user1@example.com")).thenReturn(Optional.empty());
+        when(userRepository.findByUsername("user1@example.com")).thenReturn(Optional.empty());
 
         assertThrows(UsernameNotFoundException.class, () -> matchService.processVisitRequest(
-                visitRequest, matchId, setId, legId, user.email()
+                visitRequest, matchId, setId, legId, user.username()
         ));
     }
 
@@ -132,13 +132,13 @@ class MatchServiceTest {
 
         User user = new User(userId, "user1@example.com", "user1@example.com");
 
-        when(userRepository.findByEmail("user1@example.com")).thenReturn(Optional.of(user));
+        when(userRepository.findByUsername("user1@example.com")).thenReturn(Optional.of(user));
         when(matchRepository.findById(matchId)).thenReturn(Optional.of(new Match(matchId, MatchType.FiveO, 3,3,
                 OffsetDateTime.now(), null, MatchStatus.ONGOING)));
         when(matchRepository.isValidLegHierarchy(legId, setId, matchId)).thenReturn(false);
 
         assertThrows(InvalidHierarchyException.class, () -> matchService.processVisitRequest(
-                visitRequest, matchId, setId, legId, user.email()
+                visitRequest, matchId, setId, legId, user.username()
         ));
     }
 }

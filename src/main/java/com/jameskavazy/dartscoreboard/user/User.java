@@ -2,7 +2,7 @@ package com.jameskavazy.dartscoreboard.user;
 
 public record User(
         String userId,
-        String email,
-        String username
+        String username,
+        String screenName
 ) {
 }

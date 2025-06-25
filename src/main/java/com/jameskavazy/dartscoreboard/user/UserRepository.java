@@ -17,23 +17,23 @@ public class UserRepository {
         this.jdbcClient = jdbcClient;
     }
 
-    public Optional<User> findByEmail(String email) {
+    public Optional<User> findByUsername(String username) {
         String query = """
                 SELECT *
                 FROM users
-                WHERE email = :email
+                WHERE username = :username
                 """;
 
-        return jdbcClient.sql(query).param("email", email).query(User.class).optional();
+        return jdbcClient.sql(query).param("username", username).query(User.class).optional();
     }
 
     public User create(User user) {
-        int updated = jdbcClient.sql("INSERT INTO users(user_id, email, username) values(?, ?, ?)")
-                .params(List.of(UUID.randomUUID().toString(), user.email(), user.username()))
+        int updated = jdbcClient.sql("INSERT INTO users(user_id, username, screen_name) values(?, ?, ?)")
+                .params(List.of(UUID.randomUUID().toString(), user.username(), user.screenName()))
                 .update();
-        Assert.state(updated == 1, "Failed to create user " + user.email());
+        Assert.state(updated == 1, "Failed to create user " + user.username());
         return user;
     }
 
-    // TODO update username...
+    // TODO allow user to update their screennanme
 }
