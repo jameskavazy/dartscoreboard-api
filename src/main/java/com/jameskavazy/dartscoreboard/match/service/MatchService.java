@@ -152,21 +152,12 @@ public class MatchService {
     }
 
     private ResultContext handleResult(ResultScenario resultScenario, MatchContext matchContext) {
-        switch (resultScenario) {
-            case NO_RESULT -> {
-                return handleNoResult(matchContext);
-            }
-            case LEG_WON -> {
-                return handleLegWon(matchContext);
-            }
-            case MATCH_WON -> {
-                return handleMatchWon(matchContext);
-            }
-            case SET_WON -> {
-                return handleSetWon(matchContext);
-            }
-        }
-        return null;
+        return switch (resultScenario) {
+            case NO_RESULT -> handleNoResult(matchContext);
+            case LEG_WON -> handleLegWon(matchContext);
+            case MATCH_WON -> handleMatchWon(matchContext);
+            case SET_WON -> handleSetWon(matchContext);
+        };
     }
 
     private ResultContext handleLegWon(MatchContext matchContext) {

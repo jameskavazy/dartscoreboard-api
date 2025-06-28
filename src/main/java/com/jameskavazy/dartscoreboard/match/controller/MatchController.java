@@ -1,5 +1,6 @@
 package com.jameskavazy.dartscoreboard.match.controller;
 
+import com.jameskavazy.dartscoreboard.match.domain.VisitResult;
 import com.jameskavazy.dartscoreboard.match.models.matches.Match;
 import com.jameskavazy.dartscoreboard.match.exception.MatchNotFoundException;
 import com.jameskavazy.dartscoreboard.match.dto.MatchRequest;
@@ -58,7 +59,10 @@ public class MatchController {
                                   @RequestBody VisitRequest visitRequest,
                                   @AuthenticationPrincipal UserDetails userDetails){
 
-        matchService.processVisitRequest(visitRequest, matchId, setId, legId, userDetails.getUsername());
+        VisitResult visitResult = matchService
+                .processVisitRequest(visitRequest, matchId, setId, legId, userDetails.getUsername());
+
+
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }
