@@ -1,6 +1,6 @@
 package com.jameskavazy.dartscoreboard.match.repository;
 
-import com.jameskavazy.dartscoreboard.match.models.sets.Set;
+import com.jameskavazy.dartscoreboard.match.model.sets.Set;
 import io.jsonwebtoken.lang.Assert;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;

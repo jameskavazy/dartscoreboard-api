@@ -5,9 +5,9 @@ import com.jameskavazy.dartscoreboard.auth.security.JwtFilter;
 import com.jameskavazy.dartscoreboard.auth.service.JwtService;
 import com.jameskavazy.dartscoreboard.match.dto.MatchRequest;
 import com.jameskavazy.dartscoreboard.match.SpringSecurityUserDetailsTestConfig;
-import com.jameskavazy.dartscoreboard.match.models.matches.Match;
-import com.jameskavazy.dartscoreboard.match.models.matches.MatchStatus;
-import com.jameskavazy.dartscoreboard.match.models.matches.MatchType;
+import com.jameskavazy.dartscoreboard.match.model.matches.Match;
+import com.jameskavazy.dartscoreboard.match.model.matches.MatchStatus;
+import com.jameskavazy.dartscoreboard.match.model.matches.MatchType;
 import com.jameskavazy.dartscoreboard.match.service.MatchService;
 import com.jameskavazy.dartscoreboard.match.dto.VisitRequest;
 import com.jameskavazy.dartscoreboard.user.UserPrincipal;
@@ -110,7 +110,8 @@ class MatchControllerTest {
         MatchRequest matchRequest = new MatchRequest(
                 MatchType.FiveO,
                 1,
-                2
+                2,
+                List.of("user-1", "user-2")
         );
 
         mvc.perform(post("/api/matches")

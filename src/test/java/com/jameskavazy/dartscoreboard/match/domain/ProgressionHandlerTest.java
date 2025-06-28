@@ -1,8 +1,8 @@
 package com.jameskavazy.dartscoreboard.match.domain;
 
-import com.jameskavazy.dartscoreboard.match.models.matches.Match;
-import com.jameskavazy.dartscoreboard.match.models.matches.MatchStatus;
-import com.jameskavazy.dartscoreboard.match.models.matches.MatchType;
+import com.jameskavazy.dartscoreboard.match.model.matches.Match;
+import com.jameskavazy.dartscoreboard.match.model.matches.MatchStatus;
+import com.jameskavazy.dartscoreboard.match.model.matches.MatchType;
 import org.junit.jupiter.api.Test;
 
 import java.time.OffsetDateTime;

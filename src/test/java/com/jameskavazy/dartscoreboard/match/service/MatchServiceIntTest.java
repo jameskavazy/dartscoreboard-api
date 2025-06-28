@@ -7,9 +7,9 @@ import com.jameskavazy.dartscoreboard.match.domain.ResultScenario;
 import com.jameskavazy.dartscoreboard.match.domain.ScoreCalculator;
 import com.jameskavazy.dartscoreboard.match.domain.VisitResult;
 import com.jameskavazy.dartscoreboard.match.dto.VisitRequest;
-import com.jameskavazy.dartscoreboard.match.models.matches.Match;
-import com.jameskavazy.dartscoreboard.match.models.matches.MatchStatus;
-import com.jameskavazy.dartscoreboard.match.models.matches.MatchType;
+import com.jameskavazy.dartscoreboard.match.model.matches.Match;
+import com.jameskavazy.dartscoreboard.match.model.matches.MatchStatus;
+import com.jameskavazy.dartscoreboard.match.model.matches.MatchType;
 import com.jameskavazy.dartscoreboard.match.repository.LegRepository;
 import com.jameskavazy.dartscoreboard.match.repository.MatchRepository;
 import com.jameskavazy.dartscoreboard.match.repository.SetRepository;
@@ -65,9 +65,9 @@ public class MatchServiceIntTest {
     @MockitoBean
     UserDetailsServiceImpl userDetailsService;
 
-    String matchId = "match-1";
-    String setId = "set-1";
-    String legId = "leg-1";
+    final String matchId = "match-1";
+    final String setId = "set-1";
+    final String legId = "leg-1";
 
 
     @Container

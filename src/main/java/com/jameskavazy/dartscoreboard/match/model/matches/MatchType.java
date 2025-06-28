@@ -1,4 +1,4 @@
-package com.jameskavazy.dartscoreboard.match.models.matches;
+package com.jameskavazy.dartscoreboard.match.model.matches;
 
 public enum MatchType {
     FiveO("501", 501),

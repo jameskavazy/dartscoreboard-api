@@ -5,14 +5,14 @@ import com.jameskavazy.dartscoreboard.match.dto.MatchRequest;
 import com.jameskavazy.dartscoreboard.match.exception.InvalidHierarchyException;
 import com.jameskavazy.dartscoreboard.match.exception.InvalidPlayerTurnException;
 import com.jameskavazy.dartscoreboard.match.exception.MatchNotFoundException;
-import com.jameskavazy.dartscoreboard.match.models.legs.Leg;
-import com.jameskavazy.dartscoreboard.match.models.matches.Match;
-import com.jameskavazy.dartscoreboard.match.models.matches.MatchesUsers;
-import com.jameskavazy.dartscoreboard.match.models.sets.Set;
+import com.jameskavazy.dartscoreboard.match.model.legs.Leg;
+import com.jameskavazy.dartscoreboard.match.model.matches.Match;
+import com.jameskavazy.dartscoreboard.match.model.matches.MatchesUsers;
+import com.jameskavazy.dartscoreboard.match.model.sets.Set;
 import com.jameskavazy.dartscoreboard.match.repository.LegRepository;
 import com.jameskavazy.dartscoreboard.match.repository.MatchRepository;
-import com.jameskavazy.dartscoreboard.match.models.matches.MatchStatus;
-import com.jameskavazy.dartscoreboard.match.models.visits.Visit;
+import com.jameskavazy.dartscoreboard.match.model.matches.MatchStatus;
+import com.jameskavazy.dartscoreboard.match.model.visits.Visit;
 import com.jameskavazy.dartscoreboard.match.repository.SetRepository;
 import com.jameskavazy.dartscoreboard.match.repository.VisitRepository;
 import com.jameskavazy.dartscoreboard.match.dto.VisitRequest;
@@ -53,7 +53,6 @@ public class MatchService {
         this.progressionHandler = progressionHandler;
     }
 
-
     public List<Match> findAllMatches() {
         return matchRepository.findAll();
     }
@@ -73,15 +72,12 @@ public class MatchService {
                 null,
                 MatchStatus.ONGOING
         );
-        matchRepository.create(match);
-
-        // TODO create associated data - legs, sets, match users
+        generateMatchHierarchy(matchRequest, match);
     }
 
     public void updateMatch(Match match, String matchId) {
         matchRepository.update(match, matchId);
     }
-
 
     public VisitResult processVisitRequest(VisitRequest visitRequest,
                                            String matchId,
@@ -102,7 +98,6 @@ public class MatchService {
         MatchContext matchContext = createMatchContext(matchId, setId, legId, userId, match, currentScore, visit);
         ResultScenario resultScenario = progressionHandler.checkResult(matchContext);
         ResultContext resultContext = handleResult(resultScenario, matchContext);
-        // TODO: 28/06/2025 leg repository .update winner id... create new leg..
 
         return new VisitResult(resultScenario, resultContext);
     }
@@ -165,13 +160,13 @@ public class MatchService {
         int numOfLegs = legRepository.countLegsInSet(matchContext.setId());
         int shift = setRepository.getSetsInMatch(matchContext.match().matchId()).size() - 1;
 
-        // base on leg count, shift by which set we're in, less 1
+        // Base on leg count, shift by which set we're in, less 1 (to align with indices)
         int turnIndex = nextPlayerIndex(matchContext, numOfLegs, shift);
-        Leg leg = new Leg(
+        Leg newLeg = new Leg(
                 UUID.randomUUID().toString(), matchContext.match().matchId(), matchContext.setId(), turnIndex, null, OffsetDateTime.now()
         );
-        legRepository.create(leg);
-        return new ResultContext(leg.legId(), matchContext.setId());
+        legRepository.create(newLeg);
+        return new ResultContext(newLeg.legId(), matchContext.setId());
     }
 
     private ResultContext handleSetWon(MatchContext matchContext){
@@ -185,14 +180,14 @@ public class MatchService {
         // base by numOfSets, no shift needed
         int turnIndex = nextPlayerIndex(matchContext, numOfSets, 0);
 
-        Set set = new Set(UUID.randomUUID().toString(), matchId, null, OffsetDateTime.now());
+        Set newSet = new Set(UUID.randomUUID().toString(), matchId, null, OffsetDateTime.now());
 
-        setRepository.create(set);
+        setRepository.create(newSet);
 
-        Leg leg = new Leg(UUID.randomUUID().toString(), matchId, set.setId(), turnIndex, null, OffsetDateTime.now());
-        legRepository.create(leg);
+        Leg newLeg = new Leg(UUID.randomUUID().toString(), matchId, newSet.setId(), turnIndex, null, OffsetDateTime.now());
+        legRepository.create(newLeg);
 
-        return new ResultContext(leg.legId(), set.setId());
+        return new ResultContext(newLeg.legId(), newSet.setId());
     }
 
     private ResultContext handleMatchWon(MatchContext matchContext){
@@ -215,12 +210,30 @@ public class MatchService {
         int currentTurnIndex = legRepository.getTurnIndex(matchContext.legId());
         int nextPlayerIndex = nextPlayerIndex(matchContext, currentTurnIndex, 1);
         legRepository.updateTurnIndex(nextPlayerIndex, matchContext.legId());
-
         return new ResultContext(matchContext.legId(), matchContext.setId());
     }
 
     private int nextPlayerIndex(MatchContext matchContext, int base, int shift) {
        return progressionHandler.increment(base, shift + matchContext.usersIdsInMatch().size(), matchContext.usersIdsInMatch().size());
+    }
+
+    private void generateMatchHierarchy(MatchRequest matchRequest, Match match) {
+        matchRepository.create(match);
+        List<MatchesUsers> matchesUsers = getMatchesUsers(matchRequest, match);
+        generateUserMatchAssociations(matchesUsers);
+        Set set = new Set(UUID.randomUUID().toString(), match.matchId(), null, OffsetDateTime.now());
+        setRepository.create(set);
+        legRepository.create(new Leg(UUID.randomUUID().toString(), match.matchId(), set.setId(), 0, null, OffsetDateTime.now()));
+    }
+
+    private void generateUserMatchAssociations(List<MatchesUsers> matchesUsers){
+        matchesUsers.forEach(matchRepository::createMatchUsers);
+    }
+
+    private List<MatchesUsers> getMatchesUsers(MatchRequest matchRequest, Match match) {
+        return matchRequest.userIds().stream()
+                .map(userId -> new MatchesUsers(match.matchId(), userId, userId.indexOf(userId)))
+                .toList();
     }
 }
 

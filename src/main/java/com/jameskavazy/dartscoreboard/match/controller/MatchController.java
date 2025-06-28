@@ -1,7 +1,7 @@
 package com.jameskavazy.dartscoreboard.match.controller;
 
 import com.jameskavazy.dartscoreboard.match.domain.VisitResult;
-import com.jameskavazy.dartscoreboard.match.models.matches.Match;
+import com.jameskavazy.dartscoreboard.match.model.matches.Match;
 import com.jameskavazy.dartscoreboard.match.exception.MatchNotFoundException;
 import com.jameskavazy.dartscoreboard.match.dto.MatchRequest;
 import com.jameskavazy.dartscoreboard.match.service.MatchService;
@@ -43,6 +43,7 @@ public class MatchController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("")
     void createMatch(@Valid @RequestBody MatchRequest matchRequest){
+        // matchservice.sendMatchRequest(matchRequest.userIds());
         matchService.createMatch(matchRequest);
     }
 

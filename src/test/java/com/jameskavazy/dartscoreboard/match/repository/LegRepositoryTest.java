@@ -1,6 +1,6 @@
 package com.jameskavazy.dartscoreboard.match.repository;
 
-import com.jameskavazy.dartscoreboard.match.models.legs.Leg;
+import com.jameskavazy.dartscoreboard.match.model.legs.Leg;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;

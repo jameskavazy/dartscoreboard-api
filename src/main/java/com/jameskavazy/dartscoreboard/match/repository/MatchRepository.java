@@ -1,8 +1,8 @@
 package com.jameskavazy.dartscoreboard.match.repository;
 
-import com.jameskavazy.dartscoreboard.match.models.matches.Match;
-import com.jameskavazy.dartscoreboard.match.models.matches.MatchType;
-import com.jameskavazy.dartscoreboard.match.models.matches.MatchesUsers;
+import com.jameskavazy.dartscoreboard.match.model.matches.Match;
+import com.jameskavazy.dartscoreboard.match.model.matches.MatchType;
+import com.jameskavazy.dartscoreboard.match.model.matches.MatchesUsers;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
@@ -135,5 +135,19 @@ public class MatchRepository {
                 .single();
 
         return matchType.startingScore;
+    }
+
+
+    public void createMatchUsers(MatchesUsers matchesUser) {
+        int updated = jdbcClient.sql("""
+                        INSERT INTO matches_users(match_id, user_id, position)
+                        VALUES (:matchId, :userId, :position)
+                        """)
+                .param("matchId", matchesUser.matchId())
+                .param("userId", matchesUser.userId())
+                .param("position", matchesUser.position())
+                .update();
+
+        Assert.state(updated == 1, "Could not insert match users");
     }
 }

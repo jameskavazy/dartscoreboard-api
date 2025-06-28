@@ -1,4 +1,4 @@
-package com.jameskavazy.dartscoreboard.match.models.matches;
+package com.jameskavazy.dartscoreboard.match.model.matches;
 
 import jakarta.validation.constraints.PastOrPresent;
 

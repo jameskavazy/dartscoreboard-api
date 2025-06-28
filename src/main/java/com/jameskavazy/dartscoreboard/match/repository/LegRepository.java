@@ -1,6 +1,6 @@
 package com.jameskavazy.dartscoreboard.match.repository;
 
-import com.jameskavazy.dartscoreboard.match.models.legs.Leg;
+import com.jameskavazy.dartscoreboard.match.model.legs.Leg;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;

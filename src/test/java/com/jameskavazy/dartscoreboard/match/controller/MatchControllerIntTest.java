@@ -4,10 +4,10 @@ package com.jameskavazy.dartscoreboard.match.controller;
 import com.jameskavazy.dartscoreboard.auth.service.JwtService;
 import com.jameskavazy.dartscoreboard.auth.service.UserDetailsServiceImpl;
 import com.jameskavazy.dartscoreboard.match.dto.MatchRequest;
-import com.jameskavazy.dartscoreboard.match.models.matches.Match;
+import com.jameskavazy.dartscoreboard.match.model.matches.Match;
 import com.jameskavazy.dartscoreboard.match.repository.MatchRepository;
-import com.jameskavazy.dartscoreboard.match.models.matches.MatchStatus;
-import com.jameskavazy.dartscoreboard.match.models.matches.MatchType;
+import com.jameskavazy.dartscoreboard.match.model.matches.MatchStatus;
+import com.jameskavazy.dartscoreboard.match.model.matches.MatchType;
 import com.jameskavazy.dartscoreboard.user.User;
 import com.jameskavazy.dartscoreboard.user.UserPrincipal;
 import org.junit.jupiter.api.*;
@@ -127,7 +127,8 @@ class MatchControllerIntTest {
         MatchRequest matchRequest = new MatchRequest(
                 MatchType.FiveO,
                 1,
-                2
+                2,
+                List.of("user-1", "user-2")
         );
         ResponseEntity<Void> newMatch = restClient.post().uri("/api/matches")
                 .body(matchRequest)

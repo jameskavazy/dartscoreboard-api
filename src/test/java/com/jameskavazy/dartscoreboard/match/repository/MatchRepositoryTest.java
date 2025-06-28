@@ -1,8 +1,9 @@
 package com.jameskavazy.dartscoreboard.match.repository;
 
-import com.jameskavazy.dartscoreboard.match.models.matches.Match;
-import com.jameskavazy.dartscoreboard.match.models.matches.MatchStatus;
-import com.jameskavazy.dartscoreboard.match.models.matches.MatchType;
+import com.jameskavazy.dartscoreboard.match.model.matches.Match;
+import com.jameskavazy.dartscoreboard.match.model.matches.MatchStatus;
+import com.jameskavazy.dartscoreboard.match.model.matches.MatchType;
+import com.jameskavazy.dartscoreboard.match.model.matches.MatchesUsers;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -146,4 +147,17 @@ class MatchRepositoryTest {
         int startingScore = repository.getStartingScore("match-1");
         assertEquals(501, startingScore);
     }
+
+    @Test
+    void shouldInsertMatchUsers(){
+        repository.create(
+                new Match("match-2", MatchType.SevenO, 1,1,OffsetDateTime.now(), null, MatchStatus.REQUESTED)
+        );
+        MatchesUsers matchesUser = new MatchesUsers("match-2", "user-1", 0);
+        repository.createMatchUsers(matchesUser);
+        List<MatchesUsers> matchUsers = repository.getMatchUsers("match-2");
+        assertEquals(1, matchUsers.size());
+        assertEquals("user-1", matchUsers.get(0).userId());
+    }
+
 }
