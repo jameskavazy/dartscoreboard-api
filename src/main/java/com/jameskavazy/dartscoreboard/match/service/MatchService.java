@@ -1,9 +1,6 @@
 package com.jameskavazy.dartscoreboard.match.service;
 
-import com.jameskavazy.dartscoreboard.match.domain.MatchContext;
-import com.jameskavazy.dartscoreboard.match.domain.ProgressionHandler;
-import com.jameskavazy.dartscoreboard.match.domain.ResultScenario;
-import com.jameskavazy.dartscoreboard.match.domain.ScoreCalculator;
+import com.jameskavazy.dartscoreboard.match.domain.*;
 import com.jameskavazy.dartscoreboard.match.dto.MatchRequest;
 import com.jameskavazy.dartscoreboard.match.exception.InvalidHierarchyException;
 import com.jameskavazy.dartscoreboard.match.exception.InvalidPlayerTurnException;
@@ -86,11 +83,11 @@ public class MatchService {
     }
 
 
-    public ResultScenario processVisitRequest(VisitRequest visitRequest,
-                                    String matchId,
-                                    String setId,
-                                    String legId,
-                                    String userPrincipalUsername) {
+    public VisitResult processVisitRequest(VisitRequest visitRequest,
+                                           String matchId,
+                                           String setId,
+                                           String legId,
+                                           String userPrincipalUsername) {
 
         String userId = validateUser(userPrincipalUsername);
         Match match = validateMatchHierarchy(matchId, legId, setId);
@@ -104,8 +101,10 @@ public class MatchService {
 
         MatchContext matchContext = createMatchContext(matchId, setId, legId, userId, match, currentScore, visit);
         ResultScenario resultScenario = progressionHandler.checkResult(matchContext);
-        handleResult(resultScenario, matchContext);
-        return resultScenario;
+        ResultContext resultContext = handleResult(resultScenario, matchContext);
+        // TODO: 28/06/2025 leg repository .update winner id... create new leg..
+
+        return new VisitResult(resultScenario, resultContext);
     }
 
     private void validateTurn(String matchId, String legId, String userId) {
@@ -152,31 +151,40 @@ public class MatchService {
         );
     }
 
-    private void handleResult(ResultScenario resultScenario, MatchContext matchContext) {
+    private ResultContext handleResult(ResultScenario resultScenario, MatchContext matchContext) {
         switch (resultScenario) {
-            case NO_RESULT -> handleNoLegWon(matchContext);
-            case LEG_WON -> handleLegWon(matchContext);
-            case MATCH_WON -> handleLegWonSetWonNoMatchWon(matchContext);
-            case SET_WON -> handleLegWonSetWonMatchWon(matchContext);
+            case NO_RESULT -> {
+                return handleNoResult(matchContext);
+            }
+            case LEG_WON -> {
+                return handleLegWon(matchContext);
+            }
+            case MATCH_WON -> {
+                return handleMatchWon(matchContext);
+            }
+            case SET_WON -> {
+                return handleSetWon(matchContext);
+            }
         }
+        return null;
     }
 
-    private void handleLegWon(MatchContext matchContext) {
+    private ResultContext handleLegWon(MatchContext matchContext) {
         legRepository.updateWinnerId(matchContext.userId(), matchContext.legId());
         int numOfLegs = legRepository.countLegsInSet(matchContext.setId());
         int shift = setRepository.getSetsInMatch(matchContext.match().matchId()).size() - 1;
 
         // base on leg count, shift by which set we're in, less 1
         int turnIndex = nextPlayerIndex(matchContext, numOfLegs, shift);
-
-        legRepository.create(
-                new Leg(
-                        UUID.randomUUID().toString(), matchContext.match().matchId(), matchContext.setId(), turnIndex, null, OffsetDateTime.now()
-                )
+        Leg leg = new Leg(
+                UUID.randomUUID().toString(), matchContext.match().matchId(), matchContext.setId(), turnIndex, null, OffsetDateTime.now()
         );
+        legRepository.create(leg);
+        return new ResultContext(leg.legId(), matchContext.setId());
     }
 
-    private void handleLegWonSetWonNoMatchWon(MatchContext matchContext){
+    private ResultContext handleSetWon(MatchContext matchContext){
+
         legRepository.updateWinnerId(matchContext.userId(), matchContext.legId());
         setRepository.updateWinnerId(matchContext.userId(), matchContext.setId());
 
@@ -192,9 +200,11 @@ public class MatchService {
 
         Leg leg = new Leg(UUID.randomUUID().toString(), matchId, set.setId(), turnIndex, null, OffsetDateTime.now());
         legRepository.create(leg);
+
+        return new ResultContext(leg.legId(), set.setId());
     }
 
-    private void handleLegWonSetWonMatchWon(MatchContext matchContext){
+    private ResultContext handleMatchWon(MatchContext matchContext){
         legRepository.updateWinnerId(matchContext.userId(), matchContext.legId());
         setRepository.updateWinnerId(matchContext.userId(), matchContext.setId());
         Match match = new Match(
@@ -207,12 +217,15 @@ public class MatchService {
                 MatchStatus.COMPLETE
         );
         matchRepository.update(match, match.matchId());
+        return new ResultContext(matchContext.legId(), matchContext.setId());
     }
 
-    private void handleNoLegWon(MatchContext matchContext) {
+    private ResultContext handleNoResult(MatchContext matchContext) {
         int currentTurnIndex = legRepository.getTurnIndex(matchContext.legId());
         int nextPlayerIndex = nextPlayerIndex(matchContext, currentTurnIndex, 1);
         legRepository.updateTurnIndex(nextPlayerIndex, matchContext.legId());
+
+        return new ResultContext(matchContext.legId(), matchContext.setId());
     }
 
     private int nextPlayerIndex(MatchContext matchContext, int base, int shift) {

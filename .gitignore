@@ -6,6 +6,7 @@ target/
 
 client_secret_googleusercontent.com.json
 secrets.properties
+.env
 
 ### STS ###
 .apt_generated
