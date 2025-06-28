@@ -54,7 +54,7 @@ public class MatchController {
     }
 
     @PostMapping("/{matchId}/sets/{setId}/legs/{legId}/visits/")
-    ResponseEntity<?> createVisit(@PathVariable String matchId,
+    ResponseEntity<VisitResult> createVisit(@PathVariable String matchId,
                                   @PathVariable String setId,
                                   @PathVariable String legId,
                                   @RequestBody VisitRequest visitRequest,
@@ -63,7 +63,6 @@ public class MatchController {
         VisitResult visitResult = matchService
                 .processVisitRequest(visitRequest, matchId, setId, legId, userDetails.getUsername());
 
-
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return new ResponseEntity<>(visitResult, HttpStatus.CREATED);
     }
 }

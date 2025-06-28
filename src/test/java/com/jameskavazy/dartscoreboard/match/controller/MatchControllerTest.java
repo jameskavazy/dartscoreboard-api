@@ -1,8 +1,12 @@
 package com.jameskavazy.dartscoreboard.match.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jameskavazy.dartscoreboard.GlobalExceptionHandler;
 import com.jameskavazy.dartscoreboard.auth.security.JwtFilter;
 import com.jameskavazy.dartscoreboard.auth.service.JwtService;
+import com.jameskavazy.dartscoreboard.match.domain.ResultContext;
+import com.jameskavazy.dartscoreboard.match.domain.ResultScenario;
+import com.jameskavazy.dartscoreboard.match.domain.VisitResult;
 import com.jameskavazy.dartscoreboard.match.dto.MatchRequest;
 import com.jameskavazy.dartscoreboard.match.SpringSecurityUserDetailsTestConfig;
 import com.jameskavazy.dartscoreboard.match.model.matches.Match;
@@ -13,6 +17,7 @@ import com.jameskavazy.dartscoreboard.match.dto.VisitRequest;
 import com.jameskavazy.dartscoreboard.user.UserPrincipal;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -29,12 +34,15 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(MatchController.class)
-@Import(SpringSecurityUserDetailsTestConfig.class)
+@WebMvcTest({MatchController.class, GlobalExceptionHandler.class})
+@Import({SpringSecurityUserDetailsTestConfig.class, GlobalExceptionHandler.class})
 @AutoConfigureMockMvc(addFilters = false)
 class MatchControllerTest {
 
@@ -55,7 +63,8 @@ class MatchControllerTest {
 
     @MockitoBean
     UserPrincipal userPrincipal;
-
+    @Autowired(required = false)
+    GlobalExceptionHandler globalExceptionHandler;
     private final List<Match> matches = new ArrayList<>();
 
     @BeforeEach
@@ -69,7 +78,12 @@ class MatchControllerTest {
                         OffsetDateTime.parse("2025-06-08T13:12:02.221101+01:00"),
                         null,
                         MatchStatus.ONGOING));
+
+        assertNotNull(globalExceptionHandler, "GlobalExceptionHandler not loaded");
     }
+
+
+
 
 
     @Test
@@ -140,13 +154,26 @@ class MatchControllerTest {
     }
 
     @Test
-    @WithUserDetails
-    void shouldReturnOKForCreateVisit() throws Exception {
+    @WithUserDetails()
+    void shouldReturnCREATEDForCreateVisit() throws Exception {
         VisitRequest visitRequest = new VisitRequest(40);
+        when(matchService.processVisitRequest(
+               ArgumentMatchers.any(VisitRequest.class),
+                eq("match-1"),
+                eq("set-1"),
+                eq("leg-1"),
+                anyString()))
+                .thenReturn(new VisitResult(ResultScenario.NO_RESULT, new ResultContext("leg-1", "set-1")));
+
+
+
         mvc.perform(post("/api/matches/match-1/sets/set-1/legs/leg-1/visits/")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(visitRequest))
                 )
+                .andExpect(jsonPath("$.resultScenario").value("NO_RESULT"))
+                .andExpect(jsonPath("$.resultContext.legId").value("leg-1"))
+                .andExpect(jsonPath("$.resultContext.setId").value("set-1"))
                 .andExpect(status().isCreated());
     }
 }
