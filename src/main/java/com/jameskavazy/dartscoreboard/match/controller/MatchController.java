@@ -72,6 +72,6 @@ public class MatchController {
 
     @GetMapping("/sse/{matchId}")
     public SseEmitter subscribeToMatchEmitter(@PathVariable String matchId){
-        return sseService.subscribe(matchId);
+        return sseService.subscribe(matchId, Long.MAX_VALUE);
     }
 }

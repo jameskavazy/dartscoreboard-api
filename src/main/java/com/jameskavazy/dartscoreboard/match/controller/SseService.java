@@ -21,11 +21,14 @@ public class SseService {
     ConcurrentHashMap<String, List<SseEmitter>> emitters = new ConcurrentHashMap<>();
     // possible List<Emitter + UserId object> to identify owner of emitter and custom logic per emitter?
 
-    public SseEmitter subscribe(String matchId) {
-        SseEmitter emitter = new SseEmitter(30000L);
+    public SseEmitter subscribe(String matchId, long timeout) {
+        SseEmitter emitter = new SseEmitter(timeout);
         emitters.computeIfAbsent(matchId, k -> new CopyOnWriteArrayList<>()).add(emitter);
         emitter.onCompletion(() -> emitters.get(matchId).remove(emitter));
-        emitter.onTimeout(() -> emitters.get(matchId).remove(emitter));
+        emitter.onTimeout(() -> {
+            emitter.complete();
+            emitters.get(matchId).remove(emitter);
+        });
         return emitter;
     }
 

@@ -3,9 +3,12 @@ package com.jameskavazy.dartscoreboard.match.controller;
 
 import com.jameskavazy.dartscoreboard.auth.service.JwtService;
 import com.jameskavazy.dartscoreboard.auth.service.UserDetailsServiceImpl;
+import com.jameskavazy.dartscoreboard.match.domain.PlayerState;
+import com.jameskavazy.dartscoreboard.match.domain.ResultContext;
 import com.jameskavazy.dartscoreboard.match.domain.ResultScenario;
 import com.jameskavazy.dartscoreboard.match.domain.VisitResult;
 import com.jameskavazy.dartscoreboard.match.dto.MatchRequest;
+import com.jameskavazy.dartscoreboard.match.dto.VisitEvent;
 import com.jameskavazy.dartscoreboard.match.dto.VisitRequest;
 import com.jameskavazy.dartscoreboard.match.model.matches.Match;
 import com.jameskavazy.dartscoreboard.match.repository.MatchRepository;
@@ -21,23 +24,37 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
 @Testcontainers
 @Transactional
@@ -52,6 +69,10 @@ class MatchControllerIntTest {
 
     @Autowired
     MatchRepository matchRepository;
+
+
+    @Autowired
+    SseService sseService;
 
     @MockitoBean
     JwtService jwtService;
@@ -170,4 +191,6 @@ class MatchControllerIntTest {
         assertEquals("set-1", response.getBody().resultContext().setId());
         assertEquals(ResultScenario.NO_RESULT, response.getBody().resultScenario());
     }
+
+
 }

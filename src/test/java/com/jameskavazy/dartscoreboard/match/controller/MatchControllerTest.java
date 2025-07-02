@@ -40,13 +40,11 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -195,8 +193,8 @@ class MatchControllerTest {
     @Test
     void shouldReceiveEvent() throws Exception {
         ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
-        SseEmitter emitter = new SseEmitter(1000L);
-        when(sseService.subscribe("match-1")).thenReturn(emitter);
+        SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
+        when(sseService.subscribe("match-1", Long.MAX_VALUE)).thenReturn(emitter);
 
         MvcResult result = mvc.perform(get("/api/matches/sse/match-1")
                         .accept(MediaType.TEXT_EVENT_STREAM))
@@ -222,5 +220,56 @@ class MatchControllerTest {
                         data:test data
 
                         """));
+    }
+
+    @Test
+    void shouldReceiveEvent_multipleClients() throws Exception {
+        ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
+        SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
+        SseEmitter emitter2 = new SseEmitter(Long.MAX_VALUE);
+        when(sseService.subscribe("match-1", Long.MAX_VALUE))
+                .thenReturn(emitter)
+                .thenReturn(emitter2);
+
+
+        MvcResult result = mvc.perform(get("/api/matches/sse/match-1")
+                        .accept(MediaType.TEXT_EVENT_STREAM))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+        MvcResult result2 = mvc.perform(get("/api/matches/sse/match-1")
+                        .accept(MediaType.TEXT_EVENT_STREAM))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+
+        executorService.schedule(() -> {
+            try {
+                emitter.send(SseEmitter.event().name("match-state").data("test data"));
+                emitter.complete();
+                emitter2.send(SseEmitter.event().name("match-state").data("test data 2"));
+                emitter2.complete();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }, 200L, TimeUnit.MILLISECONDS);
+
+
+        mvc.perform(asyncDispatch(result))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM))
+                .andExpect(content().string("""
+                        event:match-state
+                        data:test data
+
+                        """));
+
+        mvc.perform(asyncDispatch(result2))
+                .andExpect(status().isOk())
+                .andExpect(content().string("""
+                    event:match-state
+                    data:test data 2
+
+                    """));
     }
 }
