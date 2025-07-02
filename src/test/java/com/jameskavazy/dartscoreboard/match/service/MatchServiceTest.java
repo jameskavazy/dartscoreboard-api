@@ -4,9 +4,12 @@ import com.jameskavazy.dartscoreboard.match.controller.SseService;
 import com.jameskavazy.dartscoreboard.match.domain.ProgressionHandler;
 import com.jameskavazy.dartscoreboard.match.domain.ResultScenario;
 import com.jameskavazy.dartscoreboard.match.domain.ScoreCalculator;
+import com.jameskavazy.dartscoreboard.match.dto.MatchRequest;
 import com.jameskavazy.dartscoreboard.match.dto.VisitEvent;
 import com.jameskavazy.dartscoreboard.match.exception.InvalidHierarchyException;
+import com.jameskavazy.dartscoreboard.match.model.legs.Leg;
 import com.jameskavazy.dartscoreboard.match.model.matches.*;
+import com.jameskavazy.dartscoreboard.match.model.sets.Set;
 import com.jameskavazy.dartscoreboard.match.model.visits.Visit;
 import com.jameskavazy.dartscoreboard.match.repository.LegRepository;
 import com.jameskavazy.dartscoreboard.match.repository.MatchRepository;
@@ -28,8 +31,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class MatchServiceTest {
@@ -58,6 +60,29 @@ class MatchServiceTest {
 
     @InjectMocks
     MatchService matchService;
+
+    @Test
+    void shouldCreateMatch(){
+        MatchRequest matchRequest = new MatchRequest(MatchType.FiveO, 1,1,List.of("user1","user2"));
+        when(userRepository.userIdFromScreenName("user1")).thenReturn("user-1");
+        when(userRepository.userIdFromScreenName("user2")).thenReturn("user-2");
+
+        matchService.createMatch(matchRequest);
+
+        verify(matchRepository).create(argThat(match ->
+                match.matchType().equals(MatchType.FiveO) &&
+                        match.raceToLeg() == 1 &&
+                        match.raceToSet() == 1 &&
+                        match.matchStatus().equals(MatchStatus.ONGOING) &&
+                        match.winnerId() == null
+        ));
+
+        verify(setRepository).create(any(Set.class));
+        verify(legRepository).create(any(Leg.class));
+        verify(matchRepository, times(1)).createMatchUsers(argThat(mu -> mu.userId().equals("user-1")));
+        verify(matchRepository, times(1)).createMatchUsers(argThat(mu -> mu.userId().equals("user-2")));
+
+    }
 
     @Test
     void processVisitRequest_shouldProcessWithValidData() {

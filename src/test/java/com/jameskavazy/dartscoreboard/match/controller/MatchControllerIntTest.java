@@ -34,6 +34,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -160,6 +161,27 @@ class MatchControllerIntTest {
     }
 
     @Test
+    @WithMockUser
+    void shouldNotCreateMatchWithInvalidRequest(){
+        MatchRequest matchRequest = new MatchRequest(
+                MatchType.FiveO,
+                1,
+                -1,
+                List.of("user1", "user2")
+        );
+
+        HttpClientErrorException exception = assertThrows(HttpClientErrorException.BadRequest.class ,() -> {
+                    restClient.post().uri("/api/matches")
+                            .body(matchRequest)
+                            .retrieve()
+                            .toBodilessEntity();
+                });
+
+        assertEquals(400, exception.getStatusCode().value());
+        assertTrue(exception.getMessage().contains("raceToSet"));
+    }
+
+    @Test
     void shouldUpdateExistingMatch() {
         Match match = restClient.get()
                 .uri("/api/matches/match-1")
@@ -191,6 +213,7 @@ class MatchControllerIntTest {
         assertEquals("set-1", response.getBody().resultContext().setId());
         assertEquals(ResultScenario.NO_RESULT, response.getBody().resultScenario());
     }
+
 
 
 }

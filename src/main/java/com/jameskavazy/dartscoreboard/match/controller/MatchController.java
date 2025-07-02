@@ -46,9 +46,7 @@ public class MatchController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("")
     void createMatch(@Valid @RequestBody MatchRequest matchRequest){
-        // matchService.sendMatchRequest(matchRequest.screenNames());
         matchService.createMatch(matchRequest);
-
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
