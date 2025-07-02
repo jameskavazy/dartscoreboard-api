@@ -26,6 +26,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 
 import java.time.OffsetDateTime;
@@ -60,6 +61,9 @@ class MatchControllerTest {
 
     @MockitoBean
     JwtService jwtService;
+
+    @MockitoBean
+    SseService sseService;
 
     @MockitoBean
     UserPrincipal userPrincipal;
@@ -175,5 +179,12 @@ class MatchControllerTest {
                 .andExpect(jsonPath("$.resultContext.legId").value("leg-1"))
                 .andExpect(jsonPath("$.resultContext.setId").value("set-1"))
                 .andExpect(status().isCreated());
+    }
+
+    @Test
+    void shouldReceiveEvent(){
+//
+//        mvc.perform(get("/api/matches/match-1/sse"))
+//                .andExpect(e)
     }
 }

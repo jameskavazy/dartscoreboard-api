@@ -12,7 +12,6 @@ public record MatchContext(
         int computedScore,
         String legId,
         String userId,
-
         String setId
 
 ) {

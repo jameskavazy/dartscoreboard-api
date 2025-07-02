@@ -86,6 +86,7 @@ CREATE TABLE IF NOT EXISTS matches_users (
     match_id VARCHAR(36),
     user_id VARCHAR(36),
     position INT,
+    invite_status VARCHAR(36),
 
     PRIMARY KEY (match_id, user_id),
 

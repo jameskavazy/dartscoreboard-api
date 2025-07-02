@@ -35,5 +35,16 @@ public class UserRepository {
         return user;
     }
 
+    public String userIdFromScreenName(String screenName) {
+        return jdbcClient.sql("""
+                SELECT user_id
+                FROM users
+                WHERE screen_name = :screenName
+                """)
+                .param("screenName", screenName)
+                .query(String.class)
+                .single();
+    }
+
     // TODO allow user to update their screennanme
 }

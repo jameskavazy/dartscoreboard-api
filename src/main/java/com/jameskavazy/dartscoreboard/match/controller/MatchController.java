@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,10 +21,12 @@ import java.util.Optional;
 @RequestMapping("/api/matches")
 public class MatchController {
 
-   private final MatchService matchService;
+    private final SseService sseService;
+    private final MatchService matchService;
 
-    public MatchController(MatchService matchService){
-       this.matchService = matchService;
+    public MatchController(SseService sseService, MatchService matchService){
+        this.sseService = sseService;
+        this.matchService = matchService;
     }
 
     @GetMapping("")
@@ -43,8 +46,9 @@ public class MatchController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("")
     void createMatch(@Valid @RequestBody MatchRequest matchRequest){
-        // matchservice.sendMatchRequest(matchRequest.userIds());
+        // matchService.sendMatchRequest(matchRequest.screenNames());
         matchService.createMatch(matchRequest);
+
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -64,5 +68,10 @@ public class MatchController {
                 .processVisitRequest(visitRequest, matchId, setId, legId, userDetails.getUsername());
 
         return new ResponseEntity<>(visitResult, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/sse/{matchId}")
+    public SseEmitter subscribeToMatchEmitter(@PathVariable String matchId){
+        return sseService.subscribe(matchId);
     }
 }

@@ -3,6 +3,7 @@ package com.jameskavazy.dartscoreboard.match.model.matches;
 public record MatchesUsers(
         String matchId,
         String userId,
-        int position
+        int position,
+        InviteStatus inviteStatus
 ) {
 }

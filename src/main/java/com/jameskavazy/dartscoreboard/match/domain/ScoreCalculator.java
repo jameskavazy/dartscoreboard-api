@@ -1,5 +1,6 @@
 package com.jameskavazy.dartscoreboard.match.domain;
 
+import com.jameskavazy.dartscoreboard.match.dto.VisitRequest;
 import com.jameskavazy.dartscoreboard.match.exception.InvalidVisitScoreException;
 import com.jameskavazy.dartscoreboard.match.model.visits.Visit;
 import org.springframework.stereotype.Component;
@@ -20,12 +21,13 @@ public class ScoreCalculator {
 
     private final Set<Integer> impossibleCheckouts = new HashSet<>(List.of(169, 168, 166, 165, 163, 162, 159));
 
-    public Visit validateAndBuildVisit(String userId, int currentScore, int visitRequestScore, String legId) {
-        if (visitRequestScore < 0 || visitRequestScore > 180) {
+    public Visit validateAndBuildVisit(String userId, int currentScore, VisitRequest visitRequest, String legId) {
+        int scoreRequest = visitRequest.score();
+        if (scoreRequest < 0 || scoreRequest > 180) {
             throw new InvalidVisitScoreException();
         }
 
-        int validatedScore = validateScore(currentScore, visitRequestScore);
+        int validatedScore = validateScore(currentScore, scoreRequest);
         boolean checkout = isCheckout(currentScore);
 
         return new Visit(

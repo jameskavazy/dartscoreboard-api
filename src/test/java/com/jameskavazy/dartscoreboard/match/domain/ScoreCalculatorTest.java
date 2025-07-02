@@ -1,5 +1,6 @@
 package com.jameskavazy.dartscoreboard.match.domain;
 
+import com.jameskavazy.dartscoreboard.match.dto.VisitRequest;
 import com.jameskavazy.dartscoreboard.match.exception.InvalidVisitScoreException;
 import com.jameskavazy.dartscoreboard.match.model.visits.Visit;
 import org.junit.jupiter.api.Test;
@@ -15,10 +16,11 @@ class ScoreCalculatorTest {
 
     @Test
     void shouldValidateAndBuildVisit(){
+
         Visit visit = scoreCalculator.validateAndBuildVisit(
                 "user-1",
                 60,
-                58,
+                new VisitRequest(58),
                 "leg-id"
         );
 
@@ -32,7 +34,7 @@ class ScoreCalculatorTest {
                 () -> scoreCalculator.validateAndBuildVisit(
                         "user-1",
                         60,
-                        199,
+                        new VisitRequest(199),
                         "legId"
                 )) ;
 

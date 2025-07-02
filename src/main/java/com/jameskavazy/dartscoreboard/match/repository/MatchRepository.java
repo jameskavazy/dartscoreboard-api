@@ -113,8 +113,7 @@ public class MatchRepository {
 
     public List<MatchesUsers> getMatchUsers(String matchId) {
         return jdbcClient.sql("""
-                    SELECT *
-                    FROM matches_users
+                    SELECT * FROM matches_users
                     WHERE match_id = :matchId
                     ORDER BY position ASC
                 """)
@@ -140,12 +139,13 @@ public class MatchRepository {
 
     public void createMatchUsers(MatchesUsers matchesUser) {
         int updated = jdbcClient.sql("""
-                        INSERT INTO matches_users(match_id, user_id, position)
-                        VALUES (:matchId, :userId, :position)
+                        INSERT INTO matches_users(match_id, user_id, position, invite_status)
+                        VALUES (:matchId, :userId, :position, :inviteStatus)
                         """)
                 .param("matchId", matchesUser.matchId())
                 .param("userId", matchesUser.userId())
                 .param("position", matchesUser.position())
+                .param("inviteStatus", matchesUser.inviteStatus().name())
                 .update();
 
         Assert.state(updated == 1, "Could not insert match users");

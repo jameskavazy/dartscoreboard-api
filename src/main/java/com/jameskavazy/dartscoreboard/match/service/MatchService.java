@@ -1,11 +1,14 @@
 package com.jameskavazy.dartscoreboard.match.service;
 
+import com.jameskavazy.dartscoreboard.match.controller.SseService;
 import com.jameskavazy.dartscoreboard.match.domain.*;
 import com.jameskavazy.dartscoreboard.match.dto.MatchRequest;
+import com.jameskavazy.dartscoreboard.match.dto.VisitEvent;
 import com.jameskavazy.dartscoreboard.match.exception.InvalidHierarchyException;
 import com.jameskavazy.dartscoreboard.match.exception.InvalidPlayerTurnException;
 import com.jameskavazy.dartscoreboard.match.exception.MatchNotFoundException;
 import com.jameskavazy.dartscoreboard.match.model.legs.Leg;
+import com.jameskavazy.dartscoreboard.match.model.matches.InviteStatus;
 import com.jameskavazy.dartscoreboard.match.model.matches.Match;
 import com.jameskavazy.dartscoreboard.match.model.matches.MatchesUsers;
 import com.jameskavazy.dartscoreboard.match.model.sets.Set;
@@ -37,26 +40,28 @@ public class MatchService {
 
     private final ScoreCalculator scoreCalculator;
 
+    private final SseService sseService;
+
     private final ProgressionHandler progressionHandler;
 
     public MatchService(MatchRepository matchRepository,
                         VisitRepository visitRepository,
                         SetRepository setRepository, LegRepository legRepository, UserRepository userRepository,
                         ScoreCalculator scoreCalculator,
-                        ProgressionHandler progressionHandler){
+                        SseService sseService, ProgressionHandler progressionHandler){
         this.matchRepository = matchRepository;
         this.visitRepository = visitRepository;
         this.setRepository = setRepository;
         this.legRepository = legRepository;
         this.userRepository = userRepository;
         this.scoreCalculator = scoreCalculator;
+        this.sseService = sseService;
         this.progressionHandler = progressionHandler;
     }
 
     public List<Match> findAllMatches() {
         return matchRepository.findAll();
     }
-
 
     public Optional<Match> findMatchById(String matchId) {
         return matchRepository.findById(matchId);
@@ -73,6 +78,7 @@ public class MatchService {
                 MatchStatus.ONGOING
         );
         generateMatchHierarchy(matchRequest, match);
+        // TODO return throw some sort of error on createMatch if invalid request and add it globalException handler
     }
 
     public void updateMatch(Match match, String matchId) {
@@ -89,17 +95,36 @@ public class MatchService {
         Match match = validateMatchHierarchy(matchId, legId, setId);
         validateTurn(matchId, legId, userId);
 
-        int scoreRequest = visitRequest.score();
         int currentScore = visitRepository.extractCurrentScore(userId, legId);
-        
-        Visit visit = scoreCalculator.validateAndBuildVisit(userId, currentScore, scoreRequest, legId);
-        visitRepository.create(visit);
 
+        Visit visit = validateAndCreateVisit(visitRequest, legId, userId, currentScore);
         MatchContext matchContext = createMatchContext(matchId, setId, legId, userId, match, currentScore, visit);
+
         ResultScenario resultScenario = progressionHandler.checkResult(matchContext);
         ResultContext resultContext = handleResult(resultScenario, matchContext);
+        VisitResult visitResult = new VisitResult(resultScenario, resultContext);
+        notifyClients(matchId, legId, visitResult);
 
-        return new VisitResult(resultScenario, resultContext);
+        return visitResult;
+    }
+
+    private void notifyClients(String matchId, String legId, VisitResult visitResult) {
+        List<PlayerState> playerStates = playerStates(legId);
+        sseService.sendToMatch(matchId, new VisitEvent(playerStates, visitResult));
+
+        if (visitResult.resultScenario().equals(ResultScenario.MATCH_WON)) {
+            sseService.complete(matchId);
+        }
+    }
+
+    private Visit validateAndCreateVisit(VisitRequest visitRequest, String legId, String userId, int currentScore) {
+        Visit visit = scoreCalculator.validateAndBuildVisit(userId, currentScore, visitRequest, legId);
+        visitRepository.create(visit);
+        return visit;
+    }
+
+    private List<PlayerState> playerStates(String legId) {
+        return visitRepository.getMatchData(legId);
     }
 
     private void validateTurn(String matchId, String legId, String userId) {
@@ -231,9 +256,19 @@ public class MatchService {
     }
 
     private List<MatchesUsers> getMatchesUsers(MatchRequest matchRequest, Match match) {
-        return matchRequest.userIds().stream()
-                .map(userId -> new MatchesUsers(match.matchId(), userId, userId.indexOf(userId)))
+        return matchRequest.screenNames().stream()
+                .map(this::getUserIdFromScreenName)
+                .map(userId -> new MatchesUsers(match.matchId(), userId, userId.indexOf(userId), InviteStatus.INVITED))
                 .toList();
     }
+
+    private String getUserIdFromScreenName(String screenName) {
+        return userRepository.userIdFromScreenName(screenName);
+    }
+
+    private List<Visit> visitsInLeg(String legId){
+        return visitRepository.visitsInLeg(legId);
+    }
+
 }
 

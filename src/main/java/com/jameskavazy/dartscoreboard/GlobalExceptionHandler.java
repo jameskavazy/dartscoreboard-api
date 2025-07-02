@@ -2,6 +2,7 @@ package com.jameskavazy.dartscoreboard;
 
 import com.jameskavazy.dartscoreboard.match.exception.InvalidHierarchyException;
 import com.jameskavazy.dartscoreboard.match.exception.InvalidPlayerTurnException;
+import com.jameskavazy.dartscoreboard.match.exception.InvalidVisitScoreException;
 import com.jameskavazy.dartscoreboard.match.exception.MatchNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +30,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(InvalidHierarchyException.class)
     public ResponseEntity<String> handleInvalidHierarchy(InvalidHierarchyException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidVisitScoreException.class)
+    public ResponseEntity<String> handleInvalidScoreException(InvalidVisitScoreException ex){
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 

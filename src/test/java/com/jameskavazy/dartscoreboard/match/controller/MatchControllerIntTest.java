@@ -104,16 +104,6 @@ class MatchControllerIntTest {
         assertTrue(postgres.isCreated());
         assertTrue(postgres.isRunning());
     }
-//    @Test
-//    void shouldFindAllMatches() {
-//        List<Match> matches = restClient.get().uri("/api/matches")
-//                .retrieve()
-//                .body(new ParameterizedTypeReference<>() {
-//                });
-//
-//        assertEquals(2, matches.size());
-//    }
-
 
     @Test
     @WithMockUser
@@ -138,7 +128,7 @@ class MatchControllerIntTest {
                 MatchType.FiveO,
                 1,
                 2,
-                List.of("user-1", "user-2")
+                List.of("user1", "user2")
         );
         ResponseEntity<Void> newMatch = restClient.post().uri("/api/matches")
                 .body(matchRequest)

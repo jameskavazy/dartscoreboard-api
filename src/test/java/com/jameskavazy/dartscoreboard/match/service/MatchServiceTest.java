@@ -1,13 +1,12 @@
 package com.jameskavazy.dartscoreboard.match.service;
 
+import com.jameskavazy.dartscoreboard.match.controller.SseService;
 import com.jameskavazy.dartscoreboard.match.domain.ProgressionHandler;
 import com.jameskavazy.dartscoreboard.match.domain.ResultScenario;
 import com.jameskavazy.dartscoreboard.match.domain.ScoreCalculator;
+import com.jameskavazy.dartscoreboard.match.dto.VisitEvent;
 import com.jameskavazy.dartscoreboard.match.exception.InvalidHierarchyException;
-import com.jameskavazy.dartscoreboard.match.model.matches.Match;
-import com.jameskavazy.dartscoreboard.match.model.matches.MatchStatus;
-import com.jameskavazy.dartscoreboard.match.model.matches.MatchType;
-import com.jameskavazy.dartscoreboard.match.model.matches.MatchesUsers;
+import com.jameskavazy.dartscoreboard.match.model.matches.*;
 import com.jameskavazy.dartscoreboard.match.model.visits.Visit;
 import com.jameskavazy.dartscoreboard.match.repository.LegRepository;
 import com.jameskavazy.dartscoreboard.match.repository.MatchRepository;
@@ -54,6 +53,9 @@ class MatchServiceTest {
     @Mock
     ProgressionHandler progressionHandler;
 
+    @Mock
+    SseService sseService;
+
     @InjectMocks
     MatchService matchService;
 
@@ -75,10 +77,10 @@ class MatchServiceTest {
                 Optional.of(new Match(matchId, MatchType.FiveO, 3,3,
                         OffsetDateTime.now(), null, MatchStatus.ONGOING))
         );
-        when(matchRepository.getMatchUsers(matchId)).thenReturn(List.of(new MatchesUsers("match-1", "user-1", 0),
-                        new MatchesUsers("match-1", "user-2", 1)));
+        when(matchRepository.getMatchUsers(matchId)).thenReturn(List.of(new MatchesUsers("match-1", "user-1", 0, InviteStatus.ACCEPTED),
+                        new MatchesUsers("match-1", "user-2", 1, InviteStatus.INVITED)));
         when(legRepository.getTurnIndex(legId)).thenReturn(0);
-        when(scoreCalculator.validateAndBuildVisit(userId, 301, visitRequest.score(), legId))
+        when(scoreCalculator.validateAndBuildVisit(userId, 301, visitRequest, legId))
                 .thenReturn(new Visit(
                         "visit-4",
                         legId,
@@ -87,7 +89,6 @@ class MatchServiceTest {
                         false,
                         OffsetDateTime.now()));
         when(progressionHandler.checkResult(any())).thenReturn(ResultScenario.NO_RESULT);
-
 
         matchService.processVisitRequest(
                 visitRequest, matchId, setId, legId, user.username()
