@@ -102,6 +102,7 @@ public class VisitRepository {
                 .param("legId", legId)
                 .query(PlayerState.class)
                 .list();
-
     }
+
+
 }

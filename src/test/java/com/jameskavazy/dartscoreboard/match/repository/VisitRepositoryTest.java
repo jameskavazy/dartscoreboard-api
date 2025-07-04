@@ -1,5 +1,7 @@
 package com.jameskavazy.dartscoreboard.match.repository;
 
+import com.jameskavazy.dartscoreboard.match.domain.PlayerState;
+import com.jameskavazy.dartscoreboard.match.exception.InvalidVisitScoreException;
 import com.jameskavazy.dartscoreboard.match.model.visits.Visit;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,4 +92,22 @@ class VisitRepositoryTest {
         assertEquals(380, score);
     }
 
+    @Test
+    void shouldGetMatchData(){
+        List<PlayerState> playerStates = visitRepository.getMatchData("leg-1");
+
+        assertEquals(3, playerStates.size());
+
+        assertEquals( 380 ,playerStates.get(0).totalScore());
+        assertEquals( 360 ,playerStates.get(2).totalScore());
+        assertTrue(playerStates.get(0).turn());
+
+    }
+
+    @Test
+    void shouldGetVisitsInLeg(){
+        List<Visit> visits = visitRepository.visitsInLeg("leg-1");
+        assertEquals(8,visits.size());
+        assertEquals(90, visits.get(7).score());
+    }
 }
