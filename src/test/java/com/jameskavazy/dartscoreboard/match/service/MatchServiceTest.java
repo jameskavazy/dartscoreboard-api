@@ -1,9 +1,7 @@
 package com.jameskavazy.dartscoreboard.match.service;
 
 import com.jameskavazy.dartscoreboard.match.controller.SseService;
-import com.jameskavazy.dartscoreboard.match.domain.ProgressionHandler;
-import com.jameskavazy.dartscoreboard.match.domain.ResultScenario;
-import com.jameskavazy.dartscoreboard.match.domain.ScoreCalculator;
+import com.jameskavazy.dartscoreboard.match.domain.*;
 import com.jameskavazy.dartscoreboard.match.dto.MatchRequest;
 import com.jameskavazy.dartscoreboard.match.dto.VisitEvent;
 import com.jameskavazy.dartscoreboard.match.exception.InvalidHierarchyException;
@@ -20,14 +18,17 @@ import com.jameskavazy.dartscoreboard.user.User;
 import com.jameskavazy.dartscoreboard.user.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -166,5 +167,48 @@ class MatchServiceTest {
         assertThrows(InvalidHierarchyException.class, () -> matchService.processVisitRequest(
                 visitRequest, matchId, setId, legId, user.username()
         ));
+    }
+
+    @Test
+    void shouldProcessVisitRequest_andSendToMatch(){
+        String matchId = "match-1";
+        String setId = "set-1";
+        String legId = "leg-1";
+        String userId = "user-1";
+        String userEmail = "user1@example.com";
+        VisitRequest visitRequest = new VisitRequest(150);
+
+
+        User user = new User(userId, userEmail, userEmail);
+        Match match =  new Match(matchId, MatchType.FiveO, 1,1,OffsetDateTime.now(), null, MatchStatus.ONGOING);
+
+        when(userRepository.findByUsername(userEmail)).thenReturn(Optional.of(user));
+        when(matchRepository.findById(matchId)).thenReturn(Optional.of(match));
+        when(matchRepository.isValidLegHierarchy(legId, setId, matchId)).thenReturn(true);
+        when(matchRepository.getMatchUsers(matchId)).thenReturn(List.of(
+                new MatchesUsers(matchId, userId, 0, InviteStatus.ACCEPTED))
+        );
+        Visit visit = new Visit(UUID.randomUUID().toString(), legId, userId, 150, false, OffsetDateTime.now());
+        when(scoreCalculator.validateAndBuildVisit(eq(userId), anyInt(), eq(visitRequest), eq(legId))).thenReturn(visit);
+        when(progressionHandler.checkResult(any(MatchContext.class)))
+                .thenReturn(ResultScenario.NO_RESULT);
+        when(visitRepository.getMatchData("leg-1")).thenReturn(List.of(
+                new PlayerState("user-1", 180, false, 501),
+                new PlayerState("user-2", 200, true, 501),
+                new PlayerState("user-3", 120, false, 501)
+        ));
+       matchService.processVisitRequest(visitRequest, matchId, setId, legId, userEmail);
+
+        ArgumentCaptor<VisitEvent> captor = ArgumentCaptor.forClass(VisitEvent.class);
+        verify(sseService).sendToMatch(eq(matchId), captor.capture());
+
+        VisitEvent sentEvent = captor.getValue();
+        assertNotNull(sentEvent);
+        assertEquals(ResultScenario.NO_RESULT, sentEvent.visitResult().resultScenario());
+        assertEquals("leg-1", sentEvent.visitResult().resultContext().legId());
+        assertEquals("set-1", sentEvent.visitResult().resultContext().setId());
+        assertEquals(3, sentEvent.playerStates().size());
+        PlayerState player3 = sentEvent.playerStates().stream().filter(p -> p.userId().equals("user-3")).toList().get(0);
+        assertEquals( 381, player3.startingScore() - player3.totalScore());
     }
 }
