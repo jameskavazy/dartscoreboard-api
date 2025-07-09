@@ -70,6 +70,9 @@ class UserRepositoryTest {
         assertTrue(present);
     }
 
-
-
+    @Test
+    void shouldUpdateScreenName(){
+        userRepository.updateScreenName("user1@example.com","Shiny New Name");
+        assertEquals("Shiny New Name", userRepository.findByUsername("user1@example.com").get().screenName());
+    }
 }

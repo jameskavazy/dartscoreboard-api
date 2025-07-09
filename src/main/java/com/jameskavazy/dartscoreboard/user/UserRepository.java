@@ -46,5 +46,15 @@ public class UserRepository {
                 .single();
     }
 
-    // TODO allow user to update their screennanme
+    public void updateScreenName(String username, String newScreenName){
+        int updated = jdbcClient.sql("""
+                        UPDATE users
+                        SET screen_name = :newScreenName
+                        WHERE username = :username
+                        """)
+                .param("username", username)
+                .param("newScreenName", newScreenName)
+                .update();
+        Assert.state(updated == 1, "Could not update screen name");
+    }
 }

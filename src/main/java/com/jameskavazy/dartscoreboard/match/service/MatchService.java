@@ -1,6 +1,6 @@
 package com.jameskavazy.dartscoreboard.match.service;
 
-import com.jameskavazy.dartscoreboard.match.controller.SseService;
+import com.jameskavazy.dartscoreboard.match.controller.MatchEventEmitter;
 import com.jameskavazy.dartscoreboard.match.domain.*;
 import com.jameskavazy.dartscoreboard.match.dto.MatchRequest;
 import com.jameskavazy.dartscoreboard.match.dto.VisitEvent;
@@ -40,7 +40,7 @@ public class MatchService {
 
     private final ScoreCalculator scoreCalculator;
 
-    private final SseService sseService;
+    private final EventEmitter matchEventEmitter;
 
     private final ProgressionHandler progressionHandler;
 
@@ -48,14 +48,14 @@ public class MatchService {
                         VisitRepository visitRepository,
                         SetRepository setRepository, LegRepository legRepository, UserRepository userRepository,
                         ScoreCalculator scoreCalculator,
-                        SseService sseService, ProgressionHandler progressionHandler){
+                        MatchEventEmitter matchEventEmitter, ProgressionHandler progressionHandler){
         this.matchRepository = matchRepository;
         this.visitRepository = visitRepository;
         this.setRepository = setRepository;
         this.legRepository = legRepository;
         this.userRepository = userRepository;
         this.scoreCalculator = scoreCalculator;
-        this.sseService = sseService;
+        this.matchEventEmitter = matchEventEmitter;
         this.progressionHandler = progressionHandler;
     }
 
@@ -68,6 +68,7 @@ public class MatchService {
     }
 
     public void createMatch(MatchRequest matchRequest) {
+
         Match match = new Match(
                 UUID.randomUUID().toString(),
                 matchRequest.matchType(),
@@ -78,7 +79,6 @@ public class MatchService {
                 MatchStatus.ONGOING
         );
         generateMatchHierarchy(matchRequest, match);
-        // TODO return throw some sort of error on createMatch if invalid request and add it globalException handler
     }
 
     public void updateMatch(Match match, String matchId) {
@@ -110,10 +110,10 @@ public class MatchService {
 
     private void notifyClients(String matchId, String legId, VisitResult visitResult) {
         List<PlayerState> playerStates = playerStates(legId);
-        sseService.sendToMatch(matchId, new VisitEvent(playerStates, visitResult));
+        matchEventEmitter.send(matchId, new VisitEvent(playerStates, visitResult));
 
         if (visitResult.resultScenario().equals(ResultScenario.MATCH_WON)) {
-            sseService.complete(matchId);
+            matchEventEmitter.complete(matchId);
         }
     }
 

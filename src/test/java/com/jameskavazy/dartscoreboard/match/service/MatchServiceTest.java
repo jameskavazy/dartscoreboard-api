@@ -1,6 +1,6 @@
 package com.jameskavazy.dartscoreboard.match.service;
 
-import com.jameskavazy.dartscoreboard.match.controller.SseService;
+import com.jameskavazy.dartscoreboard.match.controller.MatchEventEmitter;
 import com.jameskavazy.dartscoreboard.match.domain.*;
 import com.jameskavazy.dartscoreboard.match.dto.MatchRequest;
 import com.jameskavazy.dartscoreboard.match.dto.VisitEvent;
@@ -25,7 +25,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -57,7 +56,7 @@ class MatchServiceTest {
     ProgressionHandler progressionHandler;
 
     @Mock
-    SseService sseService;
+    MatchEventEmitter sseService;
 
     @InjectMocks
     MatchService matchService;
@@ -200,7 +199,7 @@ class MatchServiceTest {
        matchService.processVisitRequest(visitRequest, matchId, setId, legId, userEmail);
 
         ArgumentCaptor<VisitEvent> captor = ArgumentCaptor.forClass(VisitEvent.class);
-        verify(sseService).sendToMatch(eq(matchId), captor.capture());
+        verify(sseService).send(eq(matchId), captor.capture());
 
         VisitEvent sentEvent = captor.getValue();
         assertNotNull(sentEvent);

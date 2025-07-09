@@ -9,14 +9,12 @@ import com.jameskavazy.dartscoreboard.match.domain.ResultScenario;
 import com.jameskavazy.dartscoreboard.match.domain.VisitResult;
 import com.jameskavazy.dartscoreboard.match.dto.MatchRequest;
 import com.jameskavazy.dartscoreboard.match.SpringSecurityUserDetailsTestConfig;
-import com.jameskavazy.dartscoreboard.match.dto.VisitEvent;
 import com.jameskavazy.dartscoreboard.match.model.matches.Match;
 import com.jameskavazy.dartscoreboard.match.model.matches.MatchStatus;
 import com.jameskavazy.dartscoreboard.match.model.matches.MatchType;
 import com.jameskavazy.dartscoreboard.match.service.MatchService;
 import com.jameskavazy.dartscoreboard.match.dto.VisitRequest;
 import com.jameskavazy.dartscoreboard.user.UserPrincipal;
-import jakarta.servlet.AsyncListener;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
@@ -25,13 +23,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockAsyncContext;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 
@@ -72,7 +67,7 @@ class MatchControllerTest {
     JwtService jwtService;
 
     @MockitoBean
-    SseService sseService;
+    MatchEventEmitter sseService;
 
     @MockitoBean
     UserPrincipal userPrincipal;

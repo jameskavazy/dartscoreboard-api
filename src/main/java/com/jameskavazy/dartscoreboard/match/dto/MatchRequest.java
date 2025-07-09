@@ -13,6 +13,7 @@ public record MatchRequest(
         int raceToLeg,
         @PositiveOrZero
         int raceToSet,
+        @NotNull
         List<String> screenNames
 
 ) {

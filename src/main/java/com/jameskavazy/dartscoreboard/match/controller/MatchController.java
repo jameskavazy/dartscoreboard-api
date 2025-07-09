@@ -21,10 +21,10 @@ import java.util.Optional;
 @RequestMapping("/api/matches")
 public class MatchController {
 
-    private final SseService sseService;
+    private final MatchEventEmitter sseService;
     private final MatchService matchService;
 
-    public MatchController(SseService sseService, MatchService matchService){
+    public MatchController(MatchEventEmitter sseService, MatchService matchService){
         this.sseService = sseService;
         this.matchService = matchService;
     }

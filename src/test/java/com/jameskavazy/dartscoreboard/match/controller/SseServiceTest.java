@@ -28,7 +28,7 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class SseServiceTest {
 
-    SseService sseService = new SseService();
+    MatchEventEmitter sseService = new MatchEventEmitter();
 
     VisitResult visitResult = new VisitResult(ResultScenario.NO_RESULT, new ResultContext("leg-1", "set-1"));
 
@@ -41,12 +41,12 @@ class SseServiceTest {
         String matchId = "match-1";
 
         SseEmitter emitter = sseService.subscribe(matchId, 1000L);
-        assertTrue(sseService.emitters.containsKey(matchId));
-        assertTrue(sseService.emitters.get(matchId).contains(emitter));
+        assertTrue(sseService.matchEmitters.containsKey(matchId));
+        assertTrue(sseService.matchEmitters.get(matchId).contains(emitter));
 
         Thread.sleep(5000);
         emitter.onTimeout(() -> {
-            assertFalse(sseService.emitters.get(matchId).contains(emitter));
+            assertFalse(sseService.matchEmitters.get(matchId).contains(emitter));
         });
     }
 
@@ -54,7 +54,7 @@ class SseServiceTest {
     void shouldSendToMatch() throws Exception {
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
-        Field executorField = SseService.class.getDeclaredField("executor");
+        Field executorField = MatchEventEmitter.class.getDeclaredField("executor");
         executorField.setAccessible(true);
         executorField.set(sseService, executorService);
 
@@ -63,8 +63,8 @@ class SseServiceTest {
         SseEmitter emitter = mock(SseEmitter.class);
         VisitEvent visitEvent = new VisitEvent(playerStates, visitResult);
 
-        sseService.emitters.put(matchId, new CopyOnWriteArrayList<>(List.of(emitter)));
-        sseService.sendToMatch(matchId, visitEvent);
+        sseService.matchEmitters.put(matchId, new CopyOnWriteArrayList<>(List.of(emitter)));
+        sseService.send(matchId, visitEvent);
 
         executorService.shutdown();
         executorService.awaitTermination(500, TimeUnit.MILLISECONDS);

@@ -1,6 +1,6 @@
 package com.jameskavazy.dartscoreboard.match.controller;
 
-import com.jameskavazy.dartscoreboard.match.dto.VisitEvent;
+import com.jameskavazy.dartscoreboard.match.service.EventEmitter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -14,26 +14,26 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 @Service
-public class SseService {
-
-    private final Logger log = LoggerFactory.getLogger(SseService.class);
+public class MatchEventEmitter implements EventEmitter {
+    private final Logger log = LoggerFactory.getLogger(MatchEventEmitter.class);
     private final ExecutorService executor = Executors.newFixedThreadPool(10);
-    ConcurrentHashMap<String, List<SseEmitter>> emitters = new ConcurrentHashMap<>();
+    ConcurrentHashMap<String, List<SseEmitter>> matchEmitters = new ConcurrentHashMap<>();
     // possible List<Emitter + UserId object> to identify owner of emitter and custom logic per emitter?
+
 
     public SseEmitter subscribe(String matchId, long timeout) {
         SseEmitter emitter = new SseEmitter(timeout);
-        emitters.computeIfAbsent(matchId, k -> new CopyOnWriteArrayList<>()).add(emitter);
-        emitter.onCompletion(() -> emitters.get(matchId).remove(emitter));
+        matchEmitters.computeIfAbsent(matchId, k -> new CopyOnWriteArrayList<>()).add(emitter);
+        emitter.onCompletion(() -> matchEmitters.get(matchId).remove(emitter));
         emitter.onTimeout(() -> {
             emitter.complete();
-            emitters.get(matchId).remove(emitter);
+            matchEmitters.get(matchId).remove(emitter);
         });
         return emitter;
     }
 
-    public void sendToMatch(String matchId, VisitEvent eventData) {
-        List<SseEmitter> sseEmitters = emitters.get(matchId);
+    public void send(String matchId, Object eventData) {
+        List<SseEmitter> sseEmitters = matchEmitters.get(matchId);
         if (sseEmitters != null && !sseEmitters.isEmpty()) {
             sseEmitters.forEach(emitter -> executor.submit(() -> {
                 try {
@@ -42,7 +42,7 @@ public class SseService {
                             .name("match_state")
                             .data(eventData));
                 } catch (IOException e) {
-                    emitters.get(matchId).remove(emitter);
+                    matchEmitters.get(matchId).remove(emitter);
                     log.error("Cleaning up emitter - " + e.getMessage());
                 }
             }));
@@ -50,10 +50,10 @@ public class SseService {
     }
 
     public void complete(String matchId) {
-        List<SseEmitter> sseEmitters = emitters.get(matchId);
+        List<SseEmitter> sseEmitters = matchEmitters.get(matchId);
         if (sseEmitters != null) {
             sseEmitters.forEach(ResponseBodyEmitter::complete);
-            emitters.remove(matchId);
+            matchEmitters.remove(matchId);
         }
     }
 }
