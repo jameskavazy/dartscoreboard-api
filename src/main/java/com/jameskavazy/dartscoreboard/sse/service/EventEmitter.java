@@ -1,4 +1,4 @@
-package com.jameskavazy.dartscoreboard.match.service;
+package com.jameskavazy.dartscoreboard.sse.service;
 
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 

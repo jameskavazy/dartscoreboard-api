@@ -6,6 +6,7 @@ import com.jameskavazy.dartscoreboard.match.domain.ResultScenario;
 import com.jameskavazy.dartscoreboard.match.domain.VisitResult;
 import com.jameskavazy.dartscoreboard.match.dto.VisitEvent;
 
+import com.jameskavazy.dartscoreboard.sse.impl.MatchEventEmitter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -28,7 +29,7 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class SseServiceTest {
 
-    MatchEventEmitter sseService = new MatchEventEmitter();
+    MatchEventEmitter matchEventEmitter = new MatchEventEmitter();
 
     VisitResult visitResult = new VisitResult(ResultScenario.NO_RESULT, new ResultContext("leg-1", "set-1"));
 
@@ -40,13 +41,13 @@ class SseServiceTest {
     void shouldRemoveEmitterOnTimeout() throws InterruptedException {
         String matchId = "match-1";
 
-        SseEmitter emitter = sseService.subscribe(matchId, 1000L);
-        assertTrue(sseService.matchEmitters.containsKey(matchId));
-        assertTrue(sseService.matchEmitters.get(matchId).contains(emitter));
+        SseEmitter emitter = matchEventEmitter.subscribe(matchId, 1000L);
+        assertTrue(matchEventEmitter.getMatchEmitters().containsKey(matchId));
+        assertTrue(matchEventEmitter.getMatchEmitters().get(matchId).contains(emitter));
 
         Thread.sleep(5000);
         emitter.onTimeout(() -> {
-            assertFalse(sseService.matchEmitters.get(matchId).contains(emitter));
+            assertFalse(matchEventEmitter.getMatchEmitters().get(matchId).contains(emitter));
         });
     }
 
@@ -56,15 +57,15 @@ class SseServiceTest {
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         Field executorField = MatchEventEmitter.class.getDeclaredField("executor");
         executorField.setAccessible(true);
-        executorField.set(sseService, executorService);
+        executorField.set(matchEventEmitter, executorService);
 
 
         String matchId = "match-1";
         SseEmitter emitter = mock(SseEmitter.class);
         VisitEvent visitEvent = new VisitEvent(playerStates, visitResult);
 
-        sseService.matchEmitters.put(matchId, new CopyOnWriteArrayList<>(List.of(emitter)));
-        sseService.send(matchId, visitEvent);
+        matchEventEmitter.getMatchEmitters().put(matchId, new CopyOnWriteArrayList<>(List.of(emitter)));
+        matchEventEmitter.send(matchId, visitEvent);
 
         executorService.shutdown();
         executorService.awaitTermination(500, TimeUnit.MILLISECONDS);

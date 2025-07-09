@@ -1,6 +1,6 @@
 package com.jameskavazy.dartscoreboard.match.service;
 
-import com.jameskavazy.dartscoreboard.match.controller.MatchEventEmitter;
+import com.jameskavazy.dartscoreboard.sse.impl.MatchEventEmitter;
 import com.jameskavazy.dartscoreboard.match.domain.*;
 import com.jameskavazy.dartscoreboard.match.dto.MatchRequest;
 import com.jameskavazy.dartscoreboard.match.dto.VisitEvent;
@@ -19,6 +19,7 @@ import com.jameskavazy.dartscoreboard.match.model.visits.Visit;
 import com.jameskavazy.dartscoreboard.match.repository.SetRepository;
 import com.jameskavazy.dartscoreboard.match.repository.VisitRepository;
 import com.jameskavazy.dartscoreboard.match.dto.VisitRequest;
+import com.jameskavazy.dartscoreboard.sse.service.EventEmitter;
 import com.jameskavazy.dartscoreboard.user.User;
 import com.jameskavazy.dartscoreboard.user.UserRepository;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

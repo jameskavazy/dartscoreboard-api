@@ -6,6 +6,7 @@ import com.jameskavazy.dartscoreboard.match.exception.MatchNotFoundException;
 import com.jameskavazy.dartscoreboard.match.dto.MatchRequest;
 import com.jameskavazy.dartscoreboard.match.service.MatchService;
 import com.jameskavazy.dartscoreboard.match.dto.VisitRequest;
+import com.jameskavazy.dartscoreboard.sse.impl.MatchEventEmitter;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,11 +22,9 @@ import java.util.Optional;
 @RequestMapping("/api/matches")
 public class MatchController {
 
-    private final MatchEventEmitter sseService;
     private final MatchService matchService;
 
-    public MatchController(MatchEventEmitter sseService, MatchService matchService){
-        this.sseService = sseService;
+    public MatchController(MatchService matchService){
         this.matchService = matchService;
     }
 
@@ -66,10 +65,5 @@ public class MatchController {
                 .processVisitRequest(visitRequest, matchId, setId, legId, userDetails.getUsername());
 
         return new ResponseEntity<>(visitResult, HttpStatus.CREATED);
-    }
-
-    @GetMapping("/sse/{matchId}")
-    public SseEmitter subscribeToMatchEmitter(@PathVariable String matchId){
-        return sseService.subscribe(matchId, Long.MAX_VALUE);
     }
 }

@@ -1,6 +1,6 @@
-package com.jameskavazy.dartscoreboard.match.controller;
+package com.jameskavazy.dartscoreboard.sse.impl;
 
-import com.jameskavazy.dartscoreboard.match.service.EventEmitter;
+import com.jameskavazy.dartscoreboard.sse.service.EventEmitter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -17,7 +17,7 @@ import java.util.concurrent.Executors;
 public class MatchEventEmitter implements EventEmitter {
     private final Logger log = LoggerFactory.getLogger(MatchEventEmitter.class);
     private final ExecutorService executor = Executors.newFixedThreadPool(10);
-    ConcurrentHashMap<String, List<SseEmitter>> matchEmitters = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, List<SseEmitter>> matchEmitters = new ConcurrentHashMap<>();
     // possible List<Emitter + UserId object> to identify owner of emitter and custom logic per emitter?
 
 
@@ -55,5 +55,8 @@ public class MatchEventEmitter implements EventEmitter {
             sseEmitters.forEach(ResponseBodyEmitter::complete);
             matchEmitters.remove(matchId);
         }
+    }
+    public ConcurrentHashMap<String, List<SseEmitter>> getMatchEmitters() {
+        return matchEmitters;
     }
 }
