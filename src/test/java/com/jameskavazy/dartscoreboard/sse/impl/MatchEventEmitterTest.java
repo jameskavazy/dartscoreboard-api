@@ -6,7 +6,6 @@ import com.jameskavazy.dartscoreboard.match.domain.ResultScenario;
 import com.jameskavazy.dartscoreboard.match.domain.VisitResult;
 import com.jameskavazy.dartscoreboard.match.dto.VisitEvent;
 
-import com.jameskavazy.dartscoreboard.sse.impl.MatchEventEmitter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -46,9 +45,7 @@ class MatchEventEmitterTest {
         assertTrue(matchEventEmitter.getMatchEmitters().get(matchId).contains(emitter));
 
         Thread.sleep(5000);
-        emitter.onTimeout(() -> {
-            assertFalse(matchEventEmitter.getMatchEmitters().get(matchId).contains(emitter));
-        });
+        emitter.onTimeout(() -> assertFalse(matchEventEmitter.getMatchEmitters().get(matchId).contains(emitter)));
     }
 
     @Test

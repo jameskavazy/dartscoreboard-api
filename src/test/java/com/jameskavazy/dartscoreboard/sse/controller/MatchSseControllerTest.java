@@ -4,7 +4,6 @@ import com.jameskavazy.dartscoreboard.GlobalExceptionHandler;
 import com.jameskavazy.dartscoreboard.auth.security.JwtFilter;
 import com.jameskavazy.dartscoreboard.auth.service.JwtService;
 import com.jameskavazy.dartscoreboard.match.SpringSecurityUserDetailsTestConfig;
-import com.jameskavazy.dartscoreboard.match.controller.MatchController;
 import com.jameskavazy.dartscoreboard.sse.impl.MatchEventEmitter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +21,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;

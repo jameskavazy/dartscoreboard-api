@@ -1,7 +1,6 @@
 package com.jameskavazy.dartscoreboard.match.repository;
 
 import com.jameskavazy.dartscoreboard.match.domain.PlayerState;
-import com.jameskavazy.dartscoreboard.match.exception.InvalidVisitScoreException;
 import com.jameskavazy.dartscoreboard.match.model.visits.Visit;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
