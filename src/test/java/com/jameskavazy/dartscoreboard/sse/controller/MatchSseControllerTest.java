@@ -45,8 +45,8 @@ class MatchSseControllerTest {
     @Test
     void shouldReceiveMatchEvent() throws Exception {
         ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
-        SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
-        when(matchEventEmitter.subscribe("match-1", Long.MAX_VALUE)).thenReturn(emitter);
+        SseEmitter emitter = new SseEmitter(1000L);
+        when(matchEventEmitter.subscribe("match-1", 1000L)).thenReturn(emitter);
 
         MvcResult result = mvc.perform(get("/api/sse/match/match-1")
                         .accept(MediaType.TEXT_EVENT_STREAM))
@@ -79,9 +79,9 @@ class MatchSseControllerTest {
     @Test
     void shouldReceiveEvent_multipleClients() throws Exception {
         ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
-        SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
-        SseEmitter emitter2 = new SseEmitter(Long.MAX_VALUE);
-        when(matchEventEmitter.subscribe("match-1", Long.MAX_VALUE))
+        SseEmitter emitter = new SseEmitter(1000L);
+        SseEmitter emitter2 = new SseEmitter(1000L);
+        when(matchEventEmitter.subscribe("match-1", 1000L))
                 .thenReturn(emitter)
                 .thenReturn(emitter2);
 

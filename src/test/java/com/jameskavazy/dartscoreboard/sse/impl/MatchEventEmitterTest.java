@@ -1,4 +1,4 @@
-package com.jameskavazy.dartscoreboard.match.controller;
+package com.jameskavazy.dartscoreboard.sse.impl;
 
 import com.jameskavazy.dartscoreboard.match.domain.PlayerState;
 import com.jameskavazy.dartscoreboard.match.domain.ResultContext;
@@ -27,7 +27,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-class SseServiceTest {
+class MatchEventEmitterTest {
 
     MatchEventEmitter matchEventEmitter = new MatchEventEmitter();
 

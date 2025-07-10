@@ -20,6 +20,6 @@ public class MatchSseController {
 
     @GetMapping("/{matchId}")
     public SseEmitter subscribeToMatchEmitter(@PathVariable String matchId){
-        return matchEventEmitter.subscribe(matchId, Long.MAX_VALUE);
+        return matchEventEmitter.subscribe(matchId, 1000L);
     }
 }
