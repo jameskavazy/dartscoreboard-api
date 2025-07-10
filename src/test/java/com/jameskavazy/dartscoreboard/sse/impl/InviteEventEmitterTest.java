@@ -1,11 +1,20 @@
 package com.jameskavazy.dartscoreboard.sse.impl;
 
+import com.jameskavazy.dartscoreboard.match.dto.VisitEvent;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
+
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class InviteEventEmitterTest {
@@ -31,4 +40,15 @@ class InviteEventEmitterTest {
         assertFalse(inviteEventEmitter.getInviteEventEmitters().containsKey(username));
     }
 
+    @Test
+    void shouldSendEvent() throws IOException {
+        String username = "user1@example.com";
+        SseEmitter emitter = mock(SseEmitter.class);
+
+
+        inviteEventEmitter.getInviteEventEmitters().put(username, emitter);
+        inviteEventEmitter.send(username, "testData");
+
+        verify(emitter).send(any(SseEmitter.SseEventBuilder.class));
+    }
 }
