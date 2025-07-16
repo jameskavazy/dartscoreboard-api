@@ -17,9 +17,8 @@ import java.util.concurrent.Executors;
 public class MatchEventEmitter implements EventEmitter {
     private final Logger log = LoggerFactory.getLogger(MatchEventEmitter.class);
     private final ExecutorService executor = Executors.newFixedThreadPool(10);
-    private ConcurrentHashMap<String, List<SseEmitter>> matchEmitters = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, List<SseEmitter>> matchEmitters = new ConcurrentHashMap<>();
     // possible List<Emitter + UserId object> to identify owner of emitter and custom logic per emitter?
-
 
     public SseEmitter subscribe(String matchId, long timeout) {
         SseEmitter emitter = new SseEmitter(timeout);

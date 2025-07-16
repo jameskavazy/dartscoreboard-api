@@ -1,5 +1,6 @@
 package com.jameskavazy.dartscoreboard.match.repository;
 
+import com.jameskavazy.dartscoreboard.invite.model.InviteStatus;
 import com.jameskavazy.dartscoreboard.match.model.matches.Match;
 import com.jameskavazy.dartscoreboard.match.model.matches.MatchType;
 import com.jameskavazy.dartscoreboard.match.model.matches.MatchesUsers;
@@ -149,5 +150,19 @@ public class MatchRepository {
                 .update();
 
         Assert.state(updated == 1, "Could not insert match users");
+    }
+
+    public void updateMatchUserInviteStatus(String userId, String matchId, InviteStatus inviteStatus) {
+        int updated = jdbcClient.sql("""
+                        UPDATE matches_users
+                        SET invite_status = :inviteStatus
+                        WHERE user_id = :userId AND match_id = :matchId
+                        """)
+                .param("userId", userId)
+                .param("matchId", matchId)
+                .param("inviteStatus", inviteStatus.name())
+                .update();
+
+        Assert.state(updated == 1, "Could not update user invite status");
     }
 }

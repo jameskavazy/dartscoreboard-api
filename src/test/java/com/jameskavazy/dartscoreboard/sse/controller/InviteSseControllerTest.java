@@ -78,7 +78,6 @@ class InviteSseControllerTest {
                         data:match-514
 
                         """));
-
         executorService.shutdown();
     }
 

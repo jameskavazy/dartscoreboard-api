@@ -8,7 +8,7 @@ import com.jameskavazy.dartscoreboard.match.exception.InvalidHierarchyException;
 import com.jameskavazy.dartscoreboard.match.exception.InvalidPlayerTurnException;
 import com.jameskavazy.dartscoreboard.match.exception.MatchNotFoundException;
 import com.jameskavazy.dartscoreboard.match.model.legs.Leg;
-import com.jameskavazy.dartscoreboard.match.model.matches.InviteStatus;
+import com.jameskavazy.dartscoreboard.invite.model.InviteStatus;
 import com.jameskavazy.dartscoreboard.match.model.matches.Match;
 import com.jameskavazy.dartscoreboard.match.model.matches.MatchesUsers;
 import com.jameskavazy.dartscoreboard.match.model.sets.Set;

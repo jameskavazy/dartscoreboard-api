@@ -1,5 +1,6 @@
 package com.jameskavazy.dartscoreboard.match.repository;
 
+import com.jameskavazy.dartscoreboard.invite.model.InviteStatus;
 import com.jameskavazy.dartscoreboard.match.model.matches.*;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -155,6 +156,13 @@ class MatchRepositoryTest {
         List<MatchesUsers> matchUsers = repository.getMatchUsers("match-2");
         assertEquals(1, matchUsers.size());
         assertEquals("user-1", matchUsers.get(0).userId());
+    }
+
+    @Test
+    void shouldUpdateMatchUserInviteStatusToDeclined(){
+        repository.updateMatchUserInviteStatus("user-3", "match-1", InviteStatus.DECLINED);
+        MatchesUsers matchesUser = repository.getMatchUsers("match-1").get(2);
+        assertEquals(InviteStatus.DECLINED, matchesUser.inviteStatus());
     }
 
 }

@@ -90,11 +90,6 @@ class MatchControllerTest {
 
         assertNotNull(globalExceptionHandler, "GlobalExceptionHandler not loaded");
     }
-
-
-
-
-
     @Test
     void shouldFindAllMatches() throws Exception {
         when(matchService.findAllMatches()).thenReturn(matches);

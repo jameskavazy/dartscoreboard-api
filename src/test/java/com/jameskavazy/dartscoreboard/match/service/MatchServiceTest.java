@@ -1,5 +1,6 @@
 package com.jameskavazy.dartscoreboard.match.service;
 
+import com.jameskavazy.dartscoreboard.invite.model.InviteStatus;
 import com.jameskavazy.dartscoreboard.sse.impl.MatchEventEmitter;
 import com.jameskavazy.dartscoreboard.match.domain.*;
 import com.jameskavazy.dartscoreboard.match.dto.MatchRequest;

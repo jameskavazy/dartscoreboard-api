@@ -11,8 +11,6 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @RequestMapping("/api/sse/match")
 public class MatchSseController {
 
-
-
     private final MatchEventEmitter matchEventEmitter;
     public MatchSseController(MatchEventEmitter matchEventEmitter){
         this.matchEventEmitter = matchEventEmitter;
