@@ -39,9 +39,9 @@ public class UserRepository {
         return jdbcClient.sql("""
                 SELECT user_id
                 FROM users
-                WHERE screen_name = :screenName
+                WHERE screen_name = :username
                 """)
-                .param("screenName", screenName)
+                .param("username", screenName)
                 .query(String.class)
                 .single();
     }
@@ -56,5 +56,16 @@ public class UserRepository {
                 .param("newScreenName", newScreenName)
                 .update();
         Assert.state(updated == 1, "Could not update screen name");
+    }
+
+    public String userIdFromUsername(String username) {
+        return jdbcClient.sql("""
+                SELECT user_id
+                FROM users
+                WHERE username = :username
+                """)
+                .param("username", username)
+                .query(String.class)
+                .single();
     }
 }

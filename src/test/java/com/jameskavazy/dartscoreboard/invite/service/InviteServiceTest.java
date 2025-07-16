@@ -2,9 +2,11 @@ package com.jameskavazy.dartscoreboard.invite.service;
 
 import com.jameskavazy.dartscoreboard.invite.model.InviteStatus;
 import com.jameskavazy.dartscoreboard.match.repository.MatchRepository;
+import com.jameskavazy.dartscoreboard.user.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.OngoingStubbing;
 
 import static org.mockito.Mockito.*;
 
@@ -12,19 +14,20 @@ import static org.mockito.Mockito.*;
 class InviteServiceTest {
 
     MatchRepository matchRepository = mock(MatchRepository.class);
-    InviteService inviteService = new InviteService(matchRepository);
+    UserRepository userRepository = mock(UserRepository.class);
+    InviteService inviteService = new InviteService(matchRepository, userRepository);
 
 
     @Test
     void shouldCallUpdateMatchUsers(){
 
-        String userId = "test-user";
+        String username = "example@email.com";
         String matchId = "match-id";
         InviteStatus accepted = InviteStatus.ACCEPTED;
+        when(userRepository.userIdFromUsername(username)).thenReturn("testId");
 
-        inviteService.updateMatchUserInviteStatus(userId, matchId, accepted);
-
-        verify(matchRepository).updateMatchUserInviteStatus(userId, matchId, accepted);
+       inviteService.updateMatchUserInviteStatus(username, matchId, accepted);
+       verify(matchRepository).updateMatchUserInviteStatus("testId", matchId, accepted);
     }
 
 }
