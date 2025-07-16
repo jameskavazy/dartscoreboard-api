@@ -1,6 +1,10 @@
 package com.jameskavazy.dartscoreboard.sse.controller;
 
 import com.jameskavazy.dartscoreboard.sse.impl.InviteEventEmitter;
+import com.jameskavazy.dartscoreboard.user.UserPrincipal;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,8 +20,10 @@ public class InviteSseController {
         this.inviteEventEmitter = inviteEventEmitter;
     }
 
-    @GetMapping("/{userId}")
-    public SseEmitter subscribeToInvites(@PathVariable String userId){
-        return inviteEventEmitter.subscribe(userId, 1000L);
+    @GetMapping("")
+    public SseEmitter subscribeToInvites(@AuthenticationPrincipal UserDetails userDetails) {
+        //TODO - change principal to our own impl, reduce coupling with SpringSec?
+        String username = userDetails.getUsername();
+        return inviteEventEmitter.subscribe(username, 1000L);
     }
 }

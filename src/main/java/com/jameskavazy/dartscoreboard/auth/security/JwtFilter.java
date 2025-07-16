@@ -49,7 +49,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
 
         if (email != null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(email); // TODO change to concrete impl to decouple from SpringSec?
 
             if (jwtService.validateToken(token, userDetails)){
                 UsernamePasswordAuthenticationToken authToken

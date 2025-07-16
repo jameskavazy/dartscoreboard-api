@@ -3,15 +3,21 @@ package com.jameskavazy.dartscoreboard.sse.controller;
 import com.jameskavazy.dartscoreboard.GlobalExceptionHandler;
 import com.jameskavazy.dartscoreboard.auth.security.JwtFilter;
 import com.jameskavazy.dartscoreboard.auth.service.JwtService;
+
 import com.jameskavazy.dartscoreboard.match.SpringSecurityUserDetailsTestConfig;
 import com.jameskavazy.dartscoreboard.sse.impl.InviteEventEmitter;
+
 import org.junit.jupiter.api.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.EnableAsync;
+
+import org.springframework.security.test.context.support.WithMockUser;
+
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -26,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
@@ -46,14 +53,17 @@ class InviteSseControllerTest {
 
     @MockitoBean
     JwtService jwtService;
+
+
     @Test
+    @WithMockUser(value = "user1@example.com")
     void shouldReceiveInviteEvent() throws Exception {
         String username = "user1@example.com";
         ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
         SseEmitter emitter = new SseEmitter(1000L);
         when(inviteEventEmitter.subscribe(username, 1000L)).thenReturn(emitter);
 
-        MvcResult result = mvc.perform(get("/api/sse/invite/" + username)
+        MvcResult result = mvc.perform(get("/api/sse/invite")
                         .accept(MediaType.TEXT_EVENT_STREAM))
                 .andExpect(request().asyncStarted())
                 .andReturn();
@@ -71,6 +81,7 @@ class InviteSseControllerTest {
        future.get();
 
         mvc.perform(asyncDispatch(result))
+                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM))
                 .andExpect(content().string("""

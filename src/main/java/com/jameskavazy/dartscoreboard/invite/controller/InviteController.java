@@ -21,7 +21,6 @@ public class InviteController {
     public ResponseEntity<?> respondToInvite(@PathVariable String matchId,
                                              @RequestBody InviteStatus inviteStatus,
                                              @AuthenticationPrincipal UserDetails userDetails) {
-
         inviteService.updateMatchUserInviteStatus(userDetails.getUsername(), matchId, inviteStatus);
         return ResponseEntity.noContent().build();
     }
