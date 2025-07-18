@@ -127,44 +127,6 @@ class MatchControllerIntTest {
     }
 
     @Test
-    @WithMockUser
-    void shouldCreateMatch() {
-        MatchRequest matchRequest = new MatchRequest(
-                MatchType.FiveO,
-                1,
-                2,
-                List.of("user1", "user2")
-        );
-        ResponseEntity<Void> newMatch = restClient.post().uri("/api/matches")
-                .body(matchRequest)
-                .retrieve()
-                .toBodilessEntity();
-
-        assertEquals(201, newMatch.getStatusCode().value());
-    }
-
-    @Test
-    @WithMockUser
-    void shouldNotCreateMatchWithInvalidRequest(){
-        MatchRequest matchRequest = new MatchRequest(
-                MatchType.FiveO,
-                1,
-                -1,
-                List.of("user1", "user2")
-        );
-
-        HttpClientErrorException exception = assertThrows(HttpClientErrorException.BadRequest.class ,() -> {
-                    restClient.post().uri("/api/matches")
-                            .body(matchRequest)
-                            .retrieve()
-                            .toBodilessEntity();
-                });
-
-        assertEquals(400, exception.getStatusCode().value());
-        assertTrue(exception.getMessage().contains("raceToSet"));
-    }
-
-    @Test
     void shouldUpdateExistingMatch() {
         Match match = restClient.get()
                 .uri("/api/matches/match-1")

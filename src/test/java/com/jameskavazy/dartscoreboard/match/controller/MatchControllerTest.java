@@ -124,22 +124,6 @@ class MatchControllerTest {
     }
 
     @Test
-    void shouldCreateMatch() throws Exception {
-        MatchRequest matchRequest = new MatchRequest(
-                MatchType.FiveO,
-                1,
-                2,
-                List.of("user-1", "user-2")
-        );
-
-        mvc.perform(post("/api/matches")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(matchRequest))
-                )
-                .andExpect(status().isCreated());
-    }
-
-    @Test
     void shouldUpdateMatch() throws Exception {
         Match match = new Match(
                 "match-1",

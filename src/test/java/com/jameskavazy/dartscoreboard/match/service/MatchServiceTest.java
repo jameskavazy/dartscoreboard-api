@@ -63,18 +63,18 @@ class MatchServiceTest {
     MatchService matchService;
 
     @Test
-    void shouldCreateMatch(){
+    void shouldSetupMatch(){
         MatchRequest matchRequest = new MatchRequest(MatchType.FiveO, 1,1,List.of("user1","user2"));
         when(userRepository.userIdFromScreenName("user1")).thenReturn("user-1");
         when(userRepository.userIdFromScreenName("user2")).thenReturn("user-2");
 
-        matchService.createMatch(matchRequest);
+        matchService.setupMatch(matchRequest);
 
         verify(matchRepository).create(argThat(match ->
                 match.matchType().equals(MatchType.FiveO) &&
                         match.raceToLeg() == 1 &&
                         match.raceToSet() == 1 &&
-                        match.matchStatus().equals(MatchStatus.ONGOING) &&
+                        match.matchStatus().equals(MatchStatus.REQUESTED) &&
                         match.winnerId() == null
         ));
 

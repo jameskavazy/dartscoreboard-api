@@ -2,11 +2,12 @@ package com.jameskavazy.dartscoreboard.invite.service;
 
 import com.jameskavazy.dartscoreboard.invite.model.InviteStatus;
 import com.jameskavazy.dartscoreboard.match.repository.MatchRepository;
+import com.jameskavazy.dartscoreboard.sse.impl.MatchEventEmitter;
 import com.jameskavazy.dartscoreboard.user.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.stubbing.OngoingStubbing;
 
 import static org.mockito.Mockito.*;
 
@@ -15,7 +16,11 @@ class InviteServiceTest {
 
     MatchRepository matchRepository = mock(MatchRepository.class);
     UserRepository userRepository = mock(UserRepository.class);
-    InviteService inviteService = new InviteService(matchRepository, userRepository);
+
+
+    MatchEventEmitter matchEventEmitter = new MatchEventEmitter();
+
+    InviteService inviteService = new InviteService(matchRepository, userRepository, matchEventEmitter);
 
 
     @Test

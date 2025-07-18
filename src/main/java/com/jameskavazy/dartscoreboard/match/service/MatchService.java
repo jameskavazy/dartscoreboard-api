@@ -38,11 +38,8 @@ public class MatchService {
     private final SetRepository setRepository;
     private final LegRepository legRepository;
     private final UserRepository userRepository;
-
     private final ScoreCalculator scoreCalculator;
-
     private final EventEmitter matchEventEmitter;
-
     private final ProgressionHandler progressionHandler;
 
     public MatchService(MatchRepository matchRepository,
@@ -68,7 +65,7 @@ public class MatchService {
         return matchRepository.findById(matchId);
     }
 
-    public void createMatch(MatchRequest matchRequest) {
+    public void setupMatch(MatchRequest matchRequest) {
 
         Match match = new Match(
                 UUID.randomUUID().toString(),
@@ -77,7 +74,7 @@ public class MatchService {
                 matchRequest.raceToSet(),
                 OffsetDateTime.now(),
                 null,
-                MatchStatus.ONGOING
+                MatchStatus.REQUESTED
         );
         generateMatchHierarchy(matchRequest, match);
     }

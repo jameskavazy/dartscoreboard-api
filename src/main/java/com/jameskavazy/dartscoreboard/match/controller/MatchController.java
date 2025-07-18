@@ -40,12 +40,6 @@ public class MatchController {
         return match.get();
     }
 
-    @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping("")
-    void createMatch(@Valid @RequestBody MatchRequest matchRequest){
-        matchService.createMatch(matchRequest);
-    }
-
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PutMapping("/{matchId}")
     void updateMatch(@RequestBody Match match, @PathVariable String matchId){
