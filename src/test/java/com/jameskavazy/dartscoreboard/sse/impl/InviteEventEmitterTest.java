@@ -1,15 +1,12 @@
 package com.jameskavazy.dartscoreboard.sse.impl;
 
-import com.jameskavazy.dartscoreboard.match.dto.VisitEvent;
+import com.jameskavazy.dartscoreboard.match.domain.MatchesUserDTOMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -19,7 +16,8 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class InviteEventEmitterTest {
 
-    InviteEventEmitter inviteEventEmitter = new InviteEventEmitter();
+    MatchesUserDTOMapper matchesUserDTOMapper = mock(MatchesUserDTOMapper.class);
+    InviteEventEmitter inviteEventEmitter = new InviteEventEmitter(matchesUserDTOMapper);
 
     @Test
     void shouldSubscribeToInviteEmitter(){

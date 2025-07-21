@@ -2,7 +2,7 @@ package com.jameskavazy.dartscoreboard.auth.security;
 
 import com.jameskavazy.dartscoreboard.auth.service.JwtService;
 
-import com.jameskavazy.dartscoreboard.user.UserPrincipal;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

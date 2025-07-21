@@ -3,10 +3,10 @@ package com.jameskavazy.dartscoreboard.match.controller;
 import com.jameskavazy.dartscoreboard.match.domain.VisitResult;
 import com.jameskavazy.dartscoreboard.match.model.matches.Match;
 import com.jameskavazy.dartscoreboard.match.exception.MatchNotFoundException;
-import com.jameskavazy.dartscoreboard.match.dto.MatchRequest;
+
 import com.jameskavazy.dartscoreboard.match.service.MatchService;
 import com.jameskavazy.dartscoreboard.match.dto.VisitRequest;
-import jakarta.validation.Valid;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

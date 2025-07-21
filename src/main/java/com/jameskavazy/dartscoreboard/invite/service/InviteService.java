@@ -30,9 +30,14 @@ public class InviteService {
         String userId = userRepository.userIdFromUsername(username);
         matchRepository.updateMatchUserInviteStatus(userId, matchId, inviteStatus);
 
+
+
+
+
         List<MatchesUsers> matchUsers = matchRepository.getMatchUsers(matchId);
         boolean allAccepted = matchUsers.stream()
                 .allMatch(mu -> mu.inviteStatus().equals(InviteStatus.ACCEPTED));
+
 
         if (allAccepted)
             matchEventEmitter.send(matchId, MatchStatus.ONGOING);

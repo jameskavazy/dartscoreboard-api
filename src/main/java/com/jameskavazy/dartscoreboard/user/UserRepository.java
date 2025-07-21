@@ -68,4 +68,15 @@ public class UserRepository {
                 .query(String.class)
                 .single();
     }
+
+    public String screenNameFromUserId(String userId) {
+        return jdbcClient.sql("""
+                SELECT screen_name
+                FROM users
+                WHERE user_id = :userId
+                """)
+                .param("userId", userId)
+                .query(String.class)
+                .single();
+    }
 }

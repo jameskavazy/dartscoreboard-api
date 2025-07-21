@@ -37,6 +37,6 @@ public class InviteController {
     @ResponseStatus(HttpStatus.CREATED)
     public void sendInvite(@RequestBody MatchRequest matchRequest){
         log.info("send invite endpoint hit!!!");
-        matchService.setupMatch(matchRequest);
+        matchService.setupMatchAndSendInvites(matchRequest);
     }
 }

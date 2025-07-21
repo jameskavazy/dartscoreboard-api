@@ -1,6 +1,8 @@
 package com.jameskavazy.dartscoreboard.match.service;
 
 import com.jameskavazy.dartscoreboard.invite.model.InviteStatus;
+import com.jameskavazy.dartscoreboard.sse.dto.InvitationData;
+import com.jameskavazy.dartscoreboard.sse.impl.InviteEventEmitter;
 import com.jameskavazy.dartscoreboard.sse.impl.MatchEventEmitter;
 import com.jameskavazy.dartscoreboard.match.domain.*;
 import com.jameskavazy.dartscoreboard.match.dto.MatchRequest;
@@ -23,6 +25,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.time.OffsetDateTime;
@@ -59,16 +62,22 @@ class MatchServiceTest {
     @Mock
     MatchEventEmitter sseService;
 
+    @Mock
+    MatchesUserDTOMapper dtoMapper;
+
+    @Mock
+    InviteEventEmitter inviteEventEmitter;
+
     @InjectMocks
     MatchService matchService;
 
     @Test
-    void shouldSetupMatch(){
+    void shouldSetupMatchAndSendInvites(){
         MatchRequest matchRequest = new MatchRequest(MatchType.FiveO, 1,1,List.of("user1","user2"));
         when(userRepository.userIdFromScreenName("user1")).thenReturn("user-1");
         when(userRepository.userIdFromScreenName("user2")).thenReturn("user-2");
 
-        matchService.setupMatch(matchRequest);
+        matchService.setupMatchAndSendInvites(matchRequest);
 
         verify(matchRepository).create(argThat(match ->
                 match.matchType().equals(MatchType.FiveO) &&
@@ -78,6 +87,7 @@ class MatchServiceTest {
                         match.winnerId() == null
         ));
 
+        verify(inviteEventEmitter, times(2)).send(anyString(), any(InvitationData.class));
         verify(setRepository).create(any(Set.class));
         verify(legRepository).create(any(Leg.class));
         verify(matchRepository, times(1)).createMatchUsers(argThat(mu -> mu.userId().equals("user-1")));

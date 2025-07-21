@@ -1,5 +1,8 @@
 package com.jameskavazy.dartscoreboard.match.service;
 
+import com.jameskavazy.dartscoreboard.match.dto.MatchesUserDTO;
+import com.jameskavazy.dartscoreboard.sse.dto.InvitationData;
+import com.jameskavazy.dartscoreboard.sse.impl.InviteEventEmitter;
 import com.jameskavazy.dartscoreboard.sse.impl.MatchEventEmitter;
 import com.jameskavazy.dartscoreboard.match.domain.*;
 import com.jameskavazy.dartscoreboard.match.dto.MatchRequest;
@@ -19,11 +22,11 @@ import com.jameskavazy.dartscoreboard.match.model.visits.Visit;
 import com.jameskavazy.dartscoreboard.match.repository.SetRepository;
 import com.jameskavazy.dartscoreboard.match.repository.VisitRepository;
 import com.jameskavazy.dartscoreboard.match.dto.VisitRequest;
-import com.jameskavazy.dartscoreboard.sse.service.EventEmitter;
 import com.jameskavazy.dartscoreboard.user.User;
 import com.jameskavazy.dartscoreboard.user.UserRepository;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -32,21 +35,27 @@ import java.util.UUID;
 
 @Service
 public class MatchService {
-
     private final MatchRepository matchRepository;
     private final VisitRepository visitRepository;
     private final SetRepository setRepository;
     private final LegRepository legRepository;
     private final UserRepository userRepository;
     private final ScoreCalculator scoreCalculator;
-    private final EventEmitter matchEventEmitter;
+    private final MatchEventEmitter matchEventEmitter;
+    private final InviteEventEmitter inviteEventEmitter;
     private final ProgressionHandler progressionHandler;
+    private final MatchesUserDTOMapper dtoMapper;
 
     public MatchService(MatchRepository matchRepository,
                         VisitRepository visitRepository,
-                        SetRepository setRepository, LegRepository legRepository, UserRepository userRepository,
+                        SetRepository setRepository,
+                        LegRepository legRepository,
+                        UserRepository userRepository,
                         ScoreCalculator scoreCalculator,
-                        MatchEventEmitter matchEventEmitter, ProgressionHandler progressionHandler){
+                        MatchEventEmitter matchEventEmitter,
+                        InviteEventEmitter inviteEventEmitter,
+                        ProgressionHandler progressionHandler,
+                        MatchesUserDTOMapper dtoMapper){
         this.matchRepository = matchRepository;
         this.visitRepository = visitRepository;
         this.setRepository = setRepository;
@@ -54,7 +63,9 @@ public class MatchService {
         this.userRepository = userRepository;
         this.scoreCalculator = scoreCalculator;
         this.matchEventEmitter = matchEventEmitter;
+        this.inviteEventEmitter = inviteEventEmitter;
         this.progressionHandler = progressionHandler;
+        this.dtoMapper = dtoMapper;
     }
 
     public List<Match> findAllMatches() {
@@ -65,8 +76,8 @@ public class MatchService {
         return matchRepository.findById(matchId);
     }
 
-    public void setupMatch(MatchRequest matchRequest) {
-
+    @Transactional
+    public void setupMatchAndSendInvites(MatchRequest matchRequest) {
         Match match = new Match(
                 UUID.randomUUID().toString(),
                 matchRequest.matchType(),
@@ -76,13 +87,15 @@ public class MatchService {
                 null,
                 MatchStatus.REQUESTED
         );
-        generateMatchHierarchy(matchRequest, match);
+        initialiseMatchAndHierarchy(matchRequest, match);
+
     }
 
     public void updateMatch(Match match, String matchId) {
         matchRepository.update(match, matchId);
     }
 
+    @Transactional
     public VisitResult processVisitRequest(VisitRequest visitRequest,
                                            String matchId,
                                            String setId,
@@ -183,7 +196,7 @@ public class MatchService {
         int numOfLegs = legRepository.countLegsInSet(matchContext.setId());
         int shift = setRepository.getSetsInMatch(matchContext.match().matchId()).size() - 1;
 
-        // Base on leg count, shift by which set we're in, less 1 (to align with indices)
+        // Base on leg count, shift by which set we're in, less 1
         int turnIndex = nextPlayerIndex(matchContext, numOfLegs, shift);
         Leg newLeg = new Leg(
                 UUID.randomUUID().toString(), matchContext.match().matchId(), matchContext.setId(), turnIndex, null, OffsetDateTime.now()
@@ -240,10 +253,19 @@ public class MatchService {
        return progressionHandler.increment(base, shift + matchContext.usersIdsInMatch().size(), matchContext.usersIdsInMatch().size());
     }
 
-    private void generateMatchHierarchy(MatchRequest matchRequest, Match match) {
+    private void initialiseMatchAndHierarchy(MatchRequest matchRequest, Match match) {
         matchRepository.create(match);
+
         List<MatchesUsers> matchesUsers = getMatchesUsers(matchRequest, match);
         generateUserMatchAssociations(matchesUsers);
+
+        List<MatchesUserDTO> invitedPlayers = matchesUsers.stream()
+                .map(dtoMapper::matchesUserToDTO)
+                .toList();
+
+        // TODO async?
+        matchesUsers.forEach(mu -> inviteEventEmitter.send(mu.userId(), new InvitationData(match, invitedPlayers)));
+
         Set set = new Set(UUID.randomUUID().toString(), match.matchId(), null, OffsetDateTime.now());
         setRepository.create(set);
         legRepository.create(new Leg(UUID.randomUUID().toString(), match.matchId(), set.setId(), 0, null, OffsetDateTime.now()));

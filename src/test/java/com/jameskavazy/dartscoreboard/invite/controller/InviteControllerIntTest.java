@@ -13,10 +13,13 @@ import com.jameskavazy.dartscoreboard.match.model.matches.MatchType;
 import com.jameskavazy.dartscoreboard.match.model.matches.MatchesUsers;
 import com.jameskavazy.dartscoreboard.match.repository.MatchRepository;
 import com.jameskavazy.dartscoreboard.match.service.MatchService;
+import com.jameskavazy.dartscoreboard.sse.dto.InvitationData;
+import com.jameskavazy.dartscoreboard.sse.impl.InviteEventEmitter;
 import com.jameskavazy.dartscoreboard.user.User;
 import com.jameskavazy.dartscoreboard.user.UserPrincipal;
 import org.junit.jupiter.api.*;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -70,6 +73,8 @@ public class InviteControllerIntTest {
     JdbcClient jdbcClient;
     @Autowired
     MatchService matchService;
+    @MockitoBean
+    InviteEventEmitter inviteEventEmitter;
     @Container
     @ServiceConnection
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(
@@ -86,7 +91,6 @@ public class InviteControllerIntTest {
     }
     @BeforeEach
     void setUp() {
-
         when(jwtService.getEmail("fakeToken")).thenReturn("user1@example.com");
         when(userDetailsService.loadUserByUsername("user1@example.com"))
                 .thenReturn
