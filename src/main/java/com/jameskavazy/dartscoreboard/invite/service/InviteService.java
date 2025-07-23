@@ -13,10 +13,8 @@ import java.util.List;
 
 @Service
 public class InviteService {
-
     private final MatchRepository matchRepository;
     private final UserRepository userRepository;
-
     private final MatchEventEmitter matchEventEmitter;
 
     public InviteService(MatchRepository matchRepository, UserRepository userRepository, MatchEventEmitter matchEventEmitter) {

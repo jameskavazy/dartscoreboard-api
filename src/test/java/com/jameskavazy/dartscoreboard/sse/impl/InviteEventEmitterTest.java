@@ -17,7 +17,7 @@ import static org.mockito.Mockito.verify;
 class InviteEventEmitterTest {
 
     MatchesUserDTOMapper matchesUserDTOMapper = mock(MatchesUserDTOMapper.class);
-    InviteEventEmitter inviteEventEmitter = new InviteEventEmitter(matchesUserDTOMapper);
+    InviteEventEmitter inviteEventEmitter = new InviteEventEmitter();
 
     @Test
     void shouldSubscribeToInviteEmitter(){

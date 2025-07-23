@@ -3,7 +3,7 @@ package com.jameskavazy.dartscoreboard.invite.controller;
 import com.jameskavazy.dartscoreboard.invite.model.InviteStatus;
 import com.jameskavazy.dartscoreboard.invite.service.InviteService;
 import com.jameskavazy.dartscoreboard.match.dto.MatchRequest;
-import com.jameskavazy.dartscoreboard.match.service.MatchService;
+import com.jameskavazy.dartscoreboard.match.service.MatchSetupService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -18,11 +18,11 @@ public class InviteController {
 
     Logger log = LoggerFactory.getLogger(InviteService.class);
     private final InviteService inviteService;
-    private final MatchService matchService;
+    private final MatchSetupService matchSetupService;
 
-    public InviteController(InviteService inviteService, MatchService matchService) {
+    public InviteController(InviteService inviteService, MatchSetupService matchSetupService) {
         this.inviteService = inviteService;
-        this.matchService = matchService;
+        this.matchSetupService = matchSetupService;
     }
 
     @PutMapping("/{matchId}")
@@ -37,6 +37,6 @@ public class InviteController {
     @ResponseStatus(HttpStatus.CREATED)
     public void sendInvite(@RequestBody MatchRequest matchRequest){
         log.info("send invite endpoint hit!!!");
-        matchService.setupMatchAndSendInvites(matchRequest);
+        matchSetupService.setupMatchAndSendInvites(matchRequest);
     }
 }
