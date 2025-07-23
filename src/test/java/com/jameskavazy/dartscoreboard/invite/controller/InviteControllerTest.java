@@ -11,6 +11,7 @@ import com.jameskavazy.dartscoreboard.invite.model.InviteStatus;
 import com.jameskavazy.dartscoreboard.match.dto.MatchRequest;
 import com.jameskavazy.dartscoreboard.match.model.matches.MatchType;
 import com.jameskavazy.dartscoreboard.match.service.MatchService;
+import com.jameskavazy.dartscoreboard.match.service.MatchSetupService;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +42,9 @@ class InviteControllerTest {
 
     @MockitoBean
     InviteService inviteService;
+
+    @MockitoBean
+    MatchSetupService matchSetupService;
 
     @Autowired
     MockMvc mvc;

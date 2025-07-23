@@ -16,6 +16,7 @@ public class ProgressionHandler {
         return ResultScenario.SET_WON;
     }
     public int increment(int base, int shift, int size) {
+        int result = (base + shift) % size;
         return (base + shift) % size;
     }
 

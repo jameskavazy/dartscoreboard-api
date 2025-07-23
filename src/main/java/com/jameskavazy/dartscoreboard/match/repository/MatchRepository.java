@@ -20,7 +20,6 @@ public class MatchRepository {
         this.jdbcClient = jdbcClient;
     }
 
-
     public List<Match> findAll(){
         return jdbcClient.sql("SELECT * FROM matches")
                 .query(Match.class)

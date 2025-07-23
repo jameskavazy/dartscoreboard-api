@@ -37,9 +37,10 @@ import static org.junit.jupiter.api.Assertions.*;
 @Testcontainers
 @Transactional
 @Rollback
-public class MatchServiceIntTest {
+public class ProcessVisitRequestServiceIntTest {
+
     @Autowired
-    MatchService matchService;
+    VisitProcessingService visitProcessingService;
 
     @Autowired
     MatchRepository matchRepository;
@@ -96,7 +97,7 @@ public class MatchServiceIntTest {
     void processVisitRequest_returnMatchWon(){
         legRepository.updateTurnIndex(2, legId); // Make sure it's user-3's turn
         VisitRequest visitRequest = new VisitRequest(141);
-        VisitResult visitResult = matchService
+        VisitResult visitResult = visitProcessingService
                 .processVisitRequest(visitRequest,  matchId, setId, legId, "user3@example.com");
 
         VisitResult want = wantedVisitResultHelper(ResultScenario.MATCH_WON, legId, setId);
@@ -111,7 +112,7 @@ public class MatchServiceIntTest {
 
         legRepository.updateTurnIndex(2, legId); // Make sure it's user-3's turn
         VisitRequest visitRequest = new VisitRequest(141);
-        VisitResult visitResult = matchService
+        VisitResult visitResult = visitProcessingService
                 .processVisitRequest(visitRequest, matchId, setId, legId, "user3@example.com");
 
 
@@ -129,7 +130,7 @@ public class MatchServiceIntTest {
 
         legRepository.updateTurnIndex(2, "leg-1"); // Make sure it's user-3's turn
         VisitRequest visitRequest = new VisitRequest(141);
-        VisitResult visitResult = matchService
+        VisitResult visitResult = visitProcessingService
                 .processVisitRequest(visitRequest, matchId, setId,legId, "user3@example.com");
         assertEquals(ResultScenario.LEG_WON, visitResult.resultScenario());
         assertNotEquals(legId, visitResult.resultContext().legId());
@@ -140,7 +141,7 @@ public class MatchServiceIntTest {
     void processVisitRequest_returnNoResult(){
         legRepository.updateTurnIndex(2, legId); // Make sure it's user-3's turn
         VisitRequest visitRequest = new VisitRequest(10);
-        VisitResult visitResult = matchService
+        VisitResult visitResult = visitProcessingService
                 .processVisitRequest(visitRequest, matchId, setId,legId, "user3@example.com");
 
         VisitResult want = wantedVisitResultHelper(ResultScenario.NO_RESULT, legId, setId);
@@ -151,7 +152,7 @@ public class MatchServiceIntTest {
     void processVisitRequest_turnIndexCorrectlyLoopsOn_noResult(){
         legRepository.updateTurnIndex(2, legId); // Make sure it's user-3's turn
         VisitRequest visitRequest = new VisitRequest(10);
-        VisitResult visitResult = matchService
+        VisitResult visitResult = visitProcessingService
                 .processVisitRequest(visitRequest, matchId, setId, legId, "user3@example.com");
 
         int got = legRepository.getTurnIndex(visitResult.resultContext().legId());
@@ -163,7 +164,7 @@ public class MatchServiceIntTest {
     void processVisitRequest_turnIndexCorrectlyGoesUp_noResult(){
         legRepository.updateTurnIndex(1, legId); // Make sure it's user-2's turn
         VisitRequest visitRequest = new VisitRequest(10);
-        VisitResult visitResult = matchService
+        VisitResult visitResult = visitProcessingService
                 .processVisitRequest(visitRequest, matchId, setId,legId, "user2@example.com");
 
         int got = legRepository.getTurnIndex(visitResult.resultContext().legId());
@@ -179,7 +180,7 @@ public class MatchServiceIntTest {
 
         legRepository.updateTurnIndex(2, legId); // Make sure it's user-3's turn
         VisitRequest visitRequest = new VisitRequest(141);
-        VisitResult visitResult =  matchService
+        VisitResult visitResult =  visitProcessingService
                 .processVisitRequest(visitRequest, matchId, setId, legId, "user3@example.com");
 
         int turnIndex = legRepository.getTurnIndex(visitResult.resultContext().legId());
@@ -198,7 +199,7 @@ public class MatchServiceIntTest {
         ), "match-1"); // Increase the leg boundary for this test.
         legRepository.updateTurnIndex(2, "leg-1"); // Make sure it's user-3's turn
         VisitRequest visitRequest = new VisitRequest(141);
-        VisitResult visitResult = matchService
+        VisitResult visitResult = visitProcessingService
                 .processVisitRequest(visitRequest, matchId, setId,legId, "user3@example.com");
 
         int turnIndex = legRepository.getTurnIndex(visitResult.resultContext().legId());

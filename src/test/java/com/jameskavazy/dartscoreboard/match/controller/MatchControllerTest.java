@@ -14,6 +14,7 @@ import com.jameskavazy.dartscoreboard.match.model.matches.MatchStatus;
 import com.jameskavazy.dartscoreboard.match.model.matches.MatchType;
 import com.jameskavazy.dartscoreboard.match.service.MatchService;
 import com.jameskavazy.dartscoreboard.match.dto.VisitRequest;
+import com.jameskavazy.dartscoreboard.match.service.VisitProcessingService;
 import com.jameskavazy.dartscoreboard.sse.impl.MatchEventEmitter;
 import com.jameskavazy.dartscoreboard.user.UserPrincipal;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,6 +61,9 @@ class MatchControllerTest {
 
     @MockitoBean
     MatchService matchService;
+
+    @MockitoBean
+    VisitProcessingService visitProcessingService;
 
     @MockitoBean
     JwtFilter filter;
@@ -145,14 +149,13 @@ class MatchControllerTest {
     @WithUserDetails()
     void shouldReturnCREATEDForCreateVisit() throws Exception {
         VisitRequest visitRequest = new VisitRequest(40);
-        when(matchService.processVisitRequest(
+        when(visitProcessingService.processVisitRequest(
                ArgumentMatchers.any(VisitRequest.class),
                 eq("match-1"),
                 eq("set-1"),
                 eq("leg-1"),
                 anyString()))
                 .thenReturn(new VisitResult(ResultScenario.NO_RESULT, new ResultContext("leg-1", "set-1")));
-
 
 
         mvc.perform(post("/api/matches/match-1/sets/set-1/legs/leg-1/visits/")

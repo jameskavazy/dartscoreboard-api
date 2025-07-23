@@ -14,11 +14,9 @@ import java.util.UUID;
 @Component
 public class ScoreCalculator {
 
-
     public ScoreCalculator(){
 
     }
-
     private final Set<Integer> impossibleCheckouts = new HashSet<>(List.of(169, 168, 166, 165, 163, 162, 159));
 
     public Visit validateAndBuildVisit(String userId, int currentScore, VisitRequest visitRequest, String legId) {

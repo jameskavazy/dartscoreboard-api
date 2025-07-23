@@ -7,6 +7,7 @@ import com.jameskavazy.dartscoreboard.match.exception.MatchNotFoundException;
 import com.jameskavazy.dartscoreboard.match.service.MatchService;
 import com.jameskavazy.dartscoreboard.match.dto.VisitRequest;
 
+import com.jameskavazy.dartscoreboard.match.service.VisitProcessingService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -21,9 +22,11 @@ import java.util.Optional;
 public class MatchController {
 
     private final MatchService matchService;
+    private final VisitProcessingService visitProcessingService;
 
-    public MatchController(MatchService matchService){
+    public MatchController(MatchService matchService, VisitProcessingService visitProcessingService){
         this.matchService = matchService;
+        this.visitProcessingService = visitProcessingService;
     }
 
     @GetMapping("")
@@ -53,8 +56,8 @@ public class MatchController {
                                   @RequestBody VisitRequest visitRequest,
                                   @AuthenticationPrincipal UserDetails userDetails){
 
-        VisitResult visitResult = matchService
-                .processVisitRequest(visitRequest, matchId, setId, legId, userDetails.getUsername());
+        VisitResult visitResult =
+                visitProcessingService.processVisitRequest(visitRequest, matchId, setId, legId, userDetails.getUsername());
 
         return new ResponseEntity<>(visitResult, HttpStatus.CREATED);
     }
