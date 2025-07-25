@@ -1,14 +1,14 @@
 package com.jameskavazy.dartscoreboard.match.service;
 
 import com.jameskavazy.dartscoreboard.invite.model.InviteStatus;
-import com.jameskavazy.dartscoreboard.match.domain.MatchesUserDTOMapper;
+import com.jameskavazy.dartscoreboard.match.domain.service.MatchesUserDTOMapper;
 import com.jameskavazy.dartscoreboard.match.dto.MatchRequest;
 import com.jameskavazy.dartscoreboard.match.dto.MatchesUserDTO;
-import com.jameskavazy.dartscoreboard.match.model.legs.Leg;
-import com.jameskavazy.dartscoreboard.match.model.matches.Match;
-import com.jameskavazy.dartscoreboard.match.model.matches.MatchStatus;
-import com.jameskavazy.dartscoreboard.match.model.matches.MatchesUsers;
-import com.jameskavazy.dartscoreboard.match.model.sets.Set;
+import com.jameskavazy.dartscoreboard.match.domain.model.entity.Leg;
+import com.jameskavazy.dartscoreboard.match.domain.model.entity.Match;
+import com.jameskavazy.dartscoreboard.match.domain.model.value.MatchStatus;
+import com.jameskavazy.dartscoreboard.match.domain.model.entity.MatchesUsers;
+import com.jameskavazy.dartscoreboard.match.domain.model.entity.Set;
 import com.jameskavazy.dartscoreboard.match.repository.LegRepository;
 import com.jameskavazy.dartscoreboard.match.repository.MatchRepository;
 import com.jameskavazy.dartscoreboard.match.repository.SetRepository;

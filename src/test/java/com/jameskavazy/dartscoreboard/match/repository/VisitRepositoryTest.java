@@ -1,7 +1,7 @@
 package com.jameskavazy.dartscoreboard.match.repository;
 
-import com.jameskavazy.dartscoreboard.match.domain.PlayerState;
-import com.jameskavazy.dartscoreboard.match.model.visits.Visit;
+import com.jameskavazy.dartscoreboard.match.domain.model.value.PlayerState;
+import com.jameskavazy.dartscoreboard.match.domain.model.entity.Visit;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;

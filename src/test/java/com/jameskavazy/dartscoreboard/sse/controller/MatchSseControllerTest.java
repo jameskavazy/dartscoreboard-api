@@ -1,6 +1,6 @@
 package com.jameskavazy.dartscoreboard.sse.controller;
 
-import com.jameskavazy.dartscoreboard.GlobalExceptionHandler;
+import com.jameskavazy.dartscoreboard.config.GlobalExceptionHandler;
 import com.jameskavazy.dartscoreboard.auth.security.JwtFilter;
 import com.jameskavazy.dartscoreboard.auth.service.JwtService;
 import com.jameskavazy.dartscoreboard.match.SpringSecurityUserDetailsTestConfig;

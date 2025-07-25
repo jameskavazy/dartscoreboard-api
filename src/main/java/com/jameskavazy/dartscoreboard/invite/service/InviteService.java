@@ -1,10 +1,9 @@
 package com.jameskavazy.dartscoreboard.invite.service;
 
 import com.jameskavazy.dartscoreboard.invite.model.InviteStatus;
-import com.jameskavazy.dartscoreboard.match.model.matches.MatchStatus;
-import com.jameskavazy.dartscoreboard.match.model.matches.MatchesUsers;
+import com.jameskavazy.dartscoreboard.match.domain.model.value.MatchStatus;
+import com.jameskavazy.dartscoreboard.match.domain.model.entity.MatchesUsers;
 import com.jameskavazy.dartscoreboard.match.repository.MatchRepository;
-import com.jameskavazy.dartscoreboard.sse.impl.InviteEventEmitter;
 import com.jameskavazy.dartscoreboard.sse.impl.MatchEventEmitter;
 import com.jameskavazy.dartscoreboard.user.UserRepository;
 import org.springframework.stereotype.Service;

@@ -1,5 +1,7 @@
-package com.jameskavazy.dartscoreboard.match.domain;
+package com.jameskavazy.dartscoreboard.match.domain.service;
 
+import com.jameskavazy.dartscoreboard.match.domain.model.value.ResultScenario;
+import com.jameskavazy.dartscoreboard.match.domain.aggregate.MatchContext;
 import org.springframework.stereotype.Component;
 
 @Component

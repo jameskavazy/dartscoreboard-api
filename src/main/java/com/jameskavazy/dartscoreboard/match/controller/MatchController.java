@@ -1,7 +1,7 @@
 package com.jameskavazy.dartscoreboard.match.controller;
 
-import com.jameskavazy.dartscoreboard.match.domain.VisitResult;
-import com.jameskavazy.dartscoreboard.match.model.matches.Match;
+import com.jameskavazy.dartscoreboard.match.domain.model.value.VisitResult;
+import com.jameskavazy.dartscoreboard.match.domain.model.entity.Match;
 import com.jameskavazy.dartscoreboard.match.exception.MatchNotFoundException;
 
 import com.jameskavazy.dartscoreboard.match.service.MatchService;

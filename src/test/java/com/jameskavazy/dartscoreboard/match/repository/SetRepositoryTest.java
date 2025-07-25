@@ -1,6 +1,6 @@
 package com.jameskavazy.dartscoreboard.match.repository;
 
-import com.jameskavazy.dartscoreboard.match.model.sets.Set;
+import com.jameskavazy.dartscoreboard.match.domain.model.entity.Set;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;

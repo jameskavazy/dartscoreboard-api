@@ -1,7 +1,7 @@
-package com.jameskavazy.dartscoreboard.match.domain;
+package com.jameskavazy.dartscoreboard.match.domain.service;
 
 import com.jameskavazy.dartscoreboard.match.dto.MatchesUserDTO;
-import com.jameskavazy.dartscoreboard.match.model.matches.MatchesUsers;
+import com.jameskavazy.dartscoreboard.match.domain.model.entity.MatchesUsers;
 import com.jameskavazy.dartscoreboard.user.UserRepository;
 import org.springframework.stereotype.Component;
 

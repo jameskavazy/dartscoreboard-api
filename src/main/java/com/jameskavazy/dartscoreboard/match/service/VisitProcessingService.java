@@ -1,14 +1,19 @@
 package com.jameskavazy.dartscoreboard.match.service;
 
-import com.jameskavazy.dartscoreboard.match.domain.*;
+import com.jameskavazy.dartscoreboard.match.domain.aggregate.MatchContext;
+import com.jameskavazy.dartscoreboard.match.domain.model.value.PlayerState;
+import com.jameskavazy.dartscoreboard.match.domain.model.value.ResultContext;
+import com.jameskavazy.dartscoreboard.match.domain.model.value.ResultScenario;
+import com.jameskavazy.dartscoreboard.match.domain.model.value.VisitResult;
+import com.jameskavazy.dartscoreboard.match.domain.service.ScoreCalculator;
 import com.jameskavazy.dartscoreboard.match.dto.VisitEvent;
 import com.jameskavazy.dartscoreboard.match.dto.VisitRequest;
 import com.jameskavazy.dartscoreboard.match.exception.InvalidHierarchyException;
 import com.jameskavazy.dartscoreboard.match.exception.InvalidPlayerTurnException;
 import com.jameskavazy.dartscoreboard.match.exception.MatchNotFoundException;
-import com.jameskavazy.dartscoreboard.match.model.matches.Match;
-import com.jameskavazy.dartscoreboard.match.model.matches.MatchesUsers;
-import com.jameskavazy.dartscoreboard.match.model.visits.Visit;
+import com.jameskavazy.dartscoreboard.match.domain.model.entity.Match;
+import com.jameskavazy.dartscoreboard.match.domain.model.entity.MatchesUsers;
+import com.jameskavazy.dartscoreboard.match.domain.model.entity.Visit;
 import com.jameskavazy.dartscoreboard.match.repository.LegRepository;
 import com.jameskavazy.dartscoreboard.match.repository.MatchRepository;
 import com.jameskavazy.dartscoreboard.match.repository.SetRepository;

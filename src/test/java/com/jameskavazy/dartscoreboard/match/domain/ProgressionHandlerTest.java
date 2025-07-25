@@ -1,8 +1,11 @@
 package com.jameskavazy.dartscoreboard.match.domain;
 
-import com.jameskavazy.dartscoreboard.match.model.matches.Match;
-import com.jameskavazy.dartscoreboard.match.model.matches.MatchStatus;
-import com.jameskavazy.dartscoreboard.match.model.matches.MatchType;
+import com.jameskavazy.dartscoreboard.match.domain.aggregate.MatchContext;
+import com.jameskavazy.dartscoreboard.match.domain.model.value.ResultScenario;
+import com.jameskavazy.dartscoreboard.match.domain.service.ProgressionHandler;
+import com.jameskavazy.dartscoreboard.match.domain.model.entity.Match;
+import com.jameskavazy.dartscoreboard.match.domain.model.value.MatchStatus;
+import com.jameskavazy.dartscoreboard.match.domain.model.value.MatchType;
 import org.junit.jupiter.api.Test;
 
 import java.time.OffsetDateTime;

@@ -1,4 +1,4 @@
-package com.jameskavazy.dartscoreboard;
+package com.jameskavazy.dartscoreboard.config;
 
 import com.jameskavazy.dartscoreboard.match.exception.InvalidHierarchyException;
 import com.jameskavazy.dartscoreboard.match.exception.InvalidPlayerTurnException;

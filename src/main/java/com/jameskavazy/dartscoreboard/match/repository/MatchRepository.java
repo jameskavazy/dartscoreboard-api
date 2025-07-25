@@ -1,9 +1,9 @@
 package com.jameskavazy.dartscoreboard.match.repository;
 
 import com.jameskavazy.dartscoreboard.invite.model.InviteStatus;
-import com.jameskavazy.dartscoreboard.match.model.matches.Match;
-import com.jameskavazy.dartscoreboard.match.model.matches.MatchType;
-import com.jameskavazy.dartscoreboard.match.model.matches.MatchesUsers;
+import com.jameskavazy.dartscoreboard.match.domain.model.entity.Match;
+import com.jameskavazy.dartscoreboard.match.domain.model.value.MatchType;
+import com.jameskavazy.dartscoreboard.match.domain.model.entity.MatchesUsers;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;

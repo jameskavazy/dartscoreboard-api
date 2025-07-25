@@ -1,9 +1,9 @@
 package com.jameskavazy.dartscoreboard.sse.impl;
 
-import com.jameskavazy.dartscoreboard.match.domain.PlayerState;
-import com.jameskavazy.dartscoreboard.match.domain.ResultContext;
-import com.jameskavazy.dartscoreboard.match.domain.ResultScenario;
-import com.jameskavazy.dartscoreboard.match.domain.VisitResult;
+import com.jameskavazy.dartscoreboard.match.domain.model.value.PlayerState;
+import com.jameskavazy.dartscoreboard.match.domain.model.value.ResultContext;
+import com.jameskavazy.dartscoreboard.match.domain.model.value.ResultScenario;
+import com.jameskavazy.dartscoreboard.match.domain.model.value.VisitResult;
 import com.jameskavazy.dartscoreboard.match.dto.VisitEvent;
 
 import org.junit.jupiter.api.Test;

@@ -1,5 +1,7 @@
-package com.jameskavazy.dartscoreboard.match.model.matches;
+package com.jameskavazy.dartscoreboard.match.domain.model.entity;
 
+import com.jameskavazy.dartscoreboard.match.domain.model.value.MatchStatus;
+import com.jameskavazy.dartscoreboard.match.domain.model.value.MatchType;
 import jakarta.validation.constraints.PastOrPresent;
 
 import java.time.OffsetDateTime;

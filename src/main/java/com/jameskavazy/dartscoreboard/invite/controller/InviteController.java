@@ -3,7 +3,6 @@ package com.jameskavazy.dartscoreboard.invite.controller;
 import com.jameskavazy.dartscoreboard.invite.model.InviteStatus;
 import com.jameskavazy.dartscoreboard.invite.service.InviteService;
 import com.jameskavazy.dartscoreboard.match.dto.MatchRequest;
-import com.jameskavazy.dartscoreboard.match.service.MatchService;
 import com.jameskavazy.dartscoreboard.match.service.MatchSetupService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

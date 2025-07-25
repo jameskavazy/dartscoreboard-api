@@ -1,12 +1,9 @@
 package com.jameskavazy.dartscoreboard.match.repository;
 
-import com.jameskavazy.dartscoreboard.match.model.legs.Leg;
-import com.jameskavazy.dartscoreboard.match.model.visits.Visit;
+import com.jameskavazy.dartscoreboard.match.domain.model.entity.Leg;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
-
-import java.util.List;
 
 @Repository
 public class LegRepository {

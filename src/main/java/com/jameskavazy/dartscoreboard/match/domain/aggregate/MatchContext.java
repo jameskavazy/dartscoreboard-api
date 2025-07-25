@@ -1,6 +1,6 @@
-package com.jameskavazy.dartscoreboard.match.domain;
+package com.jameskavazy.dartscoreboard.match.domain.aggregate;
 
-import com.jameskavazy.dartscoreboard.match.model.matches.Match;
+import com.jameskavazy.dartscoreboard.match.domain.model.entity.Match;
 
 import java.util.List;
 

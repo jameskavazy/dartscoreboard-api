@@ -1,7 +1,10 @@
 package com.jameskavazy.dartscoreboard.match.repository;
 
 import com.jameskavazy.dartscoreboard.invite.model.InviteStatus;
-import com.jameskavazy.dartscoreboard.match.model.matches.*;
+import com.jameskavazy.dartscoreboard.match.domain.model.value.MatchStatus;
+import com.jameskavazy.dartscoreboard.match.domain.model.value.MatchType;
+import com.jameskavazy.dartscoreboard.match.domain.model.entity.Match;
+import com.jameskavazy.dartscoreboard.match.domain.model.entity.MatchesUsers;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;

@@ -1,17 +1,16 @@
 package com.jameskavazy.dartscoreboard.match.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jameskavazy.dartscoreboard.GlobalExceptionHandler;
+import com.jameskavazy.dartscoreboard.config.GlobalExceptionHandler;
 import com.jameskavazy.dartscoreboard.auth.security.JwtFilter;
 import com.jameskavazy.dartscoreboard.auth.service.JwtService;
-import com.jameskavazy.dartscoreboard.match.domain.ResultContext;
-import com.jameskavazy.dartscoreboard.match.domain.ResultScenario;
-import com.jameskavazy.dartscoreboard.match.domain.VisitResult;
-import com.jameskavazy.dartscoreboard.match.dto.MatchRequest;
+import com.jameskavazy.dartscoreboard.match.domain.model.value.ResultContext;
+import com.jameskavazy.dartscoreboard.match.domain.model.value.ResultScenario;
+import com.jameskavazy.dartscoreboard.match.domain.model.value.VisitResult;
 import com.jameskavazy.dartscoreboard.match.SpringSecurityUserDetailsTestConfig;
-import com.jameskavazy.dartscoreboard.match.model.matches.Match;
-import com.jameskavazy.dartscoreboard.match.model.matches.MatchStatus;
-import com.jameskavazy.dartscoreboard.match.model.matches.MatchType;
+import com.jameskavazy.dartscoreboard.match.domain.model.entity.Match;
+import com.jameskavazy.dartscoreboard.match.domain.model.value.MatchStatus;
+import com.jameskavazy.dartscoreboard.match.domain.model.value.MatchType;
 import com.jameskavazy.dartscoreboard.match.service.MatchService;
 import com.jameskavazy.dartscoreboard.match.dto.VisitRequest;
 import com.jameskavazy.dartscoreboard.match.service.VisitProcessingService;
@@ -28,16 +27,12 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 
-import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.*;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

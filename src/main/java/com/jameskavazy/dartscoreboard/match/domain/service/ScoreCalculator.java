@@ -1,8 +1,8 @@
-package com.jameskavazy.dartscoreboard.match.domain;
+package com.jameskavazy.dartscoreboard.match.domain.service;
 
 import com.jameskavazy.dartscoreboard.match.dto.VisitRequest;
 import com.jameskavazy.dartscoreboard.match.exception.InvalidVisitScoreException;
-import com.jameskavazy.dartscoreboard.match.model.visits.Visit;
+import com.jameskavazy.dartscoreboard.match.domain.model.entity.Visit;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;

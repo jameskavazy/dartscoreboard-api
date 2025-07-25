@@ -1,4 +1,4 @@
-package com.jameskavazy.dartscoreboard.match.model.sets;
+package com.jameskavazy.dartscoreboard.match.domain.model.entity;
 
 import java.time.OffsetDateTime;
 

@@ -1,4 +1,4 @@
-package com.jameskavazy.dartscoreboard.match.model.matches;
+package com.jameskavazy.dartscoreboard.match.domain.model.entity;
 
 import com.jameskavazy.dartscoreboard.invite.model.InviteStatus;
 
