@@ -30,6 +30,7 @@ import java.util.Optional;
 
 @Service
 public class VisitProcessingService {
+
     private final MatchRepository matchRepository;
     private final SetRepository setRepository;
     private final LegRepository legRepository;
@@ -38,6 +39,7 @@ public class VisitProcessingService {
     private final MatchEventEmitter matchEventEmitter;
     private final UserRepository userRepository;
     private final GameEngine gameEngine;
+
     public VisitProcessingService(MatchRepository matchRepository,
                                   SetRepository setRepository,
                                   LegRepository legRepository,

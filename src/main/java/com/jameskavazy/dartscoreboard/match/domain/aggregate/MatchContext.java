@@ -13,6 +13,5 @@ public record MatchContext(
         String legId,
         String userId,
         String setId
-
 ) {
 }

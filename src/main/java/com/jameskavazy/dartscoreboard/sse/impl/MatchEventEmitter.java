@@ -9,6 +9,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
@@ -42,7 +43,7 @@ public class MatchEventEmitter implements EventEmitter {
                             .data(eventData));
                 } catch (IOException e) {
                     matchEmitters.get(matchId).remove(emitter);
-                    log.error("Cleaning up emitter - " + e.getMessage());
+                    log.error("Cleaning up emitter - ", e);
                 }
             }));
         }

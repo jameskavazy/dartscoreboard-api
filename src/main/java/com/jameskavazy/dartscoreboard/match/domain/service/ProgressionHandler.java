@@ -17,9 +17,6 @@ public class ProgressionHandler {
         if (matchContext.match().raceToSet() == matchContext.setsWon() + 1) return ResultScenario.MATCH_WON;
         return ResultScenario.SET_WON;
     }
-    public int increment(int base, int shift, int size) {
-        int result = (base + shift) % size;
-        return (base + shift) % size;
-    }
+
 
 }
