@@ -5,7 +5,6 @@ import com.jameskavazy.dartscoreboard.match.domain.aggregate.MatchContext;
 import com.jameskavazy.dartscoreboard.match.domain.model.value.PlayerState;
 import com.jameskavazy.dartscoreboard.match.domain.model.value.ResultContext;
 import com.jameskavazy.dartscoreboard.match.domain.model.value.ResultScenario;
-import com.jameskavazy.dartscoreboard.match.domain.service.ProgressionHandler;
 import com.jameskavazy.dartscoreboard.match.domain.service.ScoreCalculator;
 import com.jameskavazy.dartscoreboard.match.dto.VisitEvent;
 import com.jameskavazy.dartscoreboard.match.dto.VisitRequest;
@@ -59,8 +58,6 @@ class VisitProcessingServiceTest {
     SetRepository setRepository;
     @Mock
     ScoreCalculator scoreCalculator;
-    @Mock
-    ProgressionHandler progressionHandler;
 
     @Mock
     MatchEventEmitter matchEventEmitter;

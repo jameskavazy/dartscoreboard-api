@@ -1,6 +1,5 @@
 package com.jameskavazy.dartscoreboard.match.service;
 
-import com.jameskavazy.dartscoreboard.match.domain.service.ProgressionHandler;
 import com.jameskavazy.dartscoreboard.match.domain.service.ScoreCalculator;
 import com.jameskavazy.dartscoreboard.match.domain.service.MatchesUserDTOMapper;
 import com.jameskavazy.dartscoreboard.sse.impl.InviteEventEmitter;
@@ -32,9 +31,6 @@ class MatchServiceTest {
 
     @Mock
     SetRepository setRepository;
-
-    @Mock
-    ProgressionHandler progressionHandler;
 
     @Mock
     MatchesUserDTOMapper dtoMapper;

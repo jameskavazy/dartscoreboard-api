@@ -183,6 +183,7 @@ public class ProcessVisitRequestServiceIntTest {
         VisitResult visitResult =  visitProcessingService
                 .processVisitRequest(visitRequest, matchId, setId, legId, "user3@example.com");
 
+
         int turnIndex = legRepository.getTurnIndex(visitResult.resultContext().legId());
 
 

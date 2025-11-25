@@ -1,7 +1,7 @@
 package com.jameskavazy.dartscoreboard.match.service;
 
 import com.jameskavazy.dartscoreboard.match.domain.aggregate.MatchContext;
-import com.jameskavazy.dartscoreboard.match.domain.service.ProgressionHandler;
+import com.jameskavazy.dartscoreboard.match.domain.model.value.ResultScenario;
 import com.jameskavazy.dartscoreboard.match.domain.model.value.ResultContext;
 import com.jameskavazy.dartscoreboard.match.domain.model.entity.Leg;
 import com.jameskavazy.dartscoreboard.match.domain.model.entity.Match;
@@ -28,8 +28,7 @@ class GameEngineTest {
     LegRepository legRepository = mock(LegRepository.class);
     SetRepository setRepository = mock(SetRepository.class);
     MatchRepository matchRepository = mock(MatchRepository.class);
-    ProgressionHandler progressionHandler = mock(ProgressionHandler.class);
-    GameEngine gameEngine = new GameEngine(legRepository, setRepository, matchRepository, progressionHandler);
+    GameEngine gameEngine = new GameEngine(legRepository, setRepository, matchRepository);
     @Test
     void shouldHandleLegWon() {
         Match match = new Match(
@@ -154,7 +153,7 @@ class GameEngineTest {
                 "set-1"
         );
         when(legRepository.getTurnIndex(matchContext.legId())).thenReturn(1);
-        when(progressionHandler.increment(anyInt(), anyInt(), anyInt())).thenReturn(2);
+//        when(gameEngine.checkResult(anyInt(), anyInt(), anyInt())).thenReturn(2);
         ResultContext resultContext = gameEngine.handleNoResult(matchContext);
         verify(legRepository).updateTurnIndex(2, "leg-1");
         assertEquals("set-1", resultContext.setId());
@@ -184,7 +183,87 @@ class GameEngineTest {
                 "set-1"
         );
         gameEngine.checkResult(matchContext);
-        verify(progressionHandler).checkResult(matchContext);
+//        verify(gameEngine).checkResult(matchContext);
+    }
+
+    Match match = new Match(
+            "any-match", MatchType.FiveO, 3, 3, OffsetDateTime.now(), "", MatchStatus.ONGOING
+    );
+
+    List<String> userIds = List.of("user-1", "user-2");
+
+    @Test
+    void shouldReturnNoLegWon(){
+
+        MatchContext matchContext = new MatchContext(
+                match,  userIds, 1, 2, 100, "leg-1", "user-1", "set-1"
+        );
+
+        ResultScenario resultScenario = gameEngine.checkResult(matchContext);
+        assertEquals(ResultScenario.NO_RESULT, resultScenario);
+    }
+
+    @Test
+    void shouldReturnLegWonNoSetWon(){
+        MatchContext matchContext = new MatchContext(
+                match,  userIds, 1, 1, 0, "leg-1", "user-1", "set-1"
+        );
+        ResultScenario resultScenario = gameEngine.checkResult(matchContext);
+        assertEquals(ResultScenario.LEG_WON, resultScenario);
+    }
+
+    @Test
+    void shouldReturnLegWonSetWonNoMatchWon(){
+        MatchContext matchContext = new MatchContext(
+                match,  userIds, 2, 1, 0, "leg-1", "user-1", "set-1"
+        );
+
+        ResultScenario resultScenario = gameEngine.checkResult(matchContext);
+        assertEquals(ResultScenario.SET_WON, resultScenario);
+    }
+
+    @Test
+    void shouldReturnLegWonSetWonMatchWon(){
+        MatchContext matchContext = new MatchContext(
+                match,  userIds, 2, 2, 0, "leg-1", "user-1", "set-1"
+        );
+
+        ResultScenario resultScenario = gameEngine.checkResult(matchContext);
+        assertEquals(ResultScenario.MATCH_WON, resultScenario);
+    }
+
+    @Test
+    void shouldCorrectlyIncrementTurn(){
+
+        MatchContext ctx = new MatchContext(
+                match, userIds, 2, 2, 0, "leg-1", "user-1", "set-1");
+
+        int next = gameEngine.nextPlayerIndex(ctx, 0, 1);
+        assertEquals(1, next);
+    }
+
+    @Test
+    void shouldCorrectlyDecrementTurn_cycleBackRound(){
+        // given
+        MatchContext ctx = new MatchContext(match, userIds, 2, 2, 0, "leg-1", "user-1", "set-1");
+
+        // when
+        int next = gameEngine.nextPlayerIndex(ctx, 0, -1);
+
+        // then
+        assertEquals(1, next);
+    }
+
+    @Test
+    void shouldCorrectlyDecrementTurn() {
+        // given
+        MatchContext ctx = new MatchContext(match, List.of("user-1", "user-2", "user-3"), 2, 2, 0, "leg-1", "user-1", "set-1");
+
+        // when
+        int next = gameEngine.nextPlayerIndex(ctx, 3, -1);
+
+        // then
+        assertEquals(2, next);
     }
 
 }

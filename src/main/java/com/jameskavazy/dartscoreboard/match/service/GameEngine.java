@@ -2,7 +2,6 @@ package com.jameskavazy.dartscoreboard.match.service;
 
 
 import com.jameskavazy.dartscoreboard.match.domain.aggregate.MatchContext;
-import com.jameskavazy.dartscoreboard.match.domain.service.ProgressionHandler;
 import com.jameskavazy.dartscoreboard.match.domain.model.value.ResultContext;
 import com.jameskavazy.dartscoreboard.match.domain.model.value.ResultScenario;
 import com.jameskavazy.dartscoreboard.match.domain.model.entity.Leg;
@@ -24,13 +23,11 @@ public class GameEngine {
     private final LegRepository legRepository;
     private final SetRepository setRepository;
     private final MatchRepository matchRepository;
-    private final ProgressionHandler progressionHandler;
 
-    public GameEngine(LegRepository legRepository, SetRepository setRepository, MatchRepository matchRepository, ProgressionHandler progressionHandler) {
+    public GameEngine(LegRepository legRepository, SetRepository setRepository, MatchRepository matchRepository) {
         this.legRepository = legRepository;
         this.setRepository = setRepository;
         this.matchRepository = matchRepository;
-        this.progressionHandler = progressionHandler;
     }
 
     /**
@@ -47,7 +44,8 @@ public class GameEngine {
         int setsInMatch = setRepository.getSetsInMatch(matchContext.match().matchId()).size() - 1;
 
         // Rotate by number of legs in the match. Offset by which set we're in, less 1
-        int turnIndex = nextPlayerIndex(matchContext, legsInMatch, setsInMatch);
+        int playersInMatch = matchRepository.getMatchUsers(matchContext.match().matchId()).size();
+        int turnIndex = nextPlayerIndex(matchContext, playersInMatch, legsInMatch);
         Leg newLeg = createNewLeg(matchContext.match().matchId(), matchContext.setId(), turnIndex);
         legRepository.create(newLeg);
         return new ResultContext(newLeg.legId(), matchContext.setId());
@@ -60,6 +58,8 @@ public class GameEngine {
      * @param matchContext The context contains crucial metadata about the match required for processing the turn
      * @return resultContext The context of the match is returned after processing the required steps
      */
+
+
     @Transactional
     public ResultContext handleSetWon(MatchContext matchContext){
 
@@ -70,10 +70,10 @@ public class GameEngine {
         int setsInMatch = setRepository.getSetsInMatch(matchId).size();
 
         /*
-         * Rotate by setsInMatch
-         * No offset needed as player who starts the next set can be determined simply from the number of sets played
+         * Step by setsInMatch - determine who starts the next set can be determined simply from the number of sets played
          */
-        int turnIndex = nextPlayerIndex(matchContext, setsInMatch, 0);
+        int size = matchRepository.getUsersIdsInMatch(matchId).size();
+        int turnIndex = nextPlayerIndex(matchContext, size, setsInMatch);
 
         Set newSet = new Set(UUID.randomUUID().toString(), matchId, null, OffsetDateTime.now());
         setRepository.create(newSet);
@@ -107,6 +107,7 @@ public class GameEngine {
                 matchContext.userId(),
                 MatchStatus.COMPLETE
         );
+        // TODO: Update match elements without creating an entire new object for efficiency
         matchRepository.update(match, match.matchId());
         return new ResultContext(matchContext.legId(), matchContext.setId());
     }
@@ -125,54 +126,55 @@ public class GameEngine {
         return new ResultContext(matchContext.legId(), matchContext.setId());
     }
 
-    /**
-     * checkResult determines the ResultScenario used by caller to determine required match state updates
-     * @param matchContext The context contains crucial metadata about the match required for processing the turn
-     * @return ResultScenario the determined result situation enum
-     */
-    public ResultScenario checkResult(MatchContext matchContext) {
-        return progressionHandler.checkResult(matchContext);
-    }
+//    /**
+//     * checkResult determines the ResultScenario used by caller to determine required match state updates
+//     * @param matchContext The context contains crucial metadata about the match required for processing the turn
+//     * @return ResultScenario the determined result situation enum
+//     */
+//    public ResultScenario checkResult(MatchContext matchContext) {
+//        return progressionHandler.checkResult(matchContext);
+//    }
 
     /**
      * Computes the next player's turn index using simple modular rotation.
-     *
-     * <p>
-     * The caller supplies two values:
-     * <strong>rotations</strong> which represents how many rounds of the relevant type
-     * (legs or sets) have been completed, and an <strong>offset</strong> which adjusts
-     * the rotation when the match rules require it. The meaning of both parameters is
-     * entirely dictated by the calling logic.
-     * </p>
-     *
-     * <p>Formula:</p>
-     * <pre>
-     * nextIndex = (rotations + offset) % playerCount
-     * </pre>
-     *
-     * <p>
-     * Examples of how callers may use this:
-     * </p>
-     * <ul>
-     *     <li>When a leg is won: rotations = legs completed in the current set;
-     *         offset = (current set index - 1) to ensure the starting player shifts each set.</li>
-     *     <li>When simply moving to the next turn in a leg: rotations = darts thrown so far,
-     *         offset = 0.</li>
-     * </ul>
+     * *
+     *  <p>
+     *  The caller provides two values:
+     *  <strong>currentTurnIndex</strong> – the index of the player whose turn it is currently, and
+     *  <strong>step</strong> – the number of "rotations" to apply:
+     *  this is typically the count of legs or sets completed, or simply 1 if advancing to the next player
+     *  without any special rotation rules. Negative values can be used to move backward.
+     *  </p>
+     *       *  <p>Formula:</p>
+     *  <pre>
+     *  nextIndex = (currentTurnIndex + step + playerCount) % playerCount
+     *  </pre>
+     *       *  <p>Example usage:</p>
+     *  <ul>
+     *      <li>When a leg is won: step = number of legs completed in the current set, possibly adjusted
+     *          by the set index to shift the starting player for the new set.</li>
+     *      <li>When simply moving to the next turn in a leg: step = 1 (or -1 to move backward).</li>
+     *  </ul>
      *
      * @param ctx Match context containing the players involved.
-     * @param rotations Number of completed units relevant to the rule being applied
-     *                  (completed legs, completed sets, etc.).
-     * @param offset Adjustment applied to the rotation based on match structure.
+     * @param currentTurnIndex The current index of the turn.
+     * @param step Positive or negative adjustment to the turn.
      * @return The index of the player who should take the next turn.
      */
-    private int nextPlayerIndex(MatchContext ctx, int rotations, int offset) {
+    public int nextPlayerIndex(MatchContext ctx, int currentTurnIndex, int step) {
         int playerCount = ctx.usersIdsInMatch().size();
-        return (rotations + offset) % playerCount;
+        return (currentTurnIndex + step + playerCount) % playerCount;
     }
 
 
     private Leg createNewLeg(String matchId, String setId, int turnIndex) {
         return new Leg(UUID.randomUUID().toString(), matchId, setId, turnIndex, null, OffsetDateTime.now());
+    }
+
+    ResultScenario checkResult(MatchContext matchContext){
+        if (matchContext.computedScore() != 0) return ResultScenario.NO_RESULT;
+        if (matchContext.match().raceToLeg() != matchContext.legsWon() + 1) return ResultScenario.LEG_WON;
+        if (matchContext.match().raceToSet() == matchContext.setsWon() + 1) return ResultScenario.MATCH_WON;
+        return ResultScenario.SET_WON;
     }
 }
