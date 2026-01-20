@@ -192,4 +192,21 @@ class VisitProcessingServiceTest {
         PlayerState player3 = sentEvent.playerStates().stream().filter(p -> p.userId().equals("user-3")).toList().get(0);
         assertEquals( 381, player3.startingScore() - player3.totalScore());
     }
+
+//    @Test
+//    void shouldValidateVisit_andPublishVisitSubmitEvent(){
+//        String matchId = "match-1";
+//        String setId = "set-1";
+//        String legId = "leg-1";
+//        String userId = "user-1";
+//        String userEmail = "user1@example.com";
+//        VisitRequest visitRequest = new VisitRequest(150);
+//
+//        User user = new User(userId, userEmail, userEmail);
+//        Match match =  new Match(matchId, MatchType.FiveO, 1,1,OffsetDateTime.now(), null, MatchStatus.ONGOING);
+//
+//        visitProcessingService.processVisitRequest(visitRequest, matchId, setId, legId, userEmail);
+//        verify()
+//
+//    }
 }

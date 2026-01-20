@@ -24,7 +24,7 @@ public class MatchController {
     private final MatchService matchService;
     private final VisitProcessingService visitProcessingService;
 
-    public MatchController(MatchService matchService, VisitProcessingService visitProcessingService){
+    public MatchController(MatchService matchService, VisitProcessingService visitProcessingService) {
         this.matchService = matchService;
         this.visitProcessingService = visitProcessingService;
     }

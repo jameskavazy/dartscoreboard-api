@@ -46,7 +46,8 @@ public class VisitProcessingService {
                                   VisitRepository visitRepository,
                                   ScoreCalculator scoreCalculator,
                                   MatchEventEmitter matchEventEmitter,
-                                  UserRepository userRepository, GameEngine gameEngine) {
+                                  UserRepository userRepository,
+                                  GameEngine gameEngine) {
         this.matchRepository = matchRepository;
         this.setRepository = setRepository;
         this.legRepository = legRepository;

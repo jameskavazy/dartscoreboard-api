@@ -9,11 +9,12 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Set;
+
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
 @Service
 public class MatchEventEmitter implements EventEmitter {
     private final Logger log = LoggerFactory.getLogger(MatchEventEmitter.class);
@@ -23,7 +24,7 @@ public class MatchEventEmitter implements EventEmitter {
 
     public SseEmitter subscribe(String matchId, long timeout) {
         SseEmitter emitter = new SseEmitter(timeout);
-        matchEmitters.computeIfAbsent(matchId, k -> new CopyOnWriteArrayList<>()).add(emitter);
+        matchEmitters.computeIfAbsent(matchId, _ -> new CopyOnWriteArrayList<>()).add(emitter);
         emitter.onCompletion(() -> matchEmitters.get(matchId).remove(emitter));
         emitter.onTimeout(() -> {
             emitter.complete();
