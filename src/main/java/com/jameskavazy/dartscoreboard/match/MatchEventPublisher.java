@@ -1,7 +1,6 @@
 package com.jameskavazy.dartscoreboard.match;
 
 import com.jameskavazy.dartscoreboard.match.domain.event.VisitSubmitEvent;
-import com.jameskavazy.dartscoreboard.match.domain.model.entity.Visit;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 
@@ -15,9 +14,7 @@ public class MatchEventPublisher implements ApplicationEventPublisherAware {
         this.publisher = publisher;
     }
 
-    public void submitVisit(Visit visit) {
-            publisher.publishEvent(new VisitSubmitEvent(this, visit));
+    public void publishVisitSubmit(String matchId, String setId, String legId, String visitId) {
+            publisher.publishEvent(new VisitSubmitEvent(this, matchId, setId, legId, visitId));
     }
-
-
 }

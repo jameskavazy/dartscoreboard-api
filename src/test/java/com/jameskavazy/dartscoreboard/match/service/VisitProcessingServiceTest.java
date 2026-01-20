@@ -3,7 +3,6 @@ package com.jameskavazy.dartscoreboard.match.service;
 import com.jameskavazy.dartscoreboard.invite.model.InviteStatus;
 import com.jameskavazy.dartscoreboard.match.MatchEventPublisher;
 import com.jameskavazy.dartscoreboard.match.domain.aggregate.MatchContext;
-import com.jameskavazy.dartscoreboard.match.domain.event.VisitSubmitEvent;
 import com.jameskavazy.dartscoreboard.match.domain.model.value.PlayerState;
 import com.jameskavazy.dartscoreboard.match.domain.model.value.ResultContext;
 import com.jameskavazy.dartscoreboard.match.domain.model.value.ResultScenario;
@@ -28,7 +27,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
@@ -231,7 +229,6 @@ class VisitProcessingServiceTest {
         visitProcessingService.processVisitRequest(visitRequest, matchId, setId, legId, userEmail);
 
 
-        verify(matchEventPublisher).submitVisit(visit);
+        verify(matchEventPublisher).publishVisitSubmit(matchId, setId, legId, visit.visitId());
     }
-
 }
