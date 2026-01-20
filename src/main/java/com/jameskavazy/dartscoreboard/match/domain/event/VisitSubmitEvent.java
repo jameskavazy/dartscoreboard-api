@@ -1,7 +1,6 @@
 package com.jameskavazy.dartscoreboard.match.domain.event;
 
 import com.jameskavazy.dartscoreboard.match.domain.model.entity.Visit;
-import com.jameskavazy.dartscoreboard.match.dto.VisitRequest;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.stereotype.Component;
 

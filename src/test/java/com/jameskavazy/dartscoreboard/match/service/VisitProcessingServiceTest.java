@@ -230,6 +230,7 @@ class VisitProcessingServiceTest {
 
         visitProcessingService.processVisitRequest(visitRequest, matchId, setId, legId, userEmail);
 
+
         verify(matchEventPublisher).submitVisit(visit);
     }
 

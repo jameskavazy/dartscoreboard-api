@@ -1,5 +1,6 @@
 package com.jameskavazy.dartscoreboard.match.service;
 
+import com.jameskavazy.dartscoreboard.match.MatchEventPublisher;
 import com.jameskavazy.dartscoreboard.match.domain.aggregate.MatchContext;
 import com.jameskavazy.dartscoreboard.match.domain.model.value.PlayerState;
 import com.jameskavazy.dartscoreboard.match.domain.model.value.ResultContext;
@@ -39,6 +40,7 @@ public class VisitProcessingService {
     private final MatchEventEmitter matchEventEmitter;
     private final UserRepository userRepository;
     private final GameEngine gameEngine;
+    private final MatchEventPublisher matchEventPublisher;
 
     public VisitProcessingService(MatchRepository matchRepository,
                                   SetRepository setRepository,
@@ -47,7 +49,8 @@ public class VisitProcessingService {
                                   ScoreCalculator scoreCalculator,
                                   MatchEventEmitter matchEventEmitter,
                                   UserRepository userRepository,
-                                  GameEngine gameEngine) {
+                                  GameEngine gameEngine,
+                                  MatchEventPublisher matchEventPublisher) {
         this.matchRepository = matchRepository;
         this.setRepository = setRepository;
         this.legRepository = legRepository;
@@ -56,6 +59,7 @@ public class VisitProcessingService {
         this.matchEventEmitter = matchEventEmitter;
         this.userRepository = userRepository;
         this.gameEngine = gameEngine;
+        this.matchEventPublisher = matchEventPublisher;
     }
 
     @Transactional
@@ -79,6 +83,7 @@ public class VisitProcessingService {
         VisitResult visitResult = new VisitResult(resultScenario, resultContext);
         notifyClients(matchId, legId, visitResult);
 
+        matchEventPublisher.submitVisit(visit);
         return visitResult;
     }
 
