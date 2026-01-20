@@ -1,7 +1,9 @@
 package com.jameskavazy.dartscoreboard.match.service;
 
 import com.jameskavazy.dartscoreboard.invite.model.InviteStatus;
+import com.jameskavazy.dartscoreboard.match.MatchEventPublisher;
 import com.jameskavazy.dartscoreboard.match.domain.aggregate.MatchContext;
+import com.jameskavazy.dartscoreboard.match.domain.event.VisitSubmitEvent;
 import com.jameskavazy.dartscoreboard.match.domain.model.value.PlayerState;
 import com.jameskavazy.dartscoreboard.match.domain.model.value.ResultContext;
 import com.jameskavazy.dartscoreboard.match.domain.model.value.ResultScenario;
@@ -26,6 +28,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
@@ -64,6 +67,9 @@ class VisitProcessingServiceTest {
 
     @InjectMocks
     VisitProcessingService visitProcessingService;
+
+    @Mock
+    MatchEventPublisher matchEventPublisher;
 
     @Test
     void processVisitRequest_shouldProcessWithValidData() {
@@ -193,20 +199,38 @@ class VisitProcessingServiceTest {
         assertEquals( 381, player3.startingScore() - player3.totalScore());
     }
 
-//    @Test
-//    void shouldValidateVisit_andPublishVisitSubmitEvent(){
-//        String matchId = "match-1";
-//        String setId = "set-1";
-//        String legId = "leg-1";
-//        String userId = "user-1";
-//        String userEmail = "user1@example.com";
-//        VisitRequest visitRequest = new VisitRequest(150);
-//
-//        User user = new User(userId, userEmail, userEmail);
-//        Match match =  new Match(matchId, MatchType.FiveO, 1,1,OffsetDateTime.now(), null, MatchStatus.ONGOING);
-//
-//        visitProcessingService.processVisitRequest(visitRequest, matchId, setId, legId, userEmail);
-//        verify()
-//
-//    }
+    @Test
+    void shouldValidateVisit_andPublishVisitSubmitEvent(){
+        String matchId = "match-1";
+        String setId = "set-1";
+        String legId = "leg-1";
+        String userId = "user-1";
+        String userEmail = "user1@example.com";
+        VisitRequest visitRequest = new VisitRequest(150);
+
+        User user = new User(userId, userEmail, userEmail);
+        Match match =  new Match(matchId, MatchType.FiveO, 1,1,OffsetDateTime.now(), null, MatchStatus.ONGOING);
+
+        when(userRepository.findByUsername(userEmail)).thenReturn(Optional.of(user));
+        when(matchRepository.findById(matchId)).thenReturn(Optional.of(match));
+        when(matchRepository.isValidLegHierarchy(legId, setId, matchId)).thenReturn(true);
+        when(matchRepository.getMatchUsers(matchId)).thenReturn(List.of(
+                new MatchesUsers(matchId, userId, 0, InviteStatus.ACCEPTED))
+        );
+        when(gameEngine.checkResult(any(MatchContext.class)))
+                .thenReturn(ResultScenario.NO_RESULT);
+        Visit visit = new Visit(UUID.randomUUID().toString(), legId, userId, 150, false, OffsetDateTime.now());
+        when(scoreCalculator.validateAndBuildVisit(eq(userId), anyInt(), eq(visitRequest), eq(legId))).thenReturn(visit);
+        when(visitRepository.getMatchData("leg-1")).thenReturn(List.of(
+                new PlayerState("user-1", 180, false, 501),
+                new PlayerState("user-2", 200, true, 501),
+                new PlayerState("user-3", 120, false, 501)
+        ));
+        when(gameEngine.handleNoResult(any())).thenReturn(new ResultContext(legId, setId));
+
+        visitProcessingService.processVisitRequest(visitRequest, matchId, setId, legId, userEmail);
+
+        verify(matchEventPublisher).submitVisit(visit);
+    }
+
 }
