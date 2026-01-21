@@ -1,6 +1,9 @@
 package com.jameskavazy.dartscoreboard.match.service;
 
+import com.jameskavazy.dartscoreboard.match.MatchEventPublisher;
 import com.jameskavazy.dartscoreboard.match.domain.aggregate.MatchContext;
+import com.jameskavazy.dartscoreboard.match.domain.event.VisitSubmitEvent;
+import com.jameskavazy.dartscoreboard.match.domain.model.entity.Visit;
 import com.jameskavazy.dartscoreboard.match.domain.model.value.ResultScenario;
 import com.jameskavazy.dartscoreboard.match.domain.model.value.ResultContext;
 import com.jameskavazy.dartscoreboard.match.domain.model.entity.Leg;
@@ -11,6 +14,7 @@ import com.jameskavazy.dartscoreboard.match.domain.model.entity.Set;
 import com.jameskavazy.dartscoreboard.match.repository.LegRepository;
 import com.jameskavazy.dartscoreboard.match.repository.MatchRepository;
 import com.jameskavazy.dartscoreboard.match.repository.SetRepository;
+import com.jameskavazy.dartscoreboard.match.repository.VisitRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -28,7 +32,10 @@ class GameEngineTest {
     LegRepository legRepository = mock(LegRepository.class);
     SetRepository setRepository = mock(SetRepository.class);
     MatchRepository matchRepository = mock(MatchRepository.class);
-    GameEngine gameEngine = new GameEngine(legRepository, setRepository, matchRepository);
+    VisitRepository visitRepository = mock(VisitRepository.class);
+    GameEngine gameEngine = new GameEngine(legRepository, setRepository, matchRepository, visitRepository);
+    MatchEventPublisher matchEventPublisher = mock(MatchEventPublisher.class);
+
     @Test
     void shouldHandleLegWon() {
         Match match = new Match(
@@ -265,5 +272,15 @@ class GameEngineTest {
         // then
         assertEquals(2, next);
     }
+
+//    @Test
+//    void handleVisitSubmitted_shouldReceiveVisitSubmitEventAndUpdateState(){
+//        VisitSubmitEvent event = new VisitSubmitEvent(
+//                "matchId", new Visit("visitId", "legId", "userId", 150, false, OffsetDateTime.now())
+//        );
+//
+//        gameEngine.handleVisitSubmitted(event);
+//        verify(legRepository).updateTurnIndex(anyInt(), anyString());
+//    }
 
 }

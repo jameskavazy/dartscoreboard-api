@@ -63,7 +63,7 @@ public class VisitProcessingService {
     }
 
     @Transactional
-    public VisitResult processVisitRequest(VisitRequest visitRequest,
+    public void processVisitRequest(VisitRequest visitRequest,
                                            String matchId,
                                            String setId,
                                            String legId,
@@ -75,16 +75,8 @@ public class VisitProcessingService {
 
         int currentScore = visitRepository.extractCurrentScore(userId, legId);
 
-        Visit visit = validateAndCreateVisit(visitRequest, legId, userId, currentScore);
-        MatchContext matchContext = createMatchContext(matchId, setId, legId, userId, match, currentScore, visit);
-
-        ResultScenario resultScenario = gameEngine.checkResult(matchContext);
-        ResultContext resultContext = handleResult(resultScenario, matchContext);
-        VisitResult visitResult = new VisitResult(resultScenario, resultContext);
-        notifyClients(matchId, legId, visitResult);
-
+        Visit visit = validateAndPersistVisit(visitRequest, legId, userId, currentScore);
         matchEventPublisher.publishVisitSubmit(matchId, setId, legId, visit.visitId(), userId);
-        return visitResult;
     }
 
     private void validateTurn(String matchId, String legId, String userId) {
@@ -98,7 +90,7 @@ public class VisitProcessingService {
         }
     }
 
-    private Visit validateAndCreateVisit(VisitRequest visitRequest, String legId, String userId, int currentScore) {
+    private Visit validateAndPersistVisit(VisitRequest visitRequest, String legId, String userId, int currentScore) {
         Visit visit = scoreCalculator.validateAndBuildVisit(userId, currentScore, visitRequest, legId);
         visitRepository.create(visit);
         return visit;
@@ -111,15 +103,6 @@ public class VisitProcessingService {
         if (visitResult.resultScenario().equals(ResultScenario.MATCH_WON)) {
             matchEventEmitter.complete(matchId);
         }
-    }
-
-    private ResultContext handleResult(ResultScenario resultScenario, MatchContext matchContext) {
-        return switch (resultScenario) {
-            case NO_RESULT -> gameEngine.handleNoResult(matchContext);
-            case LEG_WON -> gameEngine.handleLegWon(matchContext);
-            case MATCH_WON -> gameEngine.handleMatchWon(matchContext);
-            case SET_WON -> gameEngine.handleSetWon(matchContext);
-        };
     }
 
     private Match validateMatchHierarchy(String matchId, String legId, String setId) {
@@ -137,17 +120,5 @@ public class VisitProcessingService {
         User user = userOptional.orElseThrow(() ->
                 new UsernameNotFoundException("Could not insert visit: Could not find authorized user: " + userPrincipalUsername));
         return user.userId();
-    }
-
-    private MatchContext createMatchContext(String matchId, String setId, String legId, String userId, Match match, int currentScore, Visit validatedVisit) {
-        List<String> usersInMatch = matchRepository.getUsersIdsInMatch(matchId);
-        int startingScore = matchRepository.getStartingScore(matchId);
-        int legsWon = legRepository.countLegsWonInSet(userId, setId);
-        int setsWon = setRepository.countSetsWonInMatch(userId, matchId);
-        int finalScore = startingScore - currentScore - validatedVisit.score();
-
-        return new MatchContext(
-                match, usersInMatch, legsWon, setsWon, finalScore, legId, userId, setId
-        );
     }
 }

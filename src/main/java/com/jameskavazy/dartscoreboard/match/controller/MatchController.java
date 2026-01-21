@@ -56,9 +56,7 @@ public class MatchController {
                                   @RequestBody VisitRequest visitRequest,
                                   @AuthenticationPrincipal UserDetails userDetails){
 
-        VisitResult visitResult =
-                visitProcessingService.processVisitRequest(visitRequest, matchId, setId, legId, userDetails.getUsername());
-
-        return new ResponseEntity<>(visitResult, HttpStatus.CREATED);
+        visitProcessingService.processVisitRequest(visitRequest, matchId, setId, legId, userDetails.getUsername());
+        return ResponseEntity.accepted().build();
     }
 }

@@ -4,20 +4,25 @@ package com.jameskavazy.dartscoreboard.match.service;
 import com.jameskavazy.dartscoreboard.match.domain.aggregate.MatchContext;
 import com.jameskavazy.dartscoreboard.match.domain.event.VisitSubmitEvent;
 import com.jameskavazy.dartscoreboard.match.domain.model.entity.Visit;
-import com.jameskavazy.dartscoreboard.match.domain.model.value.ResultContext;
 import com.jameskavazy.dartscoreboard.match.domain.model.value.ResultScenario;
 import com.jameskavazy.dartscoreboard.match.domain.model.entity.Leg;
 import com.jameskavazy.dartscoreboard.match.domain.model.entity.Match;
 import com.jameskavazy.dartscoreboard.match.domain.model.value.MatchStatus;
 import com.jameskavazy.dartscoreboard.match.domain.model.entity.Set;
+import com.jameskavazy.dartscoreboard.match.exception.MatchNotFoundException;
 import com.jameskavazy.dartscoreboard.match.repository.LegRepository;
 import com.jameskavazy.dartscoreboard.match.repository.MatchRepository;
 import com.jameskavazy.dartscoreboard.match.repository.SetRepository;
+import com.jameskavazy.dartscoreboard.match.repository.VisitRepository;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.UUID;
+
+import static com.jameskavazy.dartscoreboard.match.domain.model.value.ResultScenario.*;
 
 @Component
 public class GameEngine {
@@ -25,11 +30,62 @@ public class GameEngine {
     private final LegRepository legRepository;
     private final SetRepository setRepository;
     private final MatchRepository matchRepository;
+    private final VisitRepository visitRepository;
 
-    public GameEngine(LegRepository legRepository, SetRepository setRepository, MatchRepository matchRepository) {
+    public GameEngine(LegRepository legRepository, SetRepository setRepository, MatchRepository matchRepository, VisitRepository visitRepository) {
         this.legRepository = legRepository;
         this.setRepository = setRepository;
         this.matchRepository = matchRepository;
+        this.visitRepository = visitRepository;
+    }
+
+    @EventListener
+    @Transactional
+    private void handleVisitSubmitted(VisitSubmitEvent visitSubmitEvent){
+        Match match = matchRepository.findById(visitSubmitEvent.getMatchId()).orElseThrow(
+                ()-> new MatchNotFoundException(
+                        "Could not find match by Id, match state might be corrupted"
+                ));
+
+        int currentScore = visitRepository
+                .extractCurrentScore(visitSubmitEvent.getVisitId(), visitSubmitEvent.getLegId());
+
+        Visit validatedVisit = visitRepository.findVisitById(visitSubmitEvent.getVisitId()).orElseThrow(
+                () -> new RuntimeException("Visit not found")
+        );
+
+        MatchContext matchContext = createMatchContext(
+                match.matchId(),
+                visitSubmitEvent.getSetId(),
+                visitSubmitEvent.getLegId(),
+                visitSubmitEvent.getUserId(),
+                match,
+                currentScore,
+                validatedVisit
+        );
+        ResultScenario resultScenario = checkResult(matchContext);
+        handleResult(matchContext, resultScenario);
+    }
+
+    private void handleResult(MatchContext matchContext, ResultScenario resultScenario) {
+        switch (resultScenario) {
+            case NO_RESULT -> handleNoResult(matchContext);
+            case LEG_WON -> handleLegWon(matchContext);
+            case MATCH_WON -> handleMatchWon(matchContext);
+            case SET_WON -> handleSetWon(matchContext);
+        };
+    }
+
+    private MatchContext createMatchContext(String matchId, String setId, String legId, String userId, Match match, int currentScore, Visit validatedVisit) {
+        List<String> usersInMatch = matchRepository.getUsersIdsInMatch(matchId);
+        int startingScore = matchRepository.getStartingScore(matchId);
+        int legsWon = legRepository.countLegsWonInSet(userId, setId);
+        int setsWon = setRepository.countSetsWonInMatch(userId, matchId);
+        int finalScore = startingScore - currentScore - validatedVisit.score();
+
+        return new MatchContext(
+                match, usersInMatch, legsWon, setsWon, finalScore, legId, userId, setId
+        );
     }
 
     /**
@@ -37,10 +93,9 @@ public class GameEngine {
      * leg and set data within the database.
      *
      * @param matchContext The context contains crucial metadata about the match required for processing the turn
-     * @return resultContext The context of the match is returned after processing the required steps
      */
     @Transactional
-    public ResultContext handleLegWon(MatchContext matchContext) {
+    public void handleLegWon(MatchContext matchContext) {
         legRepository.updateWinnerId(matchContext.userId(), matchContext.legId());
         int legsInMatch = legRepository.countLegsInSet(matchContext.setId());
         int setsInMatch = setRepository.getSetsInMatch(matchContext.match().matchId()).size() - 1;
@@ -50,7 +105,6 @@ public class GameEngine {
         int turnIndex = nextPlayerIndex(matchContext, playersInMatch, legsInMatch);
         Leg newLeg = createNewLeg(matchContext.match().matchId(), matchContext.setId(), turnIndex);
         legRepository.create(newLeg);
-        return new ResultContext(newLeg.legId(), matchContext.setId());
     }
 
     /**
@@ -58,12 +112,9 @@ public class GameEngine {
      * leg data within the database.
      *
      * @param matchContext The context contains crucial metadata about the match required for processing the turn
-     * @return resultContext The context of the match is returned after processing the required steps
      */
-
-
     @Transactional
-    public ResultContext handleSetWon(MatchContext matchContext){
+    public void handleSetWon(MatchContext matchContext){
 
         legRepository.updateWinnerId(matchContext.userId(), matchContext.legId());
         setRepository.updateWinnerId(matchContext.userId(), matchContext.setId());
@@ -82,18 +133,15 @@ public class GameEngine {
 
         Leg newLeg = createNewLeg(matchId, newSet.setId(), turnIndex);
         legRepository.create(newLeg);
-
-        return new ResultContext(newLeg.legId(), newSet.setId());
     }
 
     /**
      * handleMatch processes the turn when the match is determined to be won and therefore finished. The turn must
      * be updated with side effects to handle the winning of that leg and set.
      * @param matchContext The context contains crucial metadata about the match required for processing the turn
-     * @return ResultContext The context of the match is returned after processing the required steps
      */
     @Transactional
-    public ResultContext handleMatchWon(MatchContext matchContext){
+    public void handleMatchWon(MatchContext matchContext){
         if (matchContext.match().matchStatus() == MatchStatus.COMPLETE) {
             throw new IllegalStateException("Match already complete");
         }
@@ -111,31 +159,19 @@ public class GameEngine {
         );
         // TODO: Update match elements without creating an entire new object for efficiency
         matchRepository.update(match, match.matchId());
-        return new ResultContext(matchContext.legId(), matchContext.setId());
     }
 
     /**
      * handleNoResult processes the match when there is no milestone outcome. The turn must simply be updated
      * with no other side effects required.
      * @param matchContext The context contains crucial metadata about the match required for processing the turn
-     * @return ResultContext The context of the match is returned after processing the required steps
      */
     @Transactional
-    public ResultContext handleNoResult(MatchContext matchContext) {
+    public void handleNoResult(MatchContext matchContext) {
         int currentTurnIndex = legRepository.getTurnIndex(matchContext.legId());
         int nextPlayerIndex = nextPlayerIndex(matchContext, currentTurnIndex, 1);
         legRepository.updateTurnIndex(nextPlayerIndex, matchContext.legId());
-        return new ResultContext(matchContext.legId(), matchContext.setId());
     }
-
-//    /**
-//     * checkResult determines the ResultScenario used by caller to determine required match state updates
-//     * @param matchContext The context contains crucial metadata about the match required for processing the turn
-//     * @return ResultScenario the determined result situation enum
-//     */
-//    public ResultScenario checkResult(MatchContext matchContext) {
-//        return progressionHandler.checkResult(matchContext);
-//    }
 
     /**
      * Computes the next player's turn index using simple modular rotation.
@@ -163,7 +199,7 @@ public class GameEngine {
      * @param step Positive or negative adjustment to the turn.
      * @return The index of the player who should take the next turn.
      */
-    public int nextPlayerIndex(MatchContext ctx, int currentTurnIndex, int step) {
+    private int nextPlayerIndex(MatchContext ctx, int currentTurnIndex, int step) {
         int playerCount = ctx.usersIdsInMatch().size();
         return (currentTurnIndex + step + playerCount) % playerCount;
     }
@@ -173,7 +209,7 @@ public class GameEngine {
         return new Leg(UUID.randomUUID().toString(), matchId, setId, turnIndex, null, OffsetDateTime.now());
     }
 
-    ResultScenario checkResult(MatchContext matchContext){
+    ResultScenario checkResult(MatchContext matchContext) {
         if (matchContext.computedScore() != 0) return NO_RESULT;
         if (matchContext.match().raceToLeg() != matchContext.legsWon() + 1) return LEG_WON;
         if (matchContext.match().raceToSet() == matchContext.setsWon() + 1) return MATCH_WON;
