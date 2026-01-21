@@ -229,6 +229,6 @@ class VisitProcessingServiceTest {
         visitProcessingService.processVisitRequest(visitRequest, matchId, setId, legId, userEmail);
 
 
-        verify(matchEventPublisher).publishVisitSubmit(matchId, setId, legId, visit.visitId());
+        verify(matchEventPublisher).publishVisitSubmit(matchId, setId, legId, visit.visitId(), visit.userId());
     }
 }
