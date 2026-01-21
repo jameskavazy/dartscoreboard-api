@@ -83,7 +83,7 @@ public class VisitProcessingService {
         VisitResult visitResult = new VisitResult(resultScenario, resultContext);
         notifyClients(matchId, legId, visitResult);
 
-        matchEventPublisher.publishVisitSubmit(matchId, setId, legId, visit.visitId());
+        matchEventPublisher.publishVisitSubmit(matchId, setId, legId, visit.visitId(), userId);
         return visitResult;
     }
 

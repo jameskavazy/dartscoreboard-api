@@ -14,7 +14,7 @@ public class MatchEventPublisher implements ApplicationEventPublisherAware {
         this.publisher = publisher;
     }
 
-    public void publishVisitSubmit(String matchId, String setId, String legId, String visitId) {
-            publisher.publishEvent(new VisitSubmitEvent(this, matchId, setId, legId, visitId));
+    public void publishVisitSubmit(String matchId, String setId, String legId, String visitId, String userId) {
+            publisher.publishEvent(new VisitSubmitEvent(this, matchId, setId, legId, visitId, userId));
     }
 }

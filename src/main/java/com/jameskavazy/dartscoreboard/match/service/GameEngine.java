@@ -2,6 +2,8 @@ package com.jameskavazy.dartscoreboard.match.service;
 
 
 import com.jameskavazy.dartscoreboard.match.domain.aggregate.MatchContext;
+import com.jameskavazy.dartscoreboard.match.domain.event.VisitSubmitEvent;
+import com.jameskavazy.dartscoreboard.match.domain.model.entity.Visit;
 import com.jameskavazy.dartscoreboard.match.domain.model.value.ResultContext;
 import com.jameskavazy.dartscoreboard.match.domain.model.value.ResultScenario;
 import com.jameskavazy.dartscoreboard.match.domain.model.entity.Leg;
@@ -172,9 +174,9 @@ public class GameEngine {
     }
 
     ResultScenario checkResult(MatchContext matchContext){
-        if (matchContext.computedScore() != 0) return ResultScenario.NO_RESULT;
-        if (matchContext.match().raceToLeg() != matchContext.legsWon() + 1) return ResultScenario.LEG_WON;
-        if (matchContext.match().raceToSet() == matchContext.setsWon() + 1) return ResultScenario.MATCH_WON;
+        if (matchContext.computedScore() != 0) return NO_RESULT;
+        if (matchContext.match().raceToLeg() != matchContext.legsWon() + 1) return LEG_WON;
+        if (matchContext.match().raceToSet() == matchContext.setsWon() + 1) return MATCH_WON;
         return ResultScenario.SET_WON;
     }
 }
