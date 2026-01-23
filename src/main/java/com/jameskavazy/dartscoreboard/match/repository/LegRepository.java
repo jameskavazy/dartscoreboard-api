@@ -101,4 +101,17 @@ public class LegRepository {
 
         Assert.state(updated == 1, "Could not create leg");
     }
+
+    public Leg findActiveLegByMatchId(String matchId) {
+        return jdbcClient.sql("""
+                SELECT
+                    *
+                FROM legs
+                WHERE match_id = :matchId
+                AND winner_id IS NULL
+                """)
+                .param("matchId", matchId)
+                .query(Leg.class)
+                .single();
+    }
 }
