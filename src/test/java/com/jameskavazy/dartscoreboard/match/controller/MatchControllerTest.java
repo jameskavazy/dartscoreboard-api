@@ -142,24 +142,18 @@ class MatchControllerTest {
 
     @Test
     @WithUserDetails()
-    void shouldReturnCREATEDForCreateVisit() throws Exception {
+    void shouldReturnACCEPTEDForCreateVisit() throws Exception {
         VisitRequest visitRequest = new VisitRequest(40);
-        when(visitProcessingService.processVisitRequest(
+        visitProcessingService.processVisitRequest(
                ArgumentMatchers.any(VisitRequest.class),
                 eq("match-1"),
                 eq("set-1"),
                 eq("leg-1"),
-                anyString()))
-                .thenReturn(new VisitResult(ResultScenario.NO_RESULT, new ResultContext("leg-1", "set-1")));
-
+                anyString());
 
         mvc.perform(post("/api/matches/match-1/sets/set-1/legs/leg-1/visits/")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(visitRequest))
-                )
-                .andExpect(jsonPath("$.resultScenario").value("NO_RESULT"))
-                .andExpect(jsonPath("$.resultContext.legId").value("leg-1"))
-                .andExpect(jsonPath("$.resultContext.setId").value("set-1"))
-                .andExpect(status().isCreated());
+                ).andExpect(status().isAccepted());
     }
 }

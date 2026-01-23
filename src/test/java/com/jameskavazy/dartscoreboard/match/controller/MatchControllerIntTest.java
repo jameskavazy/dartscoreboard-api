@@ -142,17 +142,13 @@ class MatchControllerIntTest {
     void shouldCreateVisit_andReturnNoResult(){
         VisitRequest visitRequest = new VisitRequest(10);
 
-        ResponseEntity<VisitResult> response = restClient.post()
+        ResponseEntity<Void> entity = restClient.post()
                 .uri("/api/matches/match-1/sets/set-1/legs/leg-1/visits/")
                 .body(visitRequest)
                 .retrieve()
-                .toEntity(new ParameterizedTypeReference<VisitResult>() {
-                });
+                .toBodilessEntity();
 
-
-        assertEquals("leg-1", response.getBody().resultContext().legId());
-        assertEquals("set-1", response.getBody().resultContext().setId());
-        assertEquals(ResultScenario.NO_RESULT, response.getBody().resultScenario());
+       assertEquals(202,entity.getStatusCode().value());
     }
 
 

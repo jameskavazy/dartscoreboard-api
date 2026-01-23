@@ -59,7 +59,7 @@ class GameEngineTest {
                 "set-1"
         );
 
-        ResultContext resultContext = gameEngine.handleLegWon(matchContext);
+        gameEngine.handleLegWon(matchContext);
         verify(legRepository).updateWinnerId("user-1", "leg-1");
 
         ArgumentCaptor<Leg> captor = ArgumentCaptor.forClass(Leg.class);
@@ -67,7 +67,7 @@ class GameEngineTest {
         Leg actual = captor.getValue();
         assertEquals("test-match-id",actual.matchId());
 
-        assertEquals("set-1" ,resultContext.setId());
+//        assertEquals("set-1" ,resultContext.setId());
     }
 
     @Test
@@ -93,7 +93,7 @@ class GameEngineTest {
                 "set-1"
         );
 
-        ResultContext resultContext = gameEngine.handleSetWon(matchContext);
+        gameEngine.handleSetWon(matchContext);
         ArgumentCaptor<Leg> legArgumentCaptor = ArgumentCaptor.forClass(Leg.class);
 
         verify(legRepository).create(legArgumentCaptor.capture());
@@ -160,11 +160,8 @@ class GameEngineTest {
                 "set-1"
         );
         when(legRepository.getTurnIndex(matchContext.legId())).thenReturn(1);
-//        when(gameEngine.checkResult(anyInt(), anyInt(), anyInt())).thenReturn(2);
-        ResultContext resultContext = gameEngine.handleNoResult(matchContext);
+        gameEngine.handleNoResult(matchContext);
         verify(legRepository).updateTurnIndex(2, "leg-1");
-        assertEquals("set-1", resultContext.setId());
-        assertEquals("leg-1", resultContext.legId());
     }
 
     @Test
