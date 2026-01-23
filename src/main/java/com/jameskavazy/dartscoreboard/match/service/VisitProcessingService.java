@@ -33,32 +33,26 @@ import java.util.Optional;
 public class VisitProcessingService {
 
     private final MatchRepository matchRepository;
-    private final SetRepository setRepository;
     private final LegRepository legRepository;
     private final VisitRepository visitRepository;
     private final ScoreCalculator scoreCalculator;
     private final MatchEventEmitter matchEventEmitter;
     private final UserRepository userRepository;
-    private final GameEngine gameEngine;
     private final MatchEventPublisher matchEventPublisher;
 
     public VisitProcessingService(MatchRepository matchRepository,
-                                  SetRepository setRepository,
                                   LegRepository legRepository,
                                   VisitRepository visitRepository,
                                   ScoreCalculator scoreCalculator,
                                   MatchEventEmitter matchEventEmitter,
                                   UserRepository userRepository,
-                                  GameEngine gameEngine,
                                   MatchEventPublisher matchEventPublisher) {
         this.matchRepository = matchRepository;
-        this.setRepository = setRepository;
         this.legRepository = legRepository;
         this.visitRepository = visitRepository;
         this.scoreCalculator = scoreCalculator;
         this.matchEventEmitter = matchEventEmitter;
         this.userRepository = userRepository;
-        this.gameEngine = gameEngine;
         this.matchEventPublisher = matchEventPublisher;
     }
 
