@@ -70,7 +70,7 @@ public class VisitProcessingService {
                                            String userPrincipalUsername) {
 
         String userId = validateUser(userPrincipalUsername);
-        Match match = validateMatchHierarchy(matchId, legId, setId);
+        validateMatchHierarchy(matchId, legId, setId);
         validateTurn(matchId, legId, userId);
 
         int currentScore = visitRepository.extractCurrentScore(userId, legId);
@@ -105,14 +105,13 @@ public class VisitProcessingService {
         }
     }
 
-    private Match validateMatchHierarchy(String matchId, String legId, String setId) {
+    private void validateMatchHierarchy(String matchId, String legId, String setId) {
         Match match = matchRepository.findById(matchId)
                 .orElseThrow(() -> new MatchNotFoundException("Could not find match with id: " + matchId));
 
         if (!matchRepository.isValidLegHierarchy(legId, setId, matchId)){
-            throw new InvalidHierarchyException(legId + " does not belong to specified set or match");
+            throw new InvalidHierarchyException("Visit cannot be processed. " + legId + " does not belong to specified set or match");
         }
-        return match;
     }
 
     private String validateUser(String userPrincipalUsername){
