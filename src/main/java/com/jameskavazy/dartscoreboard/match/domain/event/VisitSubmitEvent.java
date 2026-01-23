@@ -1,8 +1,6 @@
 package com.jameskavazy.dartscoreboard.match.domain.event;
 
-import com.jameskavazy.dartscoreboard.match.domain.model.entity.Visit;
 import org.springframework.context.ApplicationEvent;
-import org.springframework.stereotype.Component;
 
 public class VisitSubmitEvent extends ApplicationEvent {
 

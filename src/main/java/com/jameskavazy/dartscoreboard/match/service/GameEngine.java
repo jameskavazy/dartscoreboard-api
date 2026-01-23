@@ -1,9 +1,9 @@
 package com.jameskavazy.dartscoreboard.match.service;
 
 
+import com.jameskavazy.dartscoreboard.match.MatchEventPublisher;
 import com.jameskavazy.dartscoreboard.match.domain.aggregate.MatchContext;
 import com.jameskavazy.dartscoreboard.match.domain.event.VisitSubmitEvent;
-import com.jameskavazy.dartscoreboard.match.domain.model.entity.Visit;
 import com.jameskavazy.dartscoreboard.match.domain.model.value.ResultScenario;
 import com.jameskavazy.dartscoreboard.match.domain.model.entity.Leg;
 import com.jameskavazy.dartscoreboard.match.domain.model.entity.Match;
@@ -31,12 +31,14 @@ public class GameEngine {
     private final SetRepository setRepository;
     private final MatchRepository matchRepository;
     private final VisitRepository visitRepository;
+    private final MatchEventPublisher matchEventPublisher;
 
-    public GameEngine(LegRepository legRepository, SetRepository setRepository, MatchRepository matchRepository, VisitRepository visitRepository) {
+    public GameEngine(LegRepository legRepository, SetRepository setRepository, MatchRepository matchRepository, VisitRepository visitRepository, MatchEventPublisher matchEventPublisher) {
         this.legRepository = legRepository;
         this.setRepository = setRepository;
         this.matchRepository = matchRepository;
         this.visitRepository = visitRepository;
+        this.matchEventPublisher = matchEventPublisher;
     }
 
     @EventListener
@@ -60,6 +62,8 @@ public class GameEngine {
         );
         ResultScenario resultScenario = checkResult(matchContext);
         handleResult(matchContext, resultScenario);
+
+        matchEventPublisher.publishStateUpdate(matchContext.match().matchId(), matchContext.setId(), matchContext.legId());
     }
 
     private void handleResult(MatchContext matchContext, ResultScenario resultScenario) {

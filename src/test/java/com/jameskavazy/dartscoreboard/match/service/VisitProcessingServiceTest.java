@@ -52,9 +52,9 @@ class VisitProcessingServiceTest {
     MatchRepository matchRepository;
     @Mock
     LegRepository legRepository;
-
-    @Mock
-    GameEngine gameEngine;
+//
+//    @Mock
+//    GameEngine gameEngine;
     @Mock
     SetRepository setRepository;
     @Mock
@@ -165,6 +165,7 @@ class VisitProcessingServiceTest {
 
         User user = new User(userId, userEmail, userEmail);
         Match match =  new Match(matchId, MatchType.FiveO, 1,1,OffsetDateTime.now(), null, MatchStatus.ONGOING);
+        Visit visit = new Visit(UUID.randomUUID().toString(), legId, userId, 150, false, OffsetDateTime.now());
 
         when(userRepository.findByUsername(userEmail)).thenReturn(Optional.of(user));
         when(matchRepository.findById(matchId)).thenReturn(Optional.of(match));
@@ -172,9 +173,11 @@ class VisitProcessingServiceTest {
         when(matchRepository.getMatchUsers(matchId)).thenReturn(List.of(
                 new MatchesUsers(matchId, userId, 0, InviteStatus.ACCEPTED))
         );
-        Visit visit = new Visit(UUID.randomUUID().toString(), legId, userId, 150, false, OffsetDateTime.now());
         when(scoreCalculator.validateAndBuildVisit(eq(userId), anyInt(), eq(visitRequest), eq(legId))).thenReturn(visit);
+
+
         visitProcessingService.processVisitRequest(visitRequest, matchId, setId, legId, userEmail);
+
         verify(matchEventPublisher).publishVisitSubmit(matchId, setId, legId, visit.visitId(), visit.userId());
     }
 }
