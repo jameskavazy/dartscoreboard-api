@@ -41,18 +41,14 @@ public class GameEngine {
 
     @EventListener
     @Transactional
-    private void handleVisitSubmitted(VisitSubmitEvent visitSubmitEvent){
+    protected void handleVisitSubmitted(VisitSubmitEvent visitSubmitEvent){
         Match match = matchRepository.findById(visitSubmitEvent.getMatchId()).orElseThrow(
                 ()-> new MatchNotFoundException(
                         "Could not find match by Id, match state might be corrupted"
                 ));
 
-        int currentScore = visitRepository
-                .extractCurrentScore(visitSubmitEvent.getVisitId(), visitSubmitEvent.getLegId());
-
-        Visit validatedVisit = visitRepository.findVisitById(visitSubmitEvent.getVisitId()).orElseThrow(
-                () -> new RuntimeException("Visit not found")
-        );
+        int currentUserScore = visitRepository
+                .extractCurrentScore(visitSubmitEvent.getUserId(), visitSubmitEvent.getLegId());
 
         MatchContext matchContext = createMatchContext(
                 match.matchId(),
@@ -60,8 +56,7 @@ public class GameEngine {
                 visitSubmitEvent.getLegId(),
                 visitSubmitEvent.getUserId(),
                 match,
-                currentScore,
-                validatedVisit
+                currentUserScore
         );
         ResultScenario resultScenario = checkResult(matchContext);
         handleResult(matchContext, resultScenario);
@@ -73,15 +68,15 @@ public class GameEngine {
             case LEG_WON -> handleLegWon(matchContext);
             case MATCH_WON -> handleMatchWon(matchContext);
             case SET_WON -> handleSetWon(matchContext);
-        };
+        }
     }
 
-    private MatchContext createMatchContext(String matchId, String setId, String legId, String userId, Match match, int currentScore, Visit validatedVisit) {
+    private MatchContext createMatchContext(String matchId, String setId, String legId, String userId, Match match, int currentUserScore) {
         List<String> usersInMatch = matchRepository.getUsersIdsInMatch(matchId);
         int startingScore = matchRepository.getStartingScore(matchId);
         int legsWon = legRepository.countLegsWonInSet(userId, setId);
         int setsWon = setRepository.countSetsWonInMatch(userId, matchId);
-        int finalScore = startingScore - currentScore - validatedVisit.score();
+        int finalScore = startingScore - currentUserScore;
 
         return new MatchContext(
                 match, usersInMatch, legsWon, setsWon, finalScore, legId, userId, setId
@@ -199,7 +194,7 @@ public class GameEngine {
      * @param step Positive or negative adjustment to the turn.
      * @return The index of the player who should take the next turn.
      */
-    private int nextPlayerIndex(MatchContext ctx, int currentTurnIndex, int step) {
+    public int nextPlayerIndex(MatchContext ctx, int currentTurnIndex, int step) {
         int playerCount = ctx.usersIdsInMatch().size();
         return (currentTurnIndex + step + playerCount) % playerCount;
     }
