@@ -1,6 +1,5 @@
 package com.jameskavazy.dartscoreboard.match.service;
 
-
 import com.jameskavazy.dartscoreboard.match.MatchEventPublisher;
 import com.jameskavazy.dartscoreboard.match.domain.aggregate.MatchContext;
 import com.jameskavazy.dartscoreboard.match.domain.event.VisitSubmitEvent;
@@ -9,6 +8,7 @@ import com.jameskavazy.dartscoreboard.match.domain.model.entity.Leg;
 import com.jameskavazy.dartscoreboard.match.domain.model.entity.Match;
 import com.jameskavazy.dartscoreboard.match.domain.model.value.MatchStatus;
 import com.jameskavazy.dartscoreboard.match.domain.model.entity.Set;
+import com.jameskavazy.dartscoreboard.match.dto.PlayerStateDTO;
 import com.jameskavazy.dartscoreboard.match.exception.MatchNotFoundException;
 import com.jameskavazy.dartscoreboard.match.repository.LegRepository;
 import com.jameskavazy.dartscoreboard.match.repository.MatchRepository;
@@ -53,7 +53,7 @@ public class GameEngine {
                 .extractCurrentScore(visitSubmitEvent.getUserId(), visitSubmitEvent.getLegId());
 
         MatchContext matchContext = createMatchContext(
-                match.matchId(),
+                visitSubmitEvent.getMatchId(),
                 visitSubmitEvent.getSetId(),
                 visitSubmitEvent.getLegId(),
                 visitSubmitEvent.getUserId(),
@@ -63,7 +63,29 @@ public class GameEngine {
         ResultScenario resultScenario = checkResult(matchContext);
         handleResult(matchContext, resultScenario);
 
-        matchEventPublisher.publishStateUpdate(matchContext.match().matchId(), matchContext.setId(), matchContext.legId());
+        List<PlayerStateDTO> playerStateDTOs = getPlayerStateDTOS(visitSubmitEvent);
+        matchEventPublisher.publishStateUpdate(playerStateDTOs);
+    }
+
+    private List<PlayerStateDTO> getPlayerStateDTOS(VisitSubmitEvent visitSubmitEvent) {
+        return matchRepository.getMatchUsers(visitSubmitEvent.getMatchId()).stream()
+                .map(user -> {
+                    int legsWon = legRepository.countLegsWonInSet(user.userId(), visitSubmitEvent.getSetId());
+                    int setsWon = setRepository.countSetsWonInMatch(user.userId(), visitSubmitEvent.getMatchId());
+                    int currentScore = visitRepository.extractCurrentScore(user.userId(), visitSubmitEvent.getLegId());
+                    boolean isTurn = user.position() == legRepository.getTurnIndex(visitSubmitEvent.getLegId());
+                    boolean finished = matchRepository.getMatchById(visitSubmitEvent.getMatchId()).matchStatus().equals(MatchStatus.COMPLETE);
+
+                    return new PlayerStateDTO(
+                            user.userId(),
+                            legsWon,
+                            setsWon,
+                            currentScore,
+                            isTurn,
+                            finished
+                    );
+                })
+                .toList(); // TODO pass winner id? Then client will know?
     }
 
     private void handleResult(MatchContext matchContext, ResultScenario resultScenario) {

@@ -80,6 +80,20 @@ public class MatchRepository {
                .update();
    }
 
+   public Match getMatchById(String matchId){
+        return jdbcClient.sql("""
+                SELECT
+                    *
+                FROM
+                    matches
+                WHERE
+                    match_id = :matchId
+                """)
+                .param("matchId", matchId)
+                .query(Match.class)
+                .single();
+   }
+
     public boolean isValidLegHierarchy(String legId, String setId, String matchId){
         Integer count = jdbcClient.sql("""
                         SELECT COUNT(*)

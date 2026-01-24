@@ -1,16 +1,15 @@
 package com.jameskavazy.dartscoreboard.match.service;
 
+import com.jameskavazy.dartscoreboard.invite.model.InviteStatus;
 import com.jameskavazy.dartscoreboard.match.MatchEventPublisher;
 import com.jameskavazy.dartscoreboard.match.domain.aggregate.MatchContext;
 import com.jameskavazy.dartscoreboard.match.domain.event.VisitSubmitEvent;
-import com.jameskavazy.dartscoreboard.match.domain.model.entity.Visit;
+import com.jameskavazy.dartscoreboard.match.domain.model.entity.*;
 import com.jameskavazy.dartscoreboard.match.domain.model.value.ResultScenario;
 import com.jameskavazy.dartscoreboard.match.domain.model.value.ResultContext;
-import com.jameskavazy.dartscoreboard.match.domain.model.entity.Leg;
-import com.jameskavazy.dartscoreboard.match.domain.model.entity.Match;
 import com.jameskavazy.dartscoreboard.match.domain.model.value.MatchStatus;
 import com.jameskavazy.dartscoreboard.match.domain.model.value.MatchType;
-import com.jameskavazy.dartscoreboard.match.domain.model.entity.Set;
+import com.jameskavazy.dartscoreboard.match.dto.PlayerStateDTO;
 import com.jameskavazy.dartscoreboard.match.repository.LegRepository;
 import com.jameskavazy.dartscoreboard.match.repository.MatchRepository;
 import com.jameskavazy.dartscoreboard.match.repository.SetRepository;
@@ -22,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -33,8 +33,8 @@ class GameEngineTest {
     SetRepository setRepository = mock(SetRepository.class);
     MatchRepository matchRepository = mock(MatchRepository.class);
     VisitRepository visitRepository = mock(VisitRepository.class);
-    GameEngine gameEngine = new GameEngine(legRepository, setRepository, matchRepository, visitRepository);
     MatchEventPublisher matchEventPublisher = mock(MatchEventPublisher.class);
+    GameEngine gameEngine = new GameEngine(legRepository, setRepository, matchRepository, visitRepository, matchEventPublisher);
 
     @Test
     void shouldHandleLegWon() {
@@ -270,14 +270,23 @@ class GameEngineTest {
         assertEquals(2, next);
     }
 
-//    @Test
-//    void handleVisitSubmitted_shouldReceiveVisitSubmitEventAndUpdateState(){
-//        VisitSubmitEvent event = new VisitSubmitEvent(
-//                "matchId", new Visit("visitId", "legId", "userId", 150, false, OffsetDateTime.now())
-//        );
-//
-//        gameEngine.handleVisitSubmitted(event);
-//        verify(legRepository).updateTurnIndex(anyInt(), anyString());
-//    }
+    @Test
+    void handleVisitSubmitted_shouldPublishStateUpdate(){
+
+        Match match = new Match("match-10", MatchType.FiveO, 1, 1, OffsetDateTime.now(), null, MatchStatus.ONGOING);
+        VisitSubmitEvent event = new VisitSubmitEvent(
+                "matchId", match.matchId(), "set-test", "leg-test", "visit-test", "user-2"
+        );
+        when(matchRepository.findById("match-10")).thenReturn(Optional.of(match));
+        when(matchRepository.getMatchUsers("match-10")).thenReturn(
+                List.of(new MatchesUsers("match-10", "user-2", 0, InviteStatus.ACCEPTED))
+        );
+        when(matchRepository.getMatchById("match-10")).thenReturn(
+                new Match("match-10", MatchType.FiveO, 1, 1, OffsetDateTime.now(), null, MatchStatus.COMPLETE)
+        );
+
+        gameEngine.handleVisitSubmitted(event);
+        verify(matchEventPublisher).publishStateUpdate(List.of(new PlayerStateDTO("user-2", 0,0, 0, true, true)));
+    }
 
 }

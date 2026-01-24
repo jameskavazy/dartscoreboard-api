@@ -1,30 +1,21 @@
 package com.jameskavazy.dartscoreboard.match.domain.event;
 
 
+import com.jameskavazy.dartscoreboard.match.dto.PlayerStateDTO;
 import org.springframework.context.ApplicationEvent;
+
+import java.util.List;
 
 public class StateUpdateEvent extends ApplicationEvent {
 
-    private final String matchId;
-    private final String setId;
-    private final String legId;
+    private final List<PlayerStateDTO> playerStateDTOList;
 
-    public StateUpdateEvent(Object source, String matchId, String setId, String legId) {
+    public StateUpdateEvent(Object source, List<PlayerStateDTO> playerStateDTOList) {
         super(source);
-        this.matchId = matchId;
-        this.setId = setId;
-        this.legId = legId;
+        this.playerStateDTOList = playerStateDTOList;
     }
 
-    public String getLegId() {
-        return legId;
-    }
-
-    public String getSetId() {
-        return setId;
-    }
-
-    public String getMatchId() {
-        return matchId;
+    public List<PlayerStateDTO> getPlayerStateDTOList() {
+        return playerStateDTOList;
     }
 }
