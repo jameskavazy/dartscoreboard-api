@@ -286,7 +286,7 @@ class GameEngineTest {
         );
 
         gameEngine.handleVisitSubmitted(event);
-        verify(matchEventPublisher).publishStateUpdate(List.of(new PlayerStateDTO("user-2", 0,0, 0, true, true)));
+        verify(matchEventPublisher).publishStateUpdate("match-10", List.of(new PlayerStateDTO("user-2", 0,0, 0, true, true)));
     }
 
 }

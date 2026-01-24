@@ -2,7 +2,7 @@ package com.jameskavazy.dartscoreboard.invite.service;
 
 import com.jameskavazy.dartscoreboard.invite.model.InviteStatus;
 import com.jameskavazy.dartscoreboard.match.repository.MatchRepository;
-import com.jameskavazy.dartscoreboard.sse.impl.MatchEventEmitter;
+import com.jameskavazy.dartscoreboard.sse.service.MatchEventEmitter;
 import com.jameskavazy.dartscoreboard.user.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

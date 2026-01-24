@@ -1,13 +1,7 @@
 package com.jameskavazy.dartscoreboard.match.service;
 
 import com.jameskavazy.dartscoreboard.match.MatchEventPublisher;
-import com.jameskavazy.dartscoreboard.match.domain.aggregate.MatchContext;
-import com.jameskavazy.dartscoreboard.match.domain.model.value.PlayerState;
-import com.jameskavazy.dartscoreboard.match.domain.model.value.ResultContext;
-import com.jameskavazy.dartscoreboard.match.domain.model.value.ResultScenario;
-import com.jameskavazy.dartscoreboard.match.domain.model.value.VisitResult;
 import com.jameskavazy.dartscoreboard.match.domain.service.ScoreCalculator;
-import com.jameskavazy.dartscoreboard.match.dto.VisitEvent;
 import com.jameskavazy.dartscoreboard.match.dto.VisitRequest;
 import com.jameskavazy.dartscoreboard.match.exception.InvalidHierarchyException;
 import com.jameskavazy.dartscoreboard.match.exception.InvalidPlayerTurnException;
@@ -17,9 +11,8 @@ import com.jameskavazy.dartscoreboard.match.domain.model.entity.MatchesUsers;
 import com.jameskavazy.dartscoreboard.match.domain.model.entity.Visit;
 import com.jameskavazy.dartscoreboard.match.repository.LegRepository;
 import com.jameskavazy.dartscoreboard.match.repository.MatchRepository;
-import com.jameskavazy.dartscoreboard.match.repository.SetRepository;
 import com.jameskavazy.dartscoreboard.match.repository.VisitRepository;
-import com.jameskavazy.dartscoreboard.sse.impl.MatchEventEmitter;
+import com.jameskavazy.dartscoreboard.sse.service.MatchEventEmitter;
 import com.jameskavazy.dartscoreboard.user.User;
 import com.jameskavazy.dartscoreboard.user.UserRepository;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -88,15 +81,6 @@ public class VisitProcessingService {
         Visit visit = scoreCalculator.validateAndBuildVisit(userId, currentScore, visitRequest, legId);
         visitRepository.create(visit);
         return visit;
-    }
-
-    private void notifyClients(String matchId, String legId, VisitResult visitResult) {
-        List<PlayerState> playerStates = visitRepository.getMatchData(legId);
-        matchEventEmitter.send(matchId, new VisitEvent(playerStates, visitResult));
-
-        if (visitResult.resultScenario().equals(ResultScenario.MATCH_WON)) {
-            matchEventEmitter.complete(matchId);
-        }
     }
 
     private void validateMatchHierarchy(String matchId, String legId, String setId) {

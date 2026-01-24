@@ -1,6 +1,7 @@
 package com.jameskavazy.dartscoreboard.sse.impl;
 
 import com.jameskavazy.dartscoreboard.match.domain.service.MatchesUserDTOMapper;
+import com.jameskavazy.dartscoreboard.sse.service.InviteEventEmitter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;

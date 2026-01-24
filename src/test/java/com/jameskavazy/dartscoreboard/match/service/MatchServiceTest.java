@@ -2,7 +2,7 @@ package com.jameskavazy.dartscoreboard.match.service;
 
 import com.jameskavazy.dartscoreboard.match.domain.service.ScoreCalculator;
 import com.jameskavazy.dartscoreboard.match.domain.service.MatchesUserDTOMapper;
-import com.jameskavazy.dartscoreboard.sse.impl.InviteEventEmitter;
+import com.jameskavazy.dartscoreboard.sse.service.InviteEventEmitter;
 import com.jameskavazy.dartscoreboard.match.repository.LegRepository;
 import com.jameskavazy.dartscoreboard.match.repository.MatchRepository;
 import com.jameskavazy.dartscoreboard.match.repository.SetRepository;

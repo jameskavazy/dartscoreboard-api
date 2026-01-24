@@ -12,7 +12,7 @@ import com.jameskavazy.dartscoreboard.match.domain.model.value.MatchType;
 import com.jameskavazy.dartscoreboard.match.domain.model.entity.MatchesUsers;
 import com.jameskavazy.dartscoreboard.match.repository.MatchRepository;
 import com.jameskavazy.dartscoreboard.match.service.MatchService;
-import com.jameskavazy.dartscoreboard.sse.impl.InviteEventEmitter;
+import com.jameskavazy.dartscoreboard.sse.service.InviteEventEmitter;
 import com.jameskavazy.dartscoreboard.user.User;
 import com.jameskavazy.dartscoreboard.user.UserPrincipal;
 import org.junit.jupiter.api.*;

@@ -64,7 +64,7 @@ public class GameEngine {
         handleResult(matchContext, resultScenario);
 
         List<PlayerStateDTO> playerStateDTOs = getPlayerStateDTOS(visitSubmitEvent);
-        matchEventPublisher.publishStateUpdate(playerStateDTOs);
+        matchEventPublisher.publishStateUpdate(visitSubmitEvent.getMatchId(), playerStateDTOs);
     }
 
     private List<PlayerStateDTO> getPlayerStateDTOS(VisitSubmitEvent visitSubmitEvent) {

@@ -1,8 +1,9 @@
-package com.jameskavazy.dartscoreboard.sse.impl;
+package com.jameskavazy.dartscoreboard.sse.service;
 
-import com.jameskavazy.dartscoreboard.sse.service.EventEmitter;
+import com.jameskavazy.dartscoreboard.match.domain.event.StateUpdateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -16,9 +17,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Service
-public class MatchEventEmitter implements EventEmitter {
+public class MatchEventEmitter {
     private final Logger log = LoggerFactory.getLogger(MatchEventEmitter.class);
-    private final ExecutorService executor = Executors.newFixedThreadPool(10);
+    private final ExecutorService executor = Executors.newFixedThreadPool(25);
     private final ConcurrentHashMap<String, List<SseEmitter>> matchEmitters = new ConcurrentHashMap<>();
     // possible List<Emitter + UserId object> to identify owner of emitter and custom logic per emitter?
 
@@ -33,20 +34,26 @@ public class MatchEventEmitter implements EventEmitter {
         return emitter;
     }
 
-    public void send(String matchId, Object eventData) {
+    //TODO use Spring @Async?
+    @EventListener
+    public void send(StateUpdateEvent stateUpdateEvent) {
+        String matchId = stateUpdateEvent.getMatchId();
         List<SseEmitter> sseEmitters = matchEmitters.get(matchId);
+
         if (sseEmitters != null && !sseEmitters.isEmpty()) {
-            sseEmitters.forEach(emitter -> executor.submit(() -> {
-                try {
-                    emitter.send(SseEmitter
-                            .event()
-                            .name("match_state")
-                            .data(eventData));
-                } catch (IOException e) {
-                    matchEmitters.get(matchId).remove(emitter);
-                    log.error("Cleaning up emitter - ", e);
-                }
-            }));
+            executor.submit(() -> {
+                sseEmitters.forEach(emitter -> {
+                    try {
+                        emitter.send(SseEmitter
+                                .event()
+                                .name("match_state")
+                                .data(stateUpdateEvent.getPlayerStateDTOList()));
+                    } catch (IOException e) {
+                        matchEmitters.get(matchId).remove(emitter);
+                        log.error("Cleaning up emitter - ", e);
+                    }
+                });
+            });
         }
     }
 

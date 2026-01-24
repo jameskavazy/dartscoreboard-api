@@ -1,10 +1,9 @@
 package com.jameskavazy.dartscoreboard.invite.service;
 
 import com.jameskavazy.dartscoreboard.invite.model.InviteStatus;
-import com.jameskavazy.dartscoreboard.match.domain.model.value.MatchStatus;
 import com.jameskavazy.dartscoreboard.match.domain.model.entity.MatchesUsers;
 import com.jameskavazy.dartscoreboard.match.repository.MatchRepository;
-import com.jameskavazy.dartscoreboard.sse.impl.MatchEventEmitter;
+import com.jameskavazy.dartscoreboard.sse.service.MatchEventEmitter;
 import com.jameskavazy.dartscoreboard.user.UserRepository;
 import org.springframework.stereotype.Service;
 
@@ -27,17 +26,13 @@ public class InviteService {
         String userId = userRepository.userIdFromUsername(username);
         matchRepository.updateMatchUserInviteStatus(userId, matchId, inviteStatus);
 
-
-
-
-
         List<MatchesUsers> matchUsers = matchRepository.getMatchUsers(matchId);
         boolean allAccepted = matchUsers.stream()
                 .allMatch(mu -> mu.inviteStatus().equals(InviteStatus.ACCEPTED));
-
-
-        if (allAccepted)
-            matchEventEmitter.send(matchId, MatchStatus.ONGOING);
+//
+//
+//        if (allAccepted)
+//            matchEventEmitter.send(matchId, MatchStatus.ONGOING);
 
     }
 }

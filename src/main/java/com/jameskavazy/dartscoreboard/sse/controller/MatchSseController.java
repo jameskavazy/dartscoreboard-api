@@ -1,6 +1,6 @@
 package com.jameskavazy.dartscoreboard.sse.controller;
 
-import com.jameskavazy.dartscoreboard.sse.impl.MatchEventEmitter;
+import com.jameskavazy.dartscoreboard.sse.service.MatchEventEmitter;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;

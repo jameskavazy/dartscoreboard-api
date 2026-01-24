@@ -1,11 +1,14 @@
 package com.jameskavazy.dartscoreboard.sse.impl;
 
+import com.jameskavazy.dartscoreboard.match.domain.event.StateUpdateEvent;
 import com.jameskavazy.dartscoreboard.match.domain.model.value.PlayerState;
 import com.jameskavazy.dartscoreboard.match.domain.model.value.ResultContext;
 import com.jameskavazy.dartscoreboard.match.domain.model.value.ResultScenario;
 import com.jameskavazy.dartscoreboard.match.domain.model.value.VisitResult;
+import com.jameskavazy.dartscoreboard.match.dto.PlayerStateDTO;
 import com.jameskavazy.dartscoreboard.match.dto.VisitEvent;
 
+import com.jameskavazy.dartscoreboard.sse.service.MatchEventEmitter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -59,10 +62,12 @@ class MatchEventEmitterTest {
 
         String matchId = "match-1";
         SseEmitter emitter = mock(SseEmitter.class);
-        VisitEvent visitEvent = new VisitEvent(playerStates, visitResult);
+//        VisitEvent visitEvent = new VisitEvent(playerStates, visitResult);
 
         matchEventEmitter.getMatchEmitters().put(matchId, new CopyOnWriteArrayList<>(List.of(emitter)));
-        matchEventEmitter.send(matchId, visitEvent);
+        matchEventEmitter.send(new StateUpdateEvent(
+                "any", matchId, List.of(new PlayerStateDTO("user-1", 0, 0, 0, true, false)))
+        );
 
         executorService.shutdown();
         executorService.awaitTermination(500, TimeUnit.MILLISECONDS);

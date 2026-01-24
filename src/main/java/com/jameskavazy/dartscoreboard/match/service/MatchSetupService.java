@@ -13,7 +13,7 @@ import com.jameskavazy.dartscoreboard.match.repository.LegRepository;
 import com.jameskavazy.dartscoreboard.match.repository.MatchRepository;
 import com.jameskavazy.dartscoreboard.match.repository.SetRepository;
 import com.jameskavazy.dartscoreboard.sse.dto.InvitationData;
-import com.jameskavazy.dartscoreboard.sse.impl.InviteEventEmitter;
+import com.jameskavazy.dartscoreboard.sse.service.InviteEventEmitter;
 import com.jameskavazy.dartscoreboard.user.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

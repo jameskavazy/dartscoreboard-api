@@ -23,7 +23,7 @@ public class MatchEventPublisher implements ApplicationEventPublisherAware {
             publisher.publishEvent(new VisitSubmitEvent(this, matchId, setId, legId, visitId, userId));
     }
 
-    public void publishStateUpdate(List<PlayerStateDTO> playerStateDTOList){
-        publisher.publishEvent(new StateUpdateEvent(this, playerStateDTOList));
+    public void publishStateUpdate(String matchId, List<PlayerStateDTO> playerStateDTOList){
+        publisher.publishEvent(new StateUpdateEvent(this, matchId, playerStateDTOList));
     }
 }
