@@ -1,6 +1,11 @@
 package com.jameskavazy.dartscoreboard.sse.impl;
 
+import com.jameskavazy.dartscoreboard.invite.domain.event.InvitationEvent;
+import com.jameskavazy.dartscoreboard.invite.model.InviteStatus;
+import com.jameskavazy.dartscoreboard.match.domain.model.entity.Match;
 import com.jameskavazy.dartscoreboard.match.domain.service.MatchesUserDTOMapper;
+import com.jameskavazy.dartscoreboard.match.dto.MatchesUserDTO;
+import com.jameskavazy.dartscoreboard.sse.dto.InvitationData;
 import com.jameskavazy.dartscoreboard.sse.service.InviteEventEmitter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -8,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -44,9 +50,10 @@ class InviteEventEmitterTest {
         String username = "user1@example.com";
         SseEmitter emitter = mock(SseEmitter.class);
 
-
         inviteEventEmitter.getInviteEventEmitters().put(username, emitter);
-        inviteEventEmitter.send(username, "testData");
+        inviteEventEmitter.send(new InvitationEvent("any", username, new InvitationData(
+                any(Match.class), List.of(new MatchesUserDTO("user1", 0, InviteStatus.ACCEPTED))
+        )));
 
         verify(emitter).send(any(SseEmitter.SseEventBuilder.class));
     }

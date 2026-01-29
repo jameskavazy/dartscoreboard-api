@@ -1,7 +1,7 @@
 package com.jameskavazy.dartscoreboard.match.service;
 
 import com.jameskavazy.dartscoreboard.invite.model.InviteStatus;
-import com.jameskavazy.dartscoreboard.match.MatchEventPublisher;
+import com.jameskavazy.dartscoreboard.match.EventPublisher;
 import com.jameskavazy.dartscoreboard.match.domain.service.ScoreCalculator;
 import com.jameskavazy.dartscoreboard.match.dto.VisitRequest;
 import com.jameskavazy.dartscoreboard.match.exception.InvalidHierarchyException;
@@ -61,7 +61,7 @@ class VisitProcessingServiceTest {
     VisitProcessingService visitProcessingService;
 
     @Mock
-    MatchEventPublisher matchEventPublisher;
+    EventPublisher eventPublisher;
 
     @Test
     void processVisitRequest_shouldProcessWithValidData() {
@@ -172,6 +172,6 @@ class VisitProcessingServiceTest {
 
         visitProcessingService.processVisitRequest(visitRequest, matchId, setId, legId, userEmail);
 
-        verify(matchEventPublisher).publishVisitSubmit(matchId, setId, legId, visit.visitId(), visit.userId());
+        verify(eventPublisher).publishVisitSubmit(matchId, setId, legId, visit.visitId(), visit.userId());
     }
 }

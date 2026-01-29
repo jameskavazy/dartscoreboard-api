@@ -1,7 +1,9 @@
 package com.jameskavazy.dartscoreboard.sse.service;
 
+import com.jameskavazy.dartscoreboard.invite.domain.event.InvitationEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -30,17 +32,19 @@ public class InviteEventEmitter {
         return emitter;
     }
 
-    public void send(String key, Object data) {
+    @EventListener
+    public void send(InvitationEvent invitationEvent) {
+        String userId = invitationEvent.getUserId();
         try {
-            if (inviteEventEmitters.get(key) != null) {
-                inviteEventEmitters.get(key).send(SseEmitter
+            if (inviteEventEmitters.get(userId) != null) {
+                inviteEventEmitters.get(userId).send(SseEmitter
                         .event()
                         .name("invitation")
-                        .data(data));
+                        .data(invitationEvent.getInvitationData()));
             }
         } catch (IOException ex) {
-            inviteEventEmitters.get(key).complete();
-            inviteEventEmitters.remove(key);
+            inviteEventEmitters.get(userId).complete();
+            inviteEventEmitters.remove(userId);
              log.error("Cleaning up emitter - {}", ex.getMessage());
         }
     }

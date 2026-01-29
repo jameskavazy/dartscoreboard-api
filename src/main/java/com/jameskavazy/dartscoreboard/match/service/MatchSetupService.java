@@ -1,6 +1,8 @@
 package com.jameskavazy.dartscoreboard.match.service;
 
+import com.jameskavazy.dartscoreboard.invite.domain.event.InvitationEvent;
 import com.jameskavazy.dartscoreboard.invite.model.InviteStatus;
+import com.jameskavazy.dartscoreboard.match.EventPublisher;
 import com.jameskavazy.dartscoreboard.match.domain.service.MatchesUserDTOMapper;
 import com.jameskavazy.dartscoreboard.match.dto.MatchRequest;
 import com.jameskavazy.dartscoreboard.match.dto.MatchesUserDTO;
@@ -15,6 +17,7 @@ import com.jameskavazy.dartscoreboard.match.repository.SetRepository;
 import com.jameskavazy.dartscoreboard.sse.dto.InvitationData;
 import com.jameskavazy.dartscoreboard.sse.service.InviteEventEmitter;
 import com.jameskavazy.dartscoreboard.user.UserRepository;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,23 +32,26 @@ public class MatchSetupService {
     private final SetRepository setRepository;
     private final LegRepository legRepository;
     private final UserRepository userRepository;
-    private final InviteEventEmitter inviteEventEmitter;
+//    private final InviteEventEmitter inviteEventEmitter;
+    private final EventPublisher eventPublisher;
     private final MatchesUserDTOMapper dtoMapper;
+
 
     public MatchSetupService(MatchRepository matchRepository,
                              SetRepository setRepository,
                              LegRepository legRepository,
                              UserRepository userRepository,
-                             InviteEventEmitter inviteEventEmitter,
+                             EventPublisher eventPublisher,
                              MatchesUserDTOMapper dtoMapper) {
         this.matchRepository = matchRepository;
         this.setRepository = setRepository;
         this.legRepository = legRepository;
         this.userRepository = userRepository;
-        this.inviteEventEmitter = inviteEventEmitter;
+        this.eventPublisher = eventPublisher;
         this.dtoMapper = dtoMapper;
     }
 
+    @EventListener
     @Transactional
     public void setupMatchAndSendInvites(MatchRequest matchRequest) {
         Match match = new Match(
@@ -67,7 +73,7 @@ public class MatchSetupService {
                 .toList();
 
         matchesUsers.forEach(mu ->
-                inviteEventEmitter.send(mu.userId(), new InvitationData(match, invitedPlayers))
+                eventPublisher.publishInvite(mu.userId(), new InvitationData(match, invitedPlayers))
         );
 
         Set set = new Set(UUID.randomUUID().toString(), match.matchId(), null, OffsetDateTime.now());
@@ -87,7 +93,4 @@ public class MatchSetupService {
         }
         return matchesUsers;
     }
-
-
-
 }

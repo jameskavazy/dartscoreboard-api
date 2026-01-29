@@ -1,6 +1,6 @@
 package com.jameskavazy.dartscoreboard.match.service;
 
-import com.jameskavazy.dartscoreboard.match.MatchEventPublisher;
+import com.jameskavazy.dartscoreboard.match.EventPublisher;
 import com.jameskavazy.dartscoreboard.match.domain.aggregate.MatchContext;
 import com.jameskavazy.dartscoreboard.match.domain.event.VisitSubmitEvent;
 import com.jameskavazy.dartscoreboard.match.domain.model.value.ResultScenario;
@@ -31,14 +31,21 @@ public class GameEngine {
     private final SetRepository setRepository;
     private final MatchRepository matchRepository;
     private final VisitRepository visitRepository;
-    private final MatchEventPublisher matchEventPublisher;
+    private final EventPublisher eventPublisher;
+    private final MatchStateAssembler matchStateAssembler;
 
-    public GameEngine(LegRepository legRepository, SetRepository setRepository, MatchRepository matchRepository, VisitRepository visitRepository, MatchEventPublisher matchEventPublisher) {
+    public GameEngine(LegRepository legRepository,
+                      SetRepository setRepository,
+                      MatchRepository matchRepository,
+                      VisitRepository visitRepository,
+                      EventPublisher eventPublisher,
+                      MatchStateAssembler matchStateAssembler) {
         this.legRepository = legRepository;
         this.setRepository = setRepository;
         this.matchRepository = matchRepository;
         this.visitRepository = visitRepository;
-        this.matchEventPublisher = matchEventPublisher;
+        this.eventPublisher = eventPublisher;
+        this.matchStateAssembler = matchStateAssembler;
     }
 
     @EventListener
@@ -63,30 +70,10 @@ public class GameEngine {
         ResultScenario resultScenario = checkResult(matchContext);
         handleResult(matchContext, resultScenario);
 
-        List<PlayerStateDTO> playerStateDTOs = getPlayerStateDTOS(visitSubmitEvent);
-        matchEventPublisher.publishStateUpdate(visitSubmitEvent.getMatchId(), playerStateDTOs);
+        List<PlayerStateDTO> playerStateDTOs = matchStateAssembler.getPlayerStateDTOS(visitSubmitEvent.getMatchId());
+        eventPublisher.publishStateUpdate(visitSubmitEvent.getMatchId(), playerStateDTOs);
     }
 
-    private List<PlayerStateDTO> getPlayerStateDTOS(VisitSubmitEvent visitSubmitEvent) {
-        return matchRepository.getMatchUsers(visitSubmitEvent.getMatchId()).stream()
-                .map(user -> {
-                    int legsWon = legRepository.countLegsWonInSet(user.userId(), visitSubmitEvent.getSetId());
-                    int setsWon = setRepository.countSetsWonInMatch(user.userId(), visitSubmitEvent.getMatchId());
-                    int currentScore = visitRepository.extractCurrentScore(user.userId(), visitSubmitEvent.getLegId());
-                    boolean isTurn = user.position() == legRepository.getTurnIndex(visitSubmitEvent.getLegId());
-                    boolean finished = matchRepository.getMatchById(visitSubmitEvent.getMatchId()).matchStatus().equals(MatchStatus.COMPLETE);
-
-                    return new PlayerStateDTO(
-                            user.userId(),
-                            legsWon,
-                            setsWon,
-                            currentScore,
-                            isTurn,
-                            finished
-                    );
-                })
-                .toList(); // TODO pass winner id? Then client will know?
-    }
 
     private void handleResult(MatchContext matchContext, ResultScenario resultScenario) {
         switch (resultScenario) {

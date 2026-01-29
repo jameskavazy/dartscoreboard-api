@@ -6,7 +6,6 @@ import com.jameskavazy.dartscoreboard.match.domain.model.value.ResultContext;
 import com.jameskavazy.dartscoreboard.match.domain.model.value.ResultScenario;
 import com.jameskavazy.dartscoreboard.match.domain.model.value.VisitResult;
 import com.jameskavazy.dartscoreboard.match.dto.PlayerStateDTO;
-import com.jameskavazy.dartscoreboard.match.dto.VisitEvent;
 
 import com.jameskavazy.dartscoreboard.sse.service.MatchEventEmitter;
 import org.junit.jupiter.api.Test;
@@ -52,7 +51,7 @@ class MatchEventEmitterTest {
     }
 
     @Test
-    void shouldSendToMatch() throws Exception {
+    void shouldSendStateUpdateToMatch() throws Exception {
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         Field executorField = MatchEventEmitter.class.getDeclaredField("executor");
@@ -65,7 +64,7 @@ class MatchEventEmitterTest {
 //        VisitEvent visitEvent = new VisitEvent(playerStates, visitResult);
 
         matchEventEmitter.getMatchEmitters().put(matchId, new CopyOnWriteArrayList<>(List.of(emitter)));
-        matchEventEmitter.send(new StateUpdateEvent(
+        matchEventEmitter.sendStateUpdate(new StateUpdateEvent(
                 "any", matchId, List.of(new PlayerStateDTO("user-1", 0, 0, 0, true, false)))
         );
 

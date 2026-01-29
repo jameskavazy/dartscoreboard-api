@@ -1,5 +1,7 @@
 package com.jameskavazy.dartscoreboard.sse.service;
 
+import com.jameskavazy.dartscoreboard.match.domain.event.MatchStartEvent;
+import com.jameskavazy.dartscoreboard.match.domain.event.StateEvent;
 import com.jameskavazy.dartscoreboard.match.domain.event.StateUpdateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,8 +38,12 @@ public class MatchEventEmitter {
 
     //TODO use Spring @Async?
     @EventListener
-    public void send(StateUpdateEvent stateUpdateEvent) {
-        String matchId = stateUpdateEvent.getMatchId();
+    public void sendStateUpdate(StateEvent stateEvent) {
+       send(stateEvent);
+    }
+
+    private void send(StateEvent stateEvent) {
+        String matchId = stateEvent.getMatchId();
         List<SseEmitter> sseEmitters = matchEmitters.get(matchId);
 
         if (sseEmitters != null && !sseEmitters.isEmpty()) {
@@ -47,7 +53,7 @@ public class MatchEventEmitter {
                         emitter.send(SseEmitter
                                 .event()
                                 .name("match_state")
-                                .data(stateUpdateEvent.getPlayerStateDTOList()));
+                                .data(stateEvent.getPlayerStateDTOList()));
                     } catch (IOException e) {
                         matchEmitters.get(matchId).remove(emitter);
                         log.error("Cleaning up emitter - ", e);
@@ -67,4 +73,6 @@ public class MatchEventEmitter {
     public ConcurrentHashMap<String, List<SseEmitter>> getMatchEmitters() {
         return matchEmitters;
     }
+
+
 }

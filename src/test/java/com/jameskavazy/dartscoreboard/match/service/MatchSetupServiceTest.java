@@ -1,5 +1,6 @@
 package com.jameskavazy.dartscoreboard.match.service;
 
+import com.jameskavazy.dartscoreboard.match.EventPublisher;
 import com.jameskavazy.dartscoreboard.match.domain.service.MatchesUserDTOMapper;
 import com.jameskavazy.dartscoreboard.match.dto.MatchRequest;
 import com.jameskavazy.dartscoreboard.match.domain.model.entity.Leg;
@@ -35,7 +36,7 @@ class MatchSetupServiceTest {
     MatchRepository matchRepository;
 
     @Mock
-    InviteEventEmitter inviteEventEmitter;
+    EventPublisher eventPublisher;
 
     @Mock
     SetRepository setRepository;
@@ -66,7 +67,8 @@ class MatchSetupServiceTest {
                         match.winnerId() == null
         ));
 
-        verify(inviteEventEmitter, times(2)).send(anyString(), any(InvitationData.class));
+        verify(eventPublisher, times(2))
+                .publishInvite(anyString(), any(InvitationData.class));
         verify(setRepository).create(any(Set.class));
         verify(legRepository).create(any(Leg.class));
         verify(matchRepository, times(1)).createMatchUsers(argThat(mu -> mu.userId().equals("user-1")));

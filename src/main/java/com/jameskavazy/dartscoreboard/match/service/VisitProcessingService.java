@@ -1,6 +1,6 @@
 package com.jameskavazy.dartscoreboard.match.service;
 
-import com.jameskavazy.dartscoreboard.match.MatchEventPublisher;
+import com.jameskavazy.dartscoreboard.match.EventPublisher;
 import com.jameskavazy.dartscoreboard.match.domain.service.ScoreCalculator;
 import com.jameskavazy.dartscoreboard.match.dto.VisitRequest;
 import com.jameskavazy.dartscoreboard.match.exception.InvalidHierarchyException;
@@ -12,7 +12,6 @@ import com.jameskavazy.dartscoreboard.match.domain.model.entity.Visit;
 import com.jameskavazy.dartscoreboard.match.repository.LegRepository;
 import com.jameskavazy.dartscoreboard.match.repository.MatchRepository;
 import com.jameskavazy.dartscoreboard.match.repository.VisitRepository;
-import com.jameskavazy.dartscoreboard.sse.service.MatchEventEmitter;
 import com.jameskavazy.dartscoreboard.user.User;
 import com.jameskavazy.dartscoreboard.user.UserRepository;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -29,24 +28,21 @@ public class VisitProcessingService {
     private final LegRepository legRepository;
     private final VisitRepository visitRepository;
     private final ScoreCalculator scoreCalculator;
-    private final MatchEventEmitter matchEventEmitter;
     private final UserRepository userRepository;
-    private final MatchEventPublisher matchEventPublisher;
+    private final EventPublisher eventPublisher;
 
     public VisitProcessingService(MatchRepository matchRepository,
                                   LegRepository legRepository,
                                   VisitRepository visitRepository,
                                   ScoreCalculator scoreCalculator,
-                                  MatchEventEmitter matchEventEmitter,
                                   UserRepository userRepository,
-                                  MatchEventPublisher matchEventPublisher) {
+                                  EventPublisher eventPublisher) {
         this.matchRepository = matchRepository;
         this.legRepository = legRepository;
         this.visitRepository = visitRepository;
         this.scoreCalculator = scoreCalculator;
-        this.matchEventEmitter = matchEventEmitter;
         this.userRepository = userRepository;
-        this.matchEventPublisher = matchEventPublisher;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional
@@ -56,14 +52,14 @@ public class VisitProcessingService {
                                            String legId,
                                            String userPrincipalUsername) {
 
-        String userId = validateUser(userPrincipalUsername);
+        String userId = getValidatedUser(userPrincipalUsername);
         validateMatchHierarchy(matchId, legId, setId);
         validateTurn(matchId, legId, userId);
 
         int currentScore = visitRepository.extractCurrentScore(userId, legId);
 
         Visit visit = validateAndPersistVisit(visitRequest, legId, userId, currentScore);
-        matchEventPublisher.publishVisitSubmit(matchId, setId, legId, visit.visitId(), userId);
+        eventPublisher.publishVisitSubmit(matchId, setId, legId, visit.visitId(), userId);
     }
 
     private void validateTurn(String matchId, String legId, String userId) {
@@ -92,7 +88,7 @@ public class VisitProcessingService {
         }
     }
 
-    private String validateUser(String userPrincipalUsername){
+    private String getValidatedUser(String userPrincipalUsername){
         Optional<User> userOptional = userRepository.findByUsername(userPrincipalUsername);
         User user = userOptional.orElseThrow(() ->
                 new UsernameNotFoundException("Could not insert visit: Could not find authorized user: " + userPrincipalUsername));
