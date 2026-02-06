@@ -1,8 +1,9 @@
 package com.jameskavazy.dartscoreboard.match.domain;
 
+import com.jameskavazy.dartscoreboard.match.domain.service.ScoreCalculator;
 import com.jameskavazy.dartscoreboard.match.dto.VisitRequest;
 import com.jameskavazy.dartscoreboard.match.exception.InvalidVisitScoreException;
-import com.jameskavazy.dartscoreboard.match.model.visits.Visit;
+import com.jameskavazy.dartscoreboard.match.domain.model.entity.Visit;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;

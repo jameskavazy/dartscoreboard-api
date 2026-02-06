@@ -1,6 +1,6 @@
 package com.jameskavazy.dartscoreboard.match.service;
 
-import com.jameskavazy.dartscoreboard.match.model.matches.Match;
+import com.jameskavazy.dartscoreboard.match.domain.model.entity.Match;
 import com.jameskavazy.dartscoreboard.match.repository.MatchRepository;
 
 import org.springframework.stereotype.Service;

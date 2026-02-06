@@ -1,25 +1,24 @@
 package com.jameskavazy.dartscoreboard.match.service;
 
 import com.jameskavazy.dartscoreboard.invite.model.InviteStatus;
-import com.jameskavazy.dartscoreboard.match.domain.*;
-import com.jameskavazy.dartscoreboard.match.dto.VisitEvent;
+import com.jameskavazy.dartscoreboard.match.EventPublisher;
+import com.jameskavazy.dartscoreboard.match.domain.service.ScoreCalculator;
 import com.jameskavazy.dartscoreboard.match.dto.VisitRequest;
 import com.jameskavazy.dartscoreboard.match.exception.InvalidHierarchyException;
-import com.jameskavazy.dartscoreboard.match.model.matches.Match;
-import com.jameskavazy.dartscoreboard.match.model.matches.MatchStatus;
-import com.jameskavazy.dartscoreboard.match.model.matches.MatchType;
-import com.jameskavazy.dartscoreboard.match.model.matches.MatchesUsers;
-import com.jameskavazy.dartscoreboard.match.model.visits.Visit;
+import com.jameskavazy.dartscoreboard.match.domain.model.entity.Match;
+import com.jameskavazy.dartscoreboard.match.domain.model.value.MatchStatus;
+import com.jameskavazy.dartscoreboard.match.domain.model.value.MatchType;
+import com.jameskavazy.dartscoreboard.match.domain.model.entity.MatchesUsers;
+import com.jameskavazy.dartscoreboard.match.domain.model.entity.Visit;
 import com.jameskavazy.dartscoreboard.match.repository.LegRepository;
 import com.jameskavazy.dartscoreboard.match.repository.MatchRepository;
 import com.jameskavazy.dartscoreboard.match.repository.SetRepository;
 import com.jameskavazy.dartscoreboard.match.repository.VisitRepository;
-import com.jameskavazy.dartscoreboard.sse.impl.MatchEventEmitter;
+import com.jameskavazy.dartscoreboard.sse.service.MatchEventEmitter;
 import com.jameskavazy.dartscoreboard.user.User;
 import com.jameskavazy.dartscoreboard.user.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -47,21 +46,22 @@ class VisitProcessingServiceTest {
     MatchRepository matchRepository;
     @Mock
     LegRepository legRepository;
-
-    @Mock
-    GameEngine gameEngine;
+//
+//    @Mock
+//    GameEngine gameEngine;
     @Mock
     SetRepository setRepository;
     @Mock
     ScoreCalculator scoreCalculator;
-    @Mock
-    ProgressionHandler progressionHandler;
 
     @Mock
     MatchEventEmitter matchEventEmitter;
 
     @InjectMocks
     VisitProcessingService visitProcessingService;
+
+    @Mock
+    EventPublisher eventPublisher;
 
     @Test
     void processVisitRequest_shouldProcessWithValidData() {
@@ -92,7 +92,7 @@ class VisitProcessingServiceTest {
                         visitRequest.score(),
                         false,
                         OffsetDateTime.now()));
-        when(gameEngine.checkResult(any())).thenReturn(ResultScenario.NO_RESULT);
+//        when(gameEngine.checkResult(any())).thenReturn(ResultScenario.NO_RESULT);
 
         visitProcessingService.processVisitRequest(
                 visitRequest, matchId, setId, legId, user.username()
@@ -147,8 +147,9 @@ class VisitProcessingServiceTest {
         ));
     }
 
+
     @Test
-    void shouldProcessVisitRequest_andSendToMatch(){
+    void shouldValidateVisit_andPublishVisitSubmitEvent(){
         String matchId = "match-1";
         String setId = "set-1";
         String legId = "leg-1";
@@ -156,9 +157,9 @@ class VisitProcessingServiceTest {
         String userEmail = "user1@example.com";
         VisitRequest visitRequest = new VisitRequest(150);
 
-
         User user = new User(userId, userEmail, userEmail);
         Match match =  new Match(matchId, MatchType.FiveO, 1,1,OffsetDateTime.now(), null, MatchStatus.ONGOING);
+        Visit visit = new Visit(UUID.randomUUID().toString(), legId, userId, 150, false, OffsetDateTime.now());
 
         when(userRepository.findByUsername(userEmail)).thenReturn(Optional.of(user));
         when(matchRepository.findById(matchId)).thenReturn(Optional.of(match));
@@ -166,28 +167,11 @@ class VisitProcessingServiceTest {
         when(matchRepository.getMatchUsers(matchId)).thenReturn(List.of(
                 new MatchesUsers(matchId, userId, 0, InviteStatus.ACCEPTED))
         );
-        Visit visit = new Visit(UUID.randomUUID().toString(), legId, userId, 150, false, OffsetDateTime.now());
         when(scoreCalculator.validateAndBuildVisit(eq(userId), anyInt(), eq(visitRequest), eq(legId))).thenReturn(visit);
-        when(gameEngine.checkResult(any(MatchContext.class)))
-                .thenReturn(ResultScenario.NO_RESULT);
-        when(visitRepository.getMatchData("leg-1")).thenReturn(List.of(
-                new PlayerState("user-1", 180, false, 501),
-                new PlayerState("user-2", 200, true, 501),
-                new PlayerState("user-3", 120, false, 501)
-        ));
-        when(gameEngine.handleNoResult(any())).thenReturn(new ResultContext(legId, setId));
+
+
         visitProcessingService.processVisitRequest(visitRequest, matchId, setId, legId, userEmail);
 
-        ArgumentCaptor<VisitEvent> captor = ArgumentCaptor.forClass(VisitEvent.class);
-        verify(matchEventEmitter).send(eq(matchId), captor.capture());
-
-        VisitEvent sentEvent = captor.getValue();
-        assertNotNull(sentEvent);
-        assertEquals(ResultScenario.NO_RESULT, sentEvent.visitResult().resultScenario());
-        assertEquals("leg-1", sentEvent.visitResult().resultContext().legId());
-        assertEquals("set-1", sentEvent.visitResult().resultContext().setId());
-        assertEquals(3, sentEvent.playerStates().size());
-        PlayerState player3 = sentEvent.playerStates().stream().filter(p -> p.userId().equals("user-3")).toList().get(0);
-        assertEquals( 381, player3.startingScore() - player3.totalScore());
+        verify(eventPublisher).publishVisitSubmit(matchId, setId, legId, visit.visitId(), visit.userId());
     }
 }

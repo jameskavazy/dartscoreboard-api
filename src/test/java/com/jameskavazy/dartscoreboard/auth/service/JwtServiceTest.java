@@ -1,6 +1,6 @@
 //package com.jameskavazy.dartscoreboard.auth.service;
 //
-//import com.jameskavazy.dartscoreboard.auth.config.AuthConfigProperties;
+//import com.jameskavazy.dartscoreboard.config.AuthConfigProperties;
 //import com.jameskavazy.dartscoreboard.user.User;
 //import com.jameskavazy.dartscoreboard.user.UserPrincipal;
 //import org.junit.jupiter.api.Test;

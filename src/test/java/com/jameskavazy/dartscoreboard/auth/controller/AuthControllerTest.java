@@ -1,20 +1,17 @@
 package com.jameskavazy.dartscoreboard.auth.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jameskavazy.dartscoreboard.Application;
 import com.jameskavazy.dartscoreboard.auth.dto.TokenRequest;
 import com.jameskavazy.dartscoreboard.auth.dto.AuthResult;
 import com.jameskavazy.dartscoreboard.auth.exception.InvalidTokenException;
 import com.jameskavazy.dartscoreboard.auth.security.JwtFilter;
 import com.jameskavazy.dartscoreboard.auth.service.AuthService;
-import com.jameskavazy.dartscoreboard.auth.config.SecurityConfig;
 import com.jameskavazy.dartscoreboard.auth.service.JwtService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 

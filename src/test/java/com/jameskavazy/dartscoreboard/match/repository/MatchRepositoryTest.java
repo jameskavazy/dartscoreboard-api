@@ -1,7 +1,11 @@
 package com.jameskavazy.dartscoreboard.match.repository;
 
 import com.jameskavazy.dartscoreboard.invite.model.InviteStatus;
-import com.jameskavazy.dartscoreboard.match.model.matches.*;
+import com.jameskavazy.dartscoreboard.match.domain.model.value.MatchStatus;
+import com.jameskavazy.dartscoreboard.match.domain.model.value.MatchType;
+import com.jameskavazy.dartscoreboard.match.domain.model.entity.Match;
+import com.jameskavazy.dartscoreboard.match.domain.model.entity.MatchesUsers;
+import com.jameskavazy.dartscoreboard.match.dto.PlayerStateDTO;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -163,6 +167,19 @@ class MatchRepositoryTest {
         repository.updateMatchUserInviteStatus("user-3", "match-1", InviteStatus.DECLINED);
         MatchesUsers matchesUser = repository.getMatchUsers("match-1").get(2);
         assertEquals(InviteStatus.DECLINED, matchesUser.inviteStatus());
+    }
+
+    @Test
+    void shouldGetLatestState(){
+        List<PlayerStateDTO> latestStateForMatch = repository.getLatestStateForMatch("match-1");
+        assertEquals("user-1",latestStateForMatch.getFirst().userId());
+        assertEquals(0,latestStateForMatch.getFirst().legsWon());
+        assertEquals(0,latestStateForMatch.getFirst().setsWon());
+        assertEquals(121,latestStateForMatch.getFirst().score());
+        assertTrue(latestStateForMatch.getFirst().isTurn());
+        assertFalse(latestStateForMatch.getFirst().finished());
+        assertEquals(126.67, latestStateForMatch.getFirst().legAverage());
+        assertEquals(126.67, latestStateForMatch.getFirst().matchAverage());
     }
 
 }

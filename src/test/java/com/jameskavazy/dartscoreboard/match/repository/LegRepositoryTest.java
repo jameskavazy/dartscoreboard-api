@@ -1,6 +1,6 @@
 package com.jameskavazy.dartscoreboard.match.repository;
 
-import com.jameskavazy.dartscoreboard.match.model.legs.Leg;
+import com.jameskavazy.dartscoreboard.match.domain.model.entity.Leg;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -97,5 +97,17 @@ class LegRepositoryTest {
         repository.updateWinnerId("user-2", "leg-1");
         String winnerId = repository.findLegById("leg-1").winnerId();
         assertEquals("user-2", winnerId);
+    }
+
+    @Test
+    void shouldReturnActiveLeg(){
+        repository.updateWinnerId("user-1", "leg-1");
+        repository.create(new Leg("test-2", "match-1", "set-1", 0, null, OffsetDateTime.now()));
+        Leg activeLegByMatchId = repository.findActiveLegByMatchId("match-1");
+
+        assertEquals("test-2", activeLegByMatchId.legId());
+        assertNull(activeLegByMatchId.winnerId());
+
+
     }
 }

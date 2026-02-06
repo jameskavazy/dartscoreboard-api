@@ -1,17 +1,16 @@
 package com.jameskavazy.dartscoreboard.invite.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jameskavazy.dartscoreboard.GlobalExceptionHandler;
+import com.jameskavazy.dartscoreboard.config.GlobalExceptionHandler;
 import com.jameskavazy.dartscoreboard.auth.security.JwtFilter;
 import com.jameskavazy.dartscoreboard.auth.service.JwtService;
 import com.jameskavazy.dartscoreboard.invite.service.InviteService;
 import com.jameskavazy.dartscoreboard.match.SpringSecurityUserDetailsTestConfig;
 import com.jameskavazy.dartscoreboard.invite.model.InviteStatus;
 import com.jameskavazy.dartscoreboard.match.dto.MatchRequest;
-import com.jameskavazy.dartscoreboard.match.model.matches.MatchType;
+import com.jameskavazy.dartscoreboard.match.domain.model.value.MatchType;
 import com.jameskavazy.dartscoreboard.match.service.MatchService;
-import com.jameskavazy.dartscoreboard.match.service.MatchSetupService;
+import com.jameskavazy.dartscoreboard.match.domain.service.MatchSetupService;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;

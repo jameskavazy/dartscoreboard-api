@@ -1,16 +1,17 @@
 package com.jameskavazy.dartscoreboard.match.service;
 
-import com.jameskavazy.dartscoreboard.match.domain.MatchesUserDTOMapper;
+import com.jameskavazy.dartscoreboard.match.EventPublisher;
+import com.jameskavazy.dartscoreboard.match.domain.service.MatchSetupService;
+import com.jameskavazy.dartscoreboard.match.domain.service.MatchesUserDTOMapper;
 import com.jameskavazy.dartscoreboard.match.dto.MatchRequest;
-import com.jameskavazy.dartscoreboard.match.model.legs.Leg;
-import com.jameskavazy.dartscoreboard.match.model.matches.MatchStatus;
-import com.jameskavazy.dartscoreboard.match.model.matches.MatchType;
-import com.jameskavazy.dartscoreboard.match.model.sets.Set;
+import com.jameskavazy.dartscoreboard.match.domain.model.entity.Leg;
+import com.jameskavazy.dartscoreboard.match.domain.model.value.MatchStatus;
+import com.jameskavazy.dartscoreboard.match.domain.model.value.MatchType;
+import com.jameskavazy.dartscoreboard.match.domain.model.entity.Set;
 import com.jameskavazy.dartscoreboard.match.repository.LegRepository;
 import com.jameskavazy.dartscoreboard.match.repository.MatchRepository;
 import com.jameskavazy.dartscoreboard.match.repository.SetRepository;
 import com.jameskavazy.dartscoreboard.sse.dto.InvitationData;
-import com.jameskavazy.dartscoreboard.sse.impl.InviteEventEmitter;
 import com.jameskavazy.dartscoreboard.user.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,7 +21,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -36,7 +36,7 @@ class MatchSetupServiceTest {
     MatchRepository matchRepository;
 
     @Mock
-    InviteEventEmitter inviteEventEmitter;
+    EventPublisher eventPublisher;
 
     @Mock
     SetRepository setRepository;
@@ -67,7 +67,8 @@ class MatchSetupServiceTest {
                         match.winnerId() == null
         ));
 
-        verify(inviteEventEmitter, times(2)).send(anyString(), any(InvitationData.class));
+        verify(eventPublisher, times(2))
+                .publishInvite(anyString(), any(InvitationData.class));
         verify(setRepository).create(any(Set.class));
         verify(legRepository).create(any(Leg.class));
         verify(matchRepository, times(1)).createMatchUsers(argThat(mu -> mu.userId().equals("user-1")));

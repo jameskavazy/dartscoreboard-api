@@ -1,6 +1,6 @@
 package com.jameskavazy.dartscoreboard.match.dto;
 
-import com.jameskavazy.dartscoreboard.match.model.matches.MatchType;
+import com.jameskavazy.dartscoreboard.match.domain.model.value.MatchType;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 

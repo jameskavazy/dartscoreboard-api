@@ -1,6 +1,6 @@
 package com.jameskavazy.dartscoreboard.user;
 
-import com.jameskavazy.dartscoreboard.auth.config.AuthConfigProperties;
+import com.jameskavazy.dartscoreboard.config.AuthConfigProperties;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;

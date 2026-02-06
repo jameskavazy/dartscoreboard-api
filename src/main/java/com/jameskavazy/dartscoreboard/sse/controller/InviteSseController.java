@@ -1,6 +1,6 @@
 package com.jameskavazy.dartscoreboard.sse.controller;
 
-import com.jameskavazy.dartscoreboard.sse.impl.InviteEventEmitter;
+import com.jameskavazy.dartscoreboard.sse.service.InviteEventEmitter;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 

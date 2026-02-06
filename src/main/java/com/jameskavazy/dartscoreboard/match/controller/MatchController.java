@@ -1,7 +1,7 @@
 package com.jameskavazy.dartscoreboard.match.controller;
 
-import com.jameskavazy.dartscoreboard.match.domain.VisitResult;
-import com.jameskavazy.dartscoreboard.match.model.matches.Match;
+import com.jameskavazy.dartscoreboard.match.domain.model.value.VisitResult;
+import com.jameskavazy.dartscoreboard.match.domain.model.entity.Match;
 import com.jameskavazy.dartscoreboard.match.exception.MatchNotFoundException;
 
 import com.jameskavazy.dartscoreboard.match.service.MatchService;
@@ -24,7 +24,7 @@ public class MatchController {
     private final MatchService matchService;
     private final VisitProcessingService visitProcessingService;
 
-    public MatchController(MatchService matchService, VisitProcessingService visitProcessingService){
+    public MatchController(MatchService matchService, VisitProcessingService visitProcessingService) {
         this.matchService = matchService;
         this.visitProcessingService = visitProcessingService;
     }
@@ -56,9 +56,7 @@ public class MatchController {
                                   @RequestBody VisitRequest visitRequest,
                                   @AuthenticationPrincipal UserDetails userDetails){
 
-        VisitResult visitResult =
-                visitProcessingService.processVisitRequest(visitRequest, matchId, setId, legId, userDetails.getUsername());
-
-        return new ResponseEntity<>(visitResult, HttpStatus.CREATED);
+        visitProcessingService.processVisitRequest(visitRequest, matchId, setId, legId, userDetails.getUsername());
+        return ResponseEntity.accepted().build();
     }
 }

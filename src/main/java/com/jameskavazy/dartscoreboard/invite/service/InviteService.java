@@ -1,11 +1,10 @@
 package com.jameskavazy.dartscoreboard.invite.service;
 
 import com.jameskavazy.dartscoreboard.invite.model.InviteStatus;
-import com.jameskavazy.dartscoreboard.match.model.matches.MatchStatus;
-import com.jameskavazy.dartscoreboard.match.model.matches.MatchesUsers;
+import com.jameskavazy.dartscoreboard.match.EventPublisher;
+import com.jameskavazy.dartscoreboard.match.domain.model.entity.MatchesUsers;
+import com.jameskavazy.dartscoreboard.match.dto.PlayerStateDTO;
 import com.jameskavazy.dartscoreboard.match.repository.MatchRepository;
-import com.jameskavazy.dartscoreboard.sse.impl.InviteEventEmitter;
-import com.jameskavazy.dartscoreboard.sse.impl.MatchEventEmitter;
 import com.jameskavazy.dartscoreboard.user.UserRepository;
 import org.springframework.stereotype.Service;
 
@@ -15,12 +14,13 @@ import java.util.List;
 public class InviteService {
     private final MatchRepository matchRepository;
     private final UserRepository userRepository;
-    private final MatchEventEmitter matchEventEmitter;
+    private final EventPublisher eventPublisher;
 
-    public InviteService(MatchRepository matchRepository, UserRepository userRepository, MatchEventEmitter matchEventEmitter) {
+
+    public InviteService(MatchRepository matchRepository, UserRepository userRepository, EventPublisher eventPublisher) {
         this.matchRepository = matchRepository;
         this.userRepository = userRepository;
-        this.matchEventEmitter = matchEventEmitter;
+        this.eventPublisher = eventPublisher;
     }
 
 
@@ -28,17 +28,14 @@ public class InviteService {
         String userId = userRepository.userIdFromUsername(username);
         matchRepository.updateMatchUserInviteStatus(userId, matchId, inviteStatus);
 
-
-
-
-
         List<MatchesUsers> matchUsers = matchRepository.getMatchUsers(matchId);
         boolean allAccepted = matchUsers.stream()
                 .allMatch(mu -> mu.inviteStatus().equals(InviteStatus.ACCEPTED));
 
+        List<PlayerStateDTO> playerStateDTOS = matchRepository.getLatestStateForMatch(matchId);
 
-        if (allAccepted)
-            matchEventEmitter.send(matchId, MatchStatus.ONGOING);
-
+        if (allAccepted) {
+            eventPublisher.publishMatchStart(matchId, playerStateDTOS);
+        }
     }
 }

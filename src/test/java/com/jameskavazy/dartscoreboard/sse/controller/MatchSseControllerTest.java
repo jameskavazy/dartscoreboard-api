@@ -1,10 +1,10 @@
 package com.jameskavazy.dartscoreboard.sse.controller;
 
-import com.jameskavazy.dartscoreboard.GlobalExceptionHandler;
+import com.jameskavazy.dartscoreboard.config.GlobalExceptionHandler;
 import com.jameskavazy.dartscoreboard.auth.security.JwtFilter;
 import com.jameskavazy.dartscoreboard.auth.service.JwtService;
 import com.jameskavazy.dartscoreboard.match.SpringSecurityUserDetailsTestConfig;
-import com.jameskavazy.dartscoreboard.sse.impl.MatchEventEmitter;
+import com.jameskavazy.dartscoreboard.sse.service.MatchEventEmitter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;

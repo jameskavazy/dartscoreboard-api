@@ -1,16 +1,17 @@
 package com.jameskavazy.dartscoreboard.match.service;
 
-import com.jameskavazy.dartscoreboard.match.domain.MatchContext;
-import com.jameskavazy.dartscoreboard.match.domain.ProgressionHandler;
-import com.jameskavazy.dartscoreboard.match.domain.ResultContext;
-import com.jameskavazy.dartscoreboard.match.model.legs.Leg;
-import com.jameskavazy.dartscoreboard.match.model.matches.Match;
-import com.jameskavazy.dartscoreboard.match.model.matches.MatchStatus;
-import com.jameskavazy.dartscoreboard.match.model.matches.MatchType;
-import com.jameskavazy.dartscoreboard.match.model.sets.Set;
+import com.jameskavazy.dartscoreboard.match.EventPublisher;
+import com.jameskavazy.dartscoreboard.match.domain.aggregate.MatchContext;
+import com.jameskavazy.dartscoreboard.match.domain.event.VisitSubmitEvent;
+import com.jameskavazy.dartscoreboard.match.domain.model.entity.*;
+import com.jameskavazy.dartscoreboard.match.domain.model.value.ResultScenario;
+import com.jameskavazy.dartscoreboard.match.domain.model.value.MatchStatus;
+import com.jameskavazy.dartscoreboard.match.domain.model.value.MatchType;
+import com.jameskavazy.dartscoreboard.match.dto.PlayerStateDTO;
 import com.jameskavazy.dartscoreboard.match.repository.LegRepository;
 import com.jameskavazy.dartscoreboard.match.repository.MatchRepository;
 import com.jameskavazy.dartscoreboard.match.repository.SetRepository;
+import com.jameskavazy.dartscoreboard.match.repository.VisitRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -18,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -28,8 +30,10 @@ class GameEngineTest {
     LegRepository legRepository = mock(LegRepository.class);
     SetRepository setRepository = mock(SetRepository.class);
     MatchRepository matchRepository = mock(MatchRepository.class);
-    ProgressionHandler progressionHandler = mock(ProgressionHandler.class);
-    GameEngine gameEngine = new GameEngine(legRepository, setRepository, matchRepository, progressionHandler);
+    VisitRepository visitRepository = mock(VisitRepository.class);
+    EventPublisher eventPublisher = mock(EventPublisher.class);
+    GameEngine gameEngine = new GameEngine(legRepository, setRepository, matchRepository, visitRepository, eventPublisher);
+
     @Test
     void shouldHandleLegWon() {
         Match match = new Match(
@@ -53,7 +57,7 @@ class GameEngineTest {
                 "set-1"
         );
 
-        ResultContext resultContext = gameEngine.handleLegWon(matchContext);
+        gameEngine.handleLegWon(matchContext);
         verify(legRepository).updateWinnerId("user-1", "leg-1");
 
         ArgumentCaptor<Leg> captor = ArgumentCaptor.forClass(Leg.class);
@@ -61,7 +65,7 @@ class GameEngineTest {
         Leg actual = captor.getValue();
         assertEquals("test-match-id",actual.matchId());
 
-        assertEquals("set-1" ,resultContext.setId());
+//        assertEquals("set-1" ,resultContext.setId());
     }
 
     @Test
@@ -87,7 +91,7 @@ class GameEngineTest {
                 "set-1"
         );
 
-        ResultContext resultContext = gameEngine.handleSetWon(matchContext);
+        gameEngine.handleSetWon(matchContext);
         ArgumentCaptor<Leg> legArgumentCaptor = ArgumentCaptor.forClass(Leg.class);
 
         verify(legRepository).create(legArgumentCaptor.capture());
@@ -154,11 +158,8 @@ class GameEngineTest {
                 "set-1"
         );
         when(legRepository.getTurnIndex(matchContext.legId())).thenReturn(1);
-        when(progressionHandler.increment(anyInt(), anyInt(), anyInt())).thenReturn(2);
-        ResultContext resultContext = gameEngine.handleNoResult(matchContext);
+        gameEngine.handleNoResult(matchContext);
         verify(legRepository).updateTurnIndex(2, "leg-1");
-        assertEquals("set-1", resultContext.setId());
-        assertEquals("leg-1", resultContext.legId());
     }
 
     @Test
@@ -184,7 +185,103 @@ class GameEngineTest {
                 "set-1"
         );
         gameEngine.checkResult(matchContext);
-        verify(progressionHandler).checkResult(matchContext);
+//        verify(gameEngine).checkResult(matchContext);
+    }
+
+    Match match = new Match(
+            "any-match", MatchType.FiveO, 3, 3, OffsetDateTime.now(), "", MatchStatus.ONGOING
+    );
+
+    List<String> userIds = List.of("user-1", "user-2");
+
+    @Test
+    void shouldReturnNoLegWon(){
+
+        MatchContext matchContext = new MatchContext(
+                match,  userIds, 1, 2, 100, "leg-1", "user-1", "set-1"
+        );
+
+        ResultScenario resultScenario = gameEngine.checkResult(matchContext);
+        assertEquals(ResultScenario.NO_RESULT, resultScenario);
+    }
+
+    @Test
+    void shouldReturnLegWonNoSetWon(){
+        MatchContext matchContext = new MatchContext(
+                match,  userIds, 1, 1, 0, "leg-1", "user-1", "set-1"
+        );
+        ResultScenario resultScenario = gameEngine.checkResult(matchContext);
+        assertEquals(ResultScenario.LEG_WON, resultScenario);
+    }
+
+    @Test
+    void shouldReturnLegWonSetWonNoMatchWon(){
+        MatchContext matchContext = new MatchContext(
+                match,  userIds, 2, 1, 0, "leg-1", "user-1", "set-1"
+        );
+
+        ResultScenario resultScenario = gameEngine.checkResult(matchContext);
+        assertEquals(ResultScenario.SET_WON, resultScenario);
+    }
+
+    @Test
+    void shouldReturnLegWonSetWonMatchWon(){
+        MatchContext matchContext = new MatchContext(
+                match,  userIds, 2, 2, 0, "leg-1", "user-1", "set-1"
+        );
+
+        ResultScenario resultScenario = gameEngine.checkResult(matchContext);
+        assertEquals(ResultScenario.MATCH_WON, resultScenario);
+    }
+
+    @Test
+    void shouldCorrectlyIncrementTurn(){
+
+        MatchContext ctx = new MatchContext(
+                match, userIds, 2, 2, 0, "leg-1", "user-1", "set-1");
+
+        int next = gameEngine.nextPlayerIndex(ctx, 0, 1);
+        assertEquals(1, next);
+    }
+
+    @Test
+    void shouldCorrectlyDecrementTurn_cycleBackRound(){
+        // given
+        MatchContext ctx = new MatchContext(match, userIds, 2, 2, 0, "leg-1", "user-1", "set-1");
+
+        // when
+        int next = gameEngine.nextPlayerIndex(ctx, 0, -1);
+
+        // then
+        assertEquals(1, next);
+    }
+
+    @Test
+    void shouldCorrectlyDecrementTurn() {
+        // given
+        MatchContext ctx = new MatchContext(match, List.of("user-1", "user-2", "user-3"), 2, 2, 0, "leg-1", "user-1", "set-1");
+
+        // when
+        int next = gameEngine.nextPlayerIndex(ctx, 3, -1);
+
+        // then
+        assertEquals(2, next);
+    }
+
+    @Test
+    void handleVisitSubmitted_shouldPublishStateUpdate(){
+
+        Match match = new Match("match-10", MatchType.FiveO, 1, 1, OffsetDateTime.now(), null, MatchStatus.ONGOING);
+        VisitSubmitEvent event = new VisitSubmitEvent(
+                "matchId", match.matchId(), "set-test", "leg-test", "visit-test", "user-2"
+        );
+        when(matchRepository.findById("match-10")).thenReturn(Optional.of(match));
+//
+        List<PlayerStateDTO> playerStateDTOS = List.of(new PlayerStateDTO("user-2", 0, 0, 0, true, true, 0, 0));
+        when(matchRepository.getLatestStateForMatch(match.matchId())).thenReturn(playerStateDTOS);
+
+        gameEngine.handleVisitSubmitted(event);
+        verify(eventPublisher).publishStateUpdate("match-10", playerStateDTOS);
     }
 
 }

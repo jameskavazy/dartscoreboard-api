@@ -3,14 +3,11 @@ package com.jameskavazy.dartscoreboard.match.controller;
 
 import com.jameskavazy.dartscoreboard.auth.service.JwtService;
 import com.jameskavazy.dartscoreboard.auth.service.UserDetailsServiceImpl;
-import com.jameskavazy.dartscoreboard.match.domain.ResultScenario;
-import com.jameskavazy.dartscoreboard.match.domain.VisitResult;
-import com.jameskavazy.dartscoreboard.match.dto.MatchRequest;
 import com.jameskavazy.dartscoreboard.match.dto.VisitRequest;
-import com.jameskavazy.dartscoreboard.match.model.matches.Match;
+import com.jameskavazy.dartscoreboard.match.domain.model.entity.Match;
 import com.jameskavazy.dartscoreboard.match.repository.MatchRepository;
-import com.jameskavazy.dartscoreboard.match.model.matches.MatchType;
-import com.jameskavazy.dartscoreboard.sse.impl.MatchEventEmitter;
+import com.jameskavazy.dartscoreboard.match.domain.model.value.MatchType;
+import com.jameskavazy.dartscoreboard.sse.service.MatchEventEmitter;
 import com.jameskavazy.dartscoreboard.user.User;
 import com.jameskavazy.dartscoreboard.user.UserPrincipal;
 import org.junit.jupiter.api.*;
@@ -25,13 +22,10 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -146,17 +140,13 @@ class MatchControllerIntTest {
     void shouldCreateVisit_andReturnNoResult(){
         VisitRequest visitRequest = new VisitRequest(10);
 
-        ResponseEntity<VisitResult> response = restClient.post()
+        ResponseEntity<Void> entity = restClient.post()
                 .uri("/api/matches/match-1/sets/set-1/legs/leg-1/visits/")
                 .body(visitRequest)
                 .retrieve()
-                .toEntity(new ParameterizedTypeReference<VisitResult>() {
-                });
+                .toBodilessEntity();
 
-
-        assertEquals("leg-1", response.getBody().resultContext().legId());
-        assertEquals("set-1", response.getBody().resultContext().setId());
-        assertEquals(ResultScenario.NO_RESULT, response.getBody().resultScenario());
+       assertEquals(202,entity.getStatusCode().value());
     }
 
 
