@@ -65,7 +65,7 @@ class MatchEventEmitterTest {
 
         matchEventEmitter.getMatchEmitters().put(matchId, new CopyOnWriteArrayList<>(List.of(emitter)));
         matchEventEmitter.sendStateUpdate(new StateUpdateEvent(
-                "any", matchId, List.of(new PlayerStateDTO("user-1", 0, 0, 0, true, false)))
+                "any", matchId, List.of(new PlayerStateDTO("user-1", 0, 0, 0, true, false, 0, 0)))
         );
 
         executorService.shutdown();

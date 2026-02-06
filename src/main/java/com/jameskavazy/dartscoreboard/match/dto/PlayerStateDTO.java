@@ -6,5 +6,7 @@ public record PlayerStateDTO(
         int setsWon,
         int score,
         boolean isTurn,
-        boolean finished
+        boolean finished,
+        double legAverage,
+        double matchAverage
 ) {}

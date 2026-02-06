@@ -1,6 +1,5 @@
 package com.jameskavazy.dartscoreboard.match.service;
 
-import com.jameskavazy.dartscoreboard.invite.model.InviteStatus;
 import com.jameskavazy.dartscoreboard.match.EventPublisher;
 import com.jameskavazy.dartscoreboard.match.domain.aggregate.MatchContext;
 import com.jameskavazy.dartscoreboard.match.domain.event.VisitSubmitEvent;
@@ -33,8 +32,7 @@ class GameEngineTest {
     MatchRepository matchRepository = mock(MatchRepository.class);
     VisitRepository visitRepository = mock(VisitRepository.class);
     EventPublisher eventPublisher = mock(EventPublisher.class);
-    MatchStateAssembler matchStateAssembler = mock(MatchStateAssembler.class);
-    GameEngine gameEngine = new GameEngine(legRepository, setRepository, matchRepository, visitRepository, eventPublisher, matchStateAssembler);
+    GameEngine gameEngine = new GameEngine(legRepository, setRepository, matchRepository, visitRepository, eventPublisher);
 
     @Test
     void shouldHandleLegWon() {
@@ -279,8 +277,8 @@ class GameEngineTest {
         );
         when(matchRepository.findById("match-10")).thenReturn(Optional.of(match));
 //
-        List<PlayerStateDTO> playerStateDTOS = List.of(new PlayerStateDTO("user-2", 0, 0, 0, true, true));
-        when(matchStateAssembler.getPlayerStateDTOS(match.matchId())).thenReturn(playerStateDTOS);
+        List<PlayerStateDTO> playerStateDTOS = List.of(new PlayerStateDTO("user-2", 0, 0, 0, true, true, 0, 0));
+        when(matchRepository.getLatestStateForMatch(match.matchId())).thenReturn(playerStateDTOS);
 
         gameEngine.handleVisitSubmitted(event);
         verify(eventPublisher).publishStateUpdate("match-10", playerStateDTOS);

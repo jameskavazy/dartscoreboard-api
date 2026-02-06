@@ -5,7 +5,6 @@ import com.jameskavazy.dartscoreboard.match.EventPublisher;
 import com.jameskavazy.dartscoreboard.match.domain.model.entity.MatchesUsers;
 import com.jameskavazy.dartscoreboard.match.dto.PlayerStateDTO;
 import com.jameskavazy.dartscoreboard.match.repository.MatchRepository;
-import com.jameskavazy.dartscoreboard.match.service.MatchStateAssembler;
 import com.jameskavazy.dartscoreboard.user.UserRepository;
 import org.springframework.stereotype.Service;
 
@@ -16,13 +15,12 @@ public class InviteService {
     private final MatchRepository matchRepository;
     private final UserRepository userRepository;
     private final EventPublisher eventPublisher;
-    private final MatchStateAssembler matchStateAssembler;
 
-    public InviteService(MatchRepository matchRepository, UserRepository userRepository, EventPublisher eventPublisher, MatchStateAssembler matchStateAssembler) {
+
+    public InviteService(MatchRepository matchRepository, UserRepository userRepository, EventPublisher eventPublisher) {
         this.matchRepository = matchRepository;
         this.userRepository = userRepository;
         this.eventPublisher = eventPublisher;
-        this.matchStateAssembler = matchStateAssembler;
     }
 
 
@@ -34,7 +32,7 @@ public class InviteService {
         boolean allAccepted = matchUsers.stream()
                 .allMatch(mu -> mu.inviteStatus().equals(InviteStatus.ACCEPTED));
 
-        List<PlayerStateDTO> playerStateDTOS = matchStateAssembler.getPlayerStateDTOS(matchId);
+        List<PlayerStateDTO> playerStateDTOS = matchRepository.getLatestStateForMatch(matchId);
 
         if (allAccepted) {
             eventPublisher.publishMatchStart(matchId, playerStateDTOS);

@@ -32,20 +32,17 @@ public class GameEngine {
     private final MatchRepository matchRepository;
     private final VisitRepository visitRepository;
     private final EventPublisher eventPublisher;
-    private final MatchStateAssembler matchStateAssembler;
 
     public GameEngine(LegRepository legRepository,
                       SetRepository setRepository,
                       MatchRepository matchRepository,
                       VisitRepository visitRepository,
-                      EventPublisher eventPublisher,
-                      MatchStateAssembler matchStateAssembler) {
+                      EventPublisher eventPublisher) {
         this.legRepository = legRepository;
         this.setRepository = setRepository;
         this.matchRepository = matchRepository;
         this.visitRepository = visitRepository;
         this.eventPublisher = eventPublisher;
-        this.matchStateAssembler = matchStateAssembler;
     }
 
     @EventListener
@@ -70,7 +67,7 @@ public class GameEngine {
         ResultScenario resultScenario = checkResult(matchContext);
         handleResult(matchContext, resultScenario);
 
-        List<PlayerStateDTO> playerStateDTOs = matchStateAssembler.getPlayerStateDTOS(visitSubmitEvent.getMatchId());
+        List<PlayerStateDTO> playerStateDTOs = matchRepository.getLatestStateForMatch(visitSubmitEvent.getMatchId());
         eventPublisher.publishStateUpdate(visitSubmitEvent.getMatchId(), playerStateDTOs);
     }
 

@@ -4,6 +4,7 @@ import com.jameskavazy.dartscoreboard.invite.model.InviteStatus;
 import com.jameskavazy.dartscoreboard.match.domain.model.entity.Match;
 import com.jameskavazy.dartscoreboard.match.domain.model.value.MatchType;
 import com.jameskavazy.dartscoreboard.match.domain.model.entity.MatchesUsers;
+import com.jameskavazy.dartscoreboard.match.dto.PlayerStateDTO;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
@@ -177,5 +178,92 @@ public class MatchRepository {
                 .update();
 
         Assert.state(updated == 1, "Could not update user invite status");
+    }
+
+    public List<PlayerStateDTO> getLatestStateForMatch(String matchId){
+
+        return jdbcClient.sql("""
+                
+                WITH current_leg AS (
+                    SELECT leg_id, turn_index
+                    FROM legs
+                    WHERE match_id = :matchId
+                    ORDER BY created_at DESC
+                    LIMIT 1
+                ),
+
+                legs_in_match as (
+                    select
+                        leg_id
+                    from legs l
+                    where l.match_id = :matchId
+                ),
+
+                legs_counts AS (
+                    SELECT winner_id, COUNT(*) as legs_won
+                    FROM legs
+                    WHERE match_id = :matchId AND winner_id IS NOT NULL
+                    GROUP BY winner_id
+                ),
+                sets_counts AS (
+                    SELECT set_winner_id, COUNT(*) as sets_won
+                    FROM sets
+                    WHERE match_id = :matchId AND set_winner_id IS NOT NULL
+                    GROUP BY set_winner_id
+                ),
+                stats_summary AS (
+                    select
+                        v.user_id,
+                        sum(coalesce(v.score, 0)) as total_score,
+                        COUNT(*) as total_visits
+                    from
+                        visits v
+                    where
+                        v.leg_id in (select leg_id from legs_in_match)
+                    group by
+                        v.user_id
+                )
+                SELECT
+                    mu.user_id,
+                    coalesce(lc.legs_won, 0) AS legs_won,
+                    coalesce(sc.sets_won, 0) AS sets_won,
+                    CASE m.match_type
+                        WHEN 'FiveO'  THEN 501 - SUM(COALESCE(v.score, 0))
+                        WHEN 'ThreeO' THEN 301 - SUM(COALESCE(v.score, 0))
+                        WHEN 'SevenO' THEN 170 - SUM(COALESCE(v.score, 0))
+                    END AS score,
+                    (mu.position = cl.turn_index) AS is_turn,
+                    CASE
+                        WHEN m.match_status = 'ONGOING' THEN FALSE
+                        ELSE TRUE
+                    END AS finished,
+                    ROUND (
+                        SUM(CAST(coalesce(v.score, 0) AS DECIMAL)) / CAST(COUNT(*) AS DECIMAL),
+                        2
+                    ) AS leg_average,
+                    ROUND(CAST(ss.total_score AS DECIMAL) / CAST(ss.total_visits AS DECIMAL), 2)AS match_average
+                
+                FROM matches_users mu
+                JOIN matches m ON m.match_id = mu.match_id
+                CROSS JOIN current_leg cl
+                LEFT JOIN legs_counts lc ON mu.user_id = lc.winner_id
+                LEFT JOIN sets_counts sc ON mu.user_id = sc.set_winner_id
+                LEFT JOIN visits v ON v.user_id = mu.user_id AND v.leg_id = cl.leg_id
+                LEFT join stats_summary ss on ss.user_id = mu.user_id
+                WHERE mu.match_id = :matchId
+                GROUP BY
+                    mu.user_id,
+                    lc.legs_won,
+                    sc.sets_won,
+                    m.match_type,
+                    mu.position,
+                    cl.turn_index,
+                    m.match_status,
+                    ss.total_score,
+                    ss.total_visits
+                """)
+                .param("matchId", matchId)
+                .query(PlayerStateDTO.class)
+                .list();
     }
 }

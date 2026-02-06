@@ -1,6 +1,7 @@
 package com.jameskavazy.dartscoreboard.match.service;
 
 import com.jameskavazy.dartscoreboard.match.EventPublisher;
+import com.jameskavazy.dartscoreboard.match.domain.service.MatchSetupService;
 import com.jameskavazy.dartscoreboard.match.domain.service.MatchesUserDTOMapper;
 import com.jameskavazy.dartscoreboard.match.dto.MatchRequest;
 import com.jameskavazy.dartscoreboard.match.domain.model.entity.Leg;
@@ -11,7 +12,6 @@ import com.jameskavazy.dartscoreboard.match.repository.LegRepository;
 import com.jameskavazy.dartscoreboard.match.repository.MatchRepository;
 import com.jameskavazy.dartscoreboard.match.repository.SetRepository;
 import com.jameskavazy.dartscoreboard.sse.dto.InvitationData;
-import com.jameskavazy.dartscoreboard.sse.service.InviteEventEmitter;
 import com.jameskavazy.dartscoreboard.user.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

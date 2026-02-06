@@ -3,14 +3,11 @@ package com.jameskavazy.dartscoreboard.invite.service;
 import com.jameskavazy.dartscoreboard.invite.model.InviteStatus;
 import com.jameskavazy.dartscoreboard.match.EventPublisher;
 import com.jameskavazy.dartscoreboard.match.domain.model.entity.Leg;
-import com.jameskavazy.dartscoreboard.match.domain.model.entity.MatchesUsers;
 import com.jameskavazy.dartscoreboard.match.domain.model.entity.Set;
 import com.jameskavazy.dartscoreboard.match.dto.PlayerStateDTO;
 import com.jameskavazy.dartscoreboard.match.repository.LegRepository;
 import com.jameskavazy.dartscoreboard.match.repository.MatchRepository;
 import com.jameskavazy.dartscoreboard.match.repository.SetRepository;
-import com.jameskavazy.dartscoreboard.match.service.MatchStateAssembler;
-import com.jameskavazy.dartscoreboard.sse.service.MatchEventEmitter;
 import com.jameskavazy.dartscoreboard.user.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,11 +26,10 @@ class InviteServiceTest {
     LegRepository legRepository = mock(LegRepository.class);
     SetRepository setRepository = mock(SetRepository.class);
     EventPublisher eventPublisher = mock(EventPublisher.class);
-    MatchStateAssembler matchStateAssembler = mock(MatchStateAssembler.class);
 
 
     InviteService inviteService
-            = new InviteService(matchRepository,userRepository,eventPublisher, matchStateAssembler);
+            = new InviteService(matchRepository,userRepository,eventPublisher);
 
 
     @Test
@@ -56,7 +52,7 @@ class InviteServiceTest {
 
 
         verify(matchRepository).updateMatchUserInviteStatus("testId", matchId, accepted);
-        verify(matchStateAssembler).getPlayerStateDTOS(matchId);
+        verify(matchRepository).getLatestStateForMatch(matchId);
     }
 
     @Test
@@ -64,10 +60,10 @@ class InviteServiceTest {
 
         String username = "example@email.com";
         String matchId = "match-id";
-        List<PlayerStateDTO> playerStateDTOS = List.of(new PlayerStateDTO(username, 0, 0, 301, true, false));
+        List<PlayerStateDTO> playerStateDTOS = List.of(new PlayerStateDTO(username, 0, 0, 301, true, false, 0 ,0));
         InviteStatus accepted = InviteStatus.ACCEPTED;
 
-        when(matchStateAssembler.getPlayerStateDTOS(matchId)).thenReturn(playerStateDTOS);
+        when(matchRepository.getLatestStateForMatch(matchId)).thenReturn(playerStateDTOS);
 
         inviteService.updateMatchUserInviteStatus(username, matchId, accepted);
         verify(eventPublisher).publishMatchStart(matchId, playerStateDTOS);

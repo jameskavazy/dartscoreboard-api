@@ -1,9 +1,7 @@
-package com.jameskavazy.dartscoreboard.match.service;
+package com.jameskavazy.dartscoreboard.match.domain.service;
 
-import com.jameskavazy.dartscoreboard.invite.domain.event.InvitationEvent;
 import com.jameskavazy.dartscoreboard.invite.model.InviteStatus;
 import com.jameskavazy.dartscoreboard.match.EventPublisher;
-import com.jameskavazy.dartscoreboard.match.domain.service.MatchesUserDTOMapper;
 import com.jameskavazy.dartscoreboard.match.dto.MatchRequest;
 import com.jameskavazy.dartscoreboard.match.dto.MatchesUserDTO;
 import com.jameskavazy.dartscoreboard.match.domain.model.entity.Leg;
@@ -15,7 +13,6 @@ import com.jameskavazy.dartscoreboard.match.repository.LegRepository;
 import com.jameskavazy.dartscoreboard.match.repository.MatchRepository;
 import com.jameskavazy.dartscoreboard.match.repository.SetRepository;
 import com.jameskavazy.dartscoreboard.sse.dto.InvitationData;
-import com.jameskavazy.dartscoreboard.sse.service.InviteEventEmitter;
 import com.jameskavazy.dartscoreboard.user.UserRepository;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;

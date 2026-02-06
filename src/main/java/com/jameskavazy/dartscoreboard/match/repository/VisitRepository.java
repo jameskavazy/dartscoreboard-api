@@ -2,6 +2,7 @@ package com.jameskavazy.dartscoreboard.match.repository;
 
 import com.jameskavazy.dartscoreboard.match.domain.model.value.PlayerState;
 import com.jameskavazy.dartscoreboard.match.domain.model.entity.Visit;
+import com.jameskavazy.dartscoreboard.match.dto.PlayerStateDTO;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
@@ -26,36 +27,36 @@ public class VisitRepository {
         Assert.state(updated == 1, "Could not insert visit");
     }
 
-    public Optional<Visit> findVisitById(String visitId){
-        return jdbcClient.sql("SELECT * FROM visits WHERE visit_id = :visitId")
-                .param("visitId", visitId)
-                .query(Visit.class)
-                .optional();
-    }
+//    public Optional<Visit> findVisitById(String visitId){
+//        return jdbcClient.sql("SELECT * FROM visits WHERE visit_id = :visitId")
+//                .param("visitId", visitId)
+//                .query(Visit.class)
+//                .optional();
+//    }
 
 
-    public void deleteLatestVisit(String legId) {
-        String query = """
-                DELETE FROM visits
-                WHERE visit_id = (
-                    SELECT visit_id
-                    FROM visits
-                    WHERE leg_id = :legId
-                    ORDER BY created_at DESC
-                    LIMIT 1
-                )
-                """;
-        int updated = jdbcClient.sql(query)
-                .param("legId", legId)
-                .update();
-        Assert.state(updated == 1, "Could not delete visit");
-    }
+//    public void deleteLatestVisit(String legId) {
+//        String query = """
+//                DELETE FROM visits
+//                WHERE visit_id = (
+//                    SELECT visit_id
+//                    FROM visits
+//                    WHERE leg_id = :legId
+//                    ORDER BY created_at DESC
+//                    LIMIT 1
+//                )
+//                """;
+//        int updated = jdbcClient.sql(query)
+//                .param("legId", legId)
+//                .update();
+//        Assert.state(updated == 1, "Could not delete visit");
+//    }
 
-    public List<Visit> findAll() {
-        return jdbcClient.sql("SELECT * FROM visits")
-                .query(Visit.class)
-                .list();
-    }
+//    public List<Visit> findAll() {
+//        return jdbcClient.sql("SELECT * FROM visits")
+//                .query(Visit.class)
+//                .list();
+//    }
 
     public int extractCurrentScore(String userId, String legId) {
         return jdbcClient.sql("""
