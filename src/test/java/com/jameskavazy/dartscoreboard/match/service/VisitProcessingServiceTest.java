@@ -46,17 +46,9 @@ class VisitProcessingServiceTest {
     MatchRepository matchRepository;
     @Mock
     LegRepository legRepository;
-//
-//    @Mock
-//    GameEngine gameEngine;
-    @Mock
-    SetRepository setRepository;
+
     @Mock
     ScoreCalculator scoreCalculator;
-
-    @Mock
-    MatchEventEmitter matchEventEmitter;
-
     @InjectMocks
     VisitProcessingService visitProcessingService;
 
@@ -92,7 +84,6 @@ class VisitProcessingServiceTest {
                         visitRequest.score(),
                         false,
                         OffsetDateTime.now()));
-//        when(gameEngine.checkResult(any())).thenReturn(ResultScenario.NO_RESULT);
 
         visitProcessingService.processVisitRequest(
                 visitRequest, matchId, setId, legId, user.username()

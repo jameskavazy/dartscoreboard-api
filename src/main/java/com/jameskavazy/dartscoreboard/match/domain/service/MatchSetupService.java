@@ -29,7 +29,6 @@ public class MatchSetupService {
     private final SetRepository setRepository;
     private final LegRepository legRepository;
     private final UserRepository userRepository;
-//    private final InviteEventEmitter inviteEventEmitter;
     private final EventPublisher eventPublisher;
     private final MatchesUserDTOMapper dtoMapper;
 
